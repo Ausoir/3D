@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://object/Object.gd\"
+
+
+const models = [[
+		preload(\"res://assets/models/bed.obj\"),
+		preload(\"res://assets/models/Headband.obj\"),
+	]
+]
+
+func set_mat(type, mat_dict):
+	pass
+	#for surface in c_mesh.mesh.get_surface_count():
+	#	var mat = c_mesh.mesh.surface_get_material(surface)
+	#	var color = mat.albedo_color
+	#	if color.r + color.g + color.b > 2.5:
+	#		c_mesh.mesh.surface_set_material(surface, mat_dict[\"dirt\"])
+"
+
+[node name="Object" type="Spatial"]
+transform = Transform( 4, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0 )
+script = SubResource( 1 )
+
+[node name="Mesh" type="MeshInstance" parent="."]
