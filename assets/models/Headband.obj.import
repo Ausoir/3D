@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/Headband.obj-90468dbe9f1c668dba94e22c88783e49.mesh"
+path="res://.import/headband.obj-3e6456c5853231ada1ea4c0584511937.mesh"
 
 [deps]
 
-files=[ "res://.import/Headband.obj-90468dbe9f1c668dba94e22c88783e49.mesh" ]
+files=[ "res://.import/headband.obj-3e6456c5853231ada1ea4c0584511937.mesh" ]
 
-source_file="res://assets/models/Headband.obj"
-dest_files=[ "res://.import/Headband.obj-90468dbe9f1c668dba94e22c88783e49.mesh", "res://.import/Headband.obj-90468dbe9f1c668dba94e22c88783e49.mesh" ]
+source_file="res://assets/models/headband.obj"
+dest_files=[ "res://.import/headband.obj-3e6456c5853231ada1ea4c0584511937.mesh", "res://.import/headband.obj-3e6456c5853231ada1ea4c0584511937.mesh" ]
 
 [params]
 

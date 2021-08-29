@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/Helm.obj-41e38b0d8dc2658b945be9a170e5c7d5.mesh"
+path="res://.import/helm.obj-7b4b4a1b6625f76718fd6bc29a7682ad.mesh"
 
 [deps]
 
-files=[ "res://.import/Helm.obj-41e38b0d8dc2658b945be9a170e5c7d5.mesh" ]
+files=[ "res://.import/helm.obj-7b4b4a1b6625f76718fd6bc29a7682ad.mesh" ]
 
-source_file="res://assets/models/Helm.obj"
-dest_files=[ "res://.import/Helm.obj-41e38b0d8dc2658b945be9a170e5c7d5.mesh", "res://.import/Helm.obj-41e38b0d8dc2658b945be9a170e5c7d5.mesh" ]
+source_file="res://assets/models/helm.obj"
+dest_files=[ "res://.import/helm.obj-7b4b4a1b6625f76718fd6bc29a7682ad.mesh", "res://.import/helm.obj-7b4b4a1b6625f76718fd6bc29a7682ad.mesh" ]
 
 [params]
 

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/mace.obj-034295bd1f3423b5b42f3b11b8d42d48.mesh"
+
+[deps]
+
+files=[ "res://.import/mace.obj-034295bd1f3423b5b42f3b11b8d42d48.mesh" ]
+
+source_file="res://assets/models/mace.obj"
+dest_files=[ "res://.import/mace.obj-034295bd1f3423b5b42f3b11b8d42d48.mesh", "res://.import/mace.obj-034295bd1f3423b5b42f3b11b8d42d48.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

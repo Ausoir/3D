@@ -8,21 +8,15 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Spatial",
-"class": "Mannequiny",
-"language": "GDScript",
-"path": "res://unit/Mannequiny.gd"
-} ]
-_global_script_class_icons={
-"Mannequiny": ""
-}
-
 [application]
 
 config/name="Game"
-run/main_scene="res://scenes/World.tscn"
+run/main_scene="res://World.tscn"
 config/icon="res://icon.png"
+
+[autoload]
+
+G="*res://G.gd"
 
 [display]
 
@@ -64,7 +58,7 @@ interact={
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
-use={
+item={
 "deadzone": 0.5,
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
  ]

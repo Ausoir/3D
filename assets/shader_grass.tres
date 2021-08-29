@@ -1,0 +1,64 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=2]
+
+[ext_resource path="res://assets/noise_texture.png" type="Texture" id=1]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type particles;
+
+uniform float rows = 16;
+uniform float spacing = 1.0;
+uniform float height;
+
+uniform vec2 heightmap_size;
+uniform sampler2D heightmap;
+uniform sampler2D noisemap;
+
+float get_height(vec2 pos) {
+	pos -= 0.5 * heightmap_size;
+	pos /= heightmap_size;
+	
+	return texture(heightmap, pos).r*6.0+6.0;
+}
+
+void vertex() {
+	// obtain our position based on which particle we're rendering
+	vec3 pos = vec3(0.0, 0.0, 0.0);
+	pos.z = float(INDEX);
+	pos.x = mod(pos.z, rows);
+	pos.z = (pos.z - pos.x) / rows;
+	
+	// center this
+	pos.x -= rows * 0.5;
+	pos.z -= rows * 0.5;
+	
+	// and now apply our spacing
+	pos *= spacing;
+	
+	// now center on our particle location but within our spacing
+	pos.x += EMISSION_TRANSFORM[3][0] - mod(EMISSION_TRANSFORM[3][0], spacing);
+	pos.z += EMISSION_TRANSFORM[3][2] - mod(EMISSION_TRANSFORM[3][2], spacing);
+	
+	// now add some noise based on our _world_ position
+	vec3 noise = texture(noisemap, pos.xz * 0.001).rgb;
+	pos.x += noise.x * spacing;
+	pos.z += noise.y * spacing;
+	
+	// rotate our transform
+	TRANSFORM[0][0] = cos(noise.z * 3.0);
+	TRANSFORM[0][2] = -sin(noise.z * 3.0);
+	TRANSFORM[2][0] = sin(noise.z * 3.0);
+	TRANSFORM[2][2] = cos(noise.z * 3.0);
+	
+	// update our transform to place
+	TRANSFORM[3][0] = pos.x;
+	TRANSFORM[3][1] = get_height(pos.xz);
+	TRANSFORM[3][2] = pos.z;
+}"
+
+[resource]
+shader = SubResource( 1 )
+shader_param/rows = 6.0
+shader_param/spacing = 1.0
+shader_param/height = 0.0
+shader_param/heightmap_size = null
+shader_param/noisemap = ExtResource( 1 )
