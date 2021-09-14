@@ -1,11 +1,33 @@
 extends Spatial
 
+const particles = {
+	"blood": preload("res://objects/particles/Blood.tscn"),
+	"dust": preload("res://objects/particles/Dust.tscn"),
+	"smoke": preload("res://objects/particles/Smoke.tscn"),
+	"splinter": preload("res://objects/particles/Splinter.tscn"),
+	"repair": preload("res://objects/particles/Repair.tscn"),
+}
+const class_item = preload("res://objects/Item.gd")
+const command = preload("res://objects/Command.gd")
+onready var item = preload("res://objects/Spawn.gd").new()
 var you
 var younit
 var world
-onready var item = preload("res://object/Spawn.gd").new()
+var space
+var resource = {"mana": 10, "food": 10}
 
-var resource = {"gold": 9, "material": 9, "food": 9}
+var rng = RandomNumberGenerator.new()
+
+
+func make_particle(arg, pos, lifetime):
+	if arg in particles:
+		var r = particles[arg].instance()
+		r.transform.origin = pos
+		r.duration = lifetime
+		r.emitting = true
+		world.others.add_child(r)
+		return r
+	print("G.make_particles can't find ", arg)
 
 
 func rid(arg, remove=true):
@@ -16,46 +38,52 @@ func rid(arg, remove=true):
 
 
 func drop(arg, exc):
-	var r = get_world().direct_space_state.intersect_ray(arg.transform.origin + Vector3(0, 1, 0), arg.transform.origin + Vector3(0, -40, 0), exc)
+	var pos = arg.transform.origin
+	var r = space.intersect_ray(pos + Vector3(0, 1, 0), pos + Vector3(0, -40, 0), exc, 0b00000000000000000011)
 	world.objects.add_child(arg)
 	if r and r.position:
 		arg.transform.origin = r.position
-
-
-func make_and_add(arg, pos):
-	var newitem = item.make(arg)
-	newitem.transform.origin = pos
-	drop(newitem, [newitem])
+	return arg
 
 
 func spawn_and_add(arg, pos):
 	var newitem = item.make_unit(arg)
 	newitem.transform.origin = pos
-	drop(newitem, [newitem])
+	world.units.add_child(newitem)
+	return newitem
 
 
-func add_resource(gold, mat, food):
-	resource["gold"] += gold
-	resource["material"] += mat
+func add_resource(mana, food):
+	resource["mana"] += mana
 	resource["food"] += food
-	you.get_node("Interface").display_gather(mat, gold, food)
+	you.get_node("Interface").display_gather(mana, food)
+	you.get_node("Interface").update_resources()
 
 
-func require_resource(gold, mat, food):
-	var ngold = resource["gold"] - gold
-	var nmat = resource["material"] - mat
-	var nfood = resource["food"] - food
-	if nmat >= 0:
-		if ngold >= 0:
-			if nfood >= 0:
-				resource["material"] = nmat
-				resource["gold"] = ngold
-				resource["food"] = nfood
-				return null
-			return "food"
-		return "gold"
-	return "material"
+func require_resource(spend, mana, food):
+	if resource["mana"] - mana >= 0:
+		if resource["food"] - food >= 0:
+			if spend:
+				add_resource(-mana, -food)
+			return true
+		message("Not enough food!")
+		return false
+	message("Not enough mana!")
+	return false
 
 
 func message(msg):
 	you.get_node("Interface").message(msg)
+
+
+func cmds(args, host):
+	var c = command.new(host)
+	for arg in args:
+		c.tgt = c.run(arg)
+		if c.stop:
+			break
+	return c.tgt
+
+func cmd(arg, host):
+	var c = command.new(host)
+	return c.run(arg)

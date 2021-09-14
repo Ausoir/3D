@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/fenceCurved.obj-84bed8a210d428623a0ed9dd442dd10d.mesh"
+
+[deps]
+
+files=[ "res://.import/fenceCurved.obj-84bed8a210d428623a0ed9dd442dd10d.mesh" ]
+
+source_file="res://assets/models/Building/fenceCurved.obj"
+dest_files=[ "res://.import/fenceCurved.obj-84bed8a210d428623a0ed9dd442dd10d.mesh", "res://.import/fenceCurved.obj-84bed8a210d428623a0ed9dd442dd10d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

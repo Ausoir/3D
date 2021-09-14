@@ -1,0 +1,158 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://objects/units/Unit.tscn" type="PackedScene" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+
+onready var unit = $Unit
+var build_queue = []
+var interactions
+var tasks
+var task
+var task_timer
+
+
+func _ready():
+	interactions = G.world
+	set_task()
+
+func set_task(newtask=[\"idle\", 999999]):
+	tasks = []
+	on_task_set(newtask)
+	task_timer = task[1]
+
+func set_tasks(newtasks):
+	tasks = []
+	for i in newtasks:
+		add_task(i)
+	next_task()
+
+func insert_tasks(newtasks):
+	tasks.append(task)
+	for i in newtasks:
+		tasks.append(i)
+	next_task()
+
+func add_task(newtask):
+	tasks.insert(0, newtask)
+
+func change_task(newtask):
+	tasks.append(newtask)
+	next_task()
+
+func next_task():
+	var newtask = tasks.pop_back()
+	if newtask == null:
+		unit.set_state()
+		newtask = [\"idle\", 999999]
+	on_task_set(newtask)
+
+func _physics_process(delta):
+	if task_timer <= 0:
+		if on_task_finish():
+			next_task()
+		return
+	elif task_timer < 999999:
+		task_timer -= delta * 10
+	on_task_update()
+
+func on_task_set(newtask):
+	if newtask[0] == \"menu\":
+		get_parent().ui.display(newtask[2], unit)
+	task = newtask
+	task_timer = newtask[1]
+
+func on_task_update():
+	if task[0] == \"idle\":
+		unit.set_state(\"move\")
+	elif task[0] == \"wait\":
+		unit.set_state(task[2])
+	elif task[0] == \"work\":
+		unit.set_state(\"work\")
+	elif task[0] == \"drop\":
+		unit.set_state(\"grab\")
+	elif task[0] == \"interact\":
+		unit.set_state(\"grab\")
+	elif task[0] == \"grab\":
+		unit.set_state(\"grab\")
+	elif task[0] == \"move\":
+		unit.set_state(\"move\")
+		var dist = face(task[2])
+		if dist.length() < 1:
+			unit.motion_target = Vector2()
+			task_timer = 0
+		else:
+			unit.motion_target = Vector2(0, 1)
+	elif task[0] == \"attack\":
+		unit.set_state(\"attack\")
+		face(task[2])
+		unit.motion_target = Vector2(0, 1)
+	elif task[0] == \"swing\":
+		unit.set_state(\"attack\")
+
+func on_task_finish():
+	if task[0] == \"grab\":
+		var item
+		if len(task) > 2:
+			item = task[2]
+			unit.set_weapon(item)
+		else:
+			item = G.world.get_item_type_at(\"item\", unit.get_interact_position())
+			unit.set_weapon(item)
+	elif task[0] == \"drop\":
+		unit.set_weapon(null)
+	elif task[0] == \"find\":
+		var item = G.item.make(task[2])
+		unit.set_weapon(item)
+	elif task[0] == \"gather\":
+		G.add_resource(task[2][0], task[2][1])
+	elif task[0] == \"damage\":
+		task[2].damage(task[3])
+	elif task[0] == \"interact\":
+		if !interact(G.world.get_object_at(unit.get_interact_position())):
+			if !interact(G.world.get_item_type_at(\"object\", unit.get_interact_position())):
+				if !interact(G.world.get_item_type_at(\"furniture\", unit.get_interact_position())):
+					interact(G.world.get_item_type_at(\"building\", unit.get_interact_position()))
+		return false
+	elif task[0] == \"work\":
+		if is_instance_valid(task[2]): #Check if node was freed
+			if task[2].work > 0:
+				task_timer = G.item.WORK_DELAY
+				task[2].work -= 1
+				task[2].check_workdone()
+				return false
+	elif task[0] == \"spawn\":
+		G.spawn_and_add(task[2], unit.get_adjacent(0, 1))
+	unit.set_state()
+	return true
+
+func face(to):
+	var diff = unit.get_position() - to
+	var dir = diff.normalized()
+	unit.anim_tree[\"parameters/head_v/add_amount\"] = dir.y * 1.5
+	dir.y = 0
+	unit.view_z = dir
+	return diff
+
+func check_vacancy(x=0, y=2):
+	var target_pos = unit.get_adjacent(x, y)
+	return G.world.get_tile_at(target_pos) == -1 and \\
+		!G.world.get_item_at(target_pos) and \\
+		!G.world.get_object_at(target_pos)
+
+
+func interact(object):
+	if object != null:
+		if object is String:
+			if object in G.item.interactions:
+				set_tasks(G.item.interactions[object])
+		elif object.onuse:
+			set_tasks(object.onuse)
+		return true
+"
+
+[node name="Pilot" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="Unit" parent="." instance=ExtResource( 1 )]

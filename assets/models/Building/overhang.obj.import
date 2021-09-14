@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/overhang.obj-0fd28e9c411c8306dddba2c1ad3d08e9.mesh"
+
+[deps]
+
+files=[ "res://.import/overhang.obj-0fd28e9c411c8306dddba2c1ad3d08e9.mesh" ]
+
+source_file="res://assets/models/Building/overhang.obj"
+dest_files=[ "res://.import/overhang.obj-0fd28e9c411c8306dddba2c1ad3d08e9.mesh", "res://.import/overhang.obj-0fd28e9c411c8306dddba2c1ad3d08e9.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

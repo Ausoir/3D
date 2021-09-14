@@ -1,3 +1,4 @@
 models - kennys cc0
 audio - from tps demo (unknown, replace)
-crosshair.png - from tps demo (unknown, replace)
+minerals - https://ipoly3d.com/
+

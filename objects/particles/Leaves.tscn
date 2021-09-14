@@ -1,0 +1,53 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://assets/leaf.png" type="Texture" id=1]
+
+[sub_resource type="ParticlesMaterial" id=1]
+emission_shape = 2
+emission_box_extents = Vector3( 16, 16, 16 )
+flag_align_y = true
+flag_rotate_y = true
+direction = Vector3( 1, -1, 0 )
+spread = 12.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 2.0
+initial_velocity_random = 0.5
+angular_velocity = 0.24
+angular_velocity_random = 1.0
+angle_random = 1.0
+scale = 0.1
+scale_random = 0.5
+
+[sub_resource type="SpatialMaterial" id=2]
+flags_transparent = true
+params_specular_mode = 4
+params_cull_mode = 2
+albedo_color = Color( 0.0862745, 0.678431, 0, 1 )
+albedo_texture = ExtResource( 1 )
+
+[sub_resource type="QuadMesh" id=3]
+material = SubResource( 2 )
+size = Vector2( 1, -1 )
+
+[sub_resource type="GDScript" id=4]
+script/source = "extends Particles
+
+var duration
+
+
+func _process(_delta):
+	var viewport = get_viewport()
+	var camera = viewport.get_camera()
+	
+	var pos = camera.global_transform.origin
+	global_transform.origin = pos
+"
+
+[node name="Particle" type="Particles"]
+amount = 16
+lifetime = 16.0
+visibility_aabb = AABB( -8, -8, -8, 16, 16, 16 )
+local_coords = false
+process_material = SubResource( 1 )
+draw_pass_1 = SubResource( 3 )
+script = SubResource( 4 )

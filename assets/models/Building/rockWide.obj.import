@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/rockWide.obj-b3f65890fa81a348fd81391bdff73104.mesh"
+
+[deps]
+
+files=[ "res://.import/rockWide.obj-b3f65890fa81a348fd81391bdff73104.mesh" ]
+
+source_file="res://assets/models/Building/rockWide.obj"
+dest_files=[ "res://.import/rockWide.obj-b3f65890fa81a348fd81391bdff73104.mesh", "res://.import/rockWide.obj-b3f65890fa81a348fd81391bdff73104.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

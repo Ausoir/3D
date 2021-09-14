@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallArchTop.obj-be55492d27d6d6bba0b9b3d9a0ddf115.mesh"
+
+[deps]
+
+files=[ "res://.import/wallArchTop.obj-be55492d27d6d6bba0b9b3d9a0ddf115.mesh" ]
+
+source_file="res://assets/models/Building/wallArchTop.obj"
+dest_files=[ "res://.import/wallArchTop.obj-be55492d27d6d6bba0b9b3d9a0ddf115.mesh", "res://.import/wallArchTop.obj-be55492d27d6d6bba0b9b3d9a0ddf115.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

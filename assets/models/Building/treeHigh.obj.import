@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/treeHigh.obj-2ce878ea7e79ed66b13266b29216725d.mesh"
+
+[deps]
+
+files=[ "res://.import/treeHigh.obj-2ce878ea7e79ed66b13266b29216725d.mesh" ]
+
+source_file="res://assets/models/Building/treeHigh.obj"
+dest_files=[ "res://.import/treeHigh.obj-2ce878ea7e79ed66b13266b29216725d.mesh", "res://.import/treeHigh.obj-2ce878ea7e79ed66b13266b29216725d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

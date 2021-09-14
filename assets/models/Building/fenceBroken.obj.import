@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/fenceBroken.obj-a477a00396da329683aa98a5069f9350.mesh"
+
+[deps]
+
+files=[ "res://.import/fenceBroken.obj-a477a00396da329683aa98a5069f9350.mesh" ]
+
+source_file="res://assets/models/Building/fenceBroken.obj"
+dest_files=[ "res://.import/fenceBroken.obj-a477a00396da329683aa98a5069f9350.mesh", "res://.import/fenceBroken.obj-a477a00396da329683aa98a5069f9350.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
