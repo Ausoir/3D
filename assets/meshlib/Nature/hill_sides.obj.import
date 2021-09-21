@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hill_sides.obj-e9b193a5061a9d06870869e9a4c1634f.mesh"
+
+[deps]
+
+files=[ "res://.import/hill_sides.obj-e9b193a5061a9d06870869e9a4c1634f.mesh" ]
+
+source_file="res://assets/meshlib/Nature/hill_sides.obj"
+dest_files=[ "res://.import/hill_sides.obj-e9b193a5061a9d06870869e9a4c1634f.mesh", "res://.import/hill_sides.obj-e9b193a5061a9d06870869e9a4c1634f.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

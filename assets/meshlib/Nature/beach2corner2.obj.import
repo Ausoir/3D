@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/beach2corner2.obj-5a7b1f1101ba9cb792e8d20090446ca3.mesh"
+
+[deps]
+
+files=[ "res://.import/beach2corner2.obj-5a7b1f1101ba9cb792e8d20090446ca3.mesh" ]
+
+source_file="res://assets/meshlib/Nature/beach2corner2.obj"
+dest_files=[ "res://.import/beach2corner2.obj-5a7b1f1101ba9cb792e8d20090446ca3.mesh", "res://.import/beach2corner2.obj-5a7b1f1101ba9cb792e8d20090446ca3.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

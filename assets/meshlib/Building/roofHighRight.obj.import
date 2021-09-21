@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/roofHighRight.obj-abac27b35ef24cac6a3405dfe0ce7266.mesh"
+
+[deps]
+
+files=[ "res://.import/roofHighRight.obj-abac27b35ef24cac6a3405dfe0ce7266.mesh" ]
+
+source_file="res://assets/meshlib/Building/roofHighRight.obj"
+dest_files=[ "res://.import/roofHighRight.obj-abac27b35ef24cac6a3405dfe0ce7266.mesh", "res://.import/roofHighRight.obj-abac27b35ef24cac6a3405dfe0ce7266.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

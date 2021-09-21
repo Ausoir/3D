@@ -1,11 +1,14 @@
 extends Spatial
 
+onready var status = G.item.Status.new()
 var item_name
 var item_type
 var health = 1
-var faction = 1
+var faction = 0
+var direction = 0
 var holder
 var req = [0, 0, 0, 0]
+var onmake
 var onuse
 var onswing
 var onwork
@@ -13,17 +16,17 @@ var work = 1
 var work_max = 0
 var attack
 var progress_bar
-var states = []
 var frame = 0
 
 
 func on_make():
-	pass
+	if onmake:
+		G.cmds(onmake, self)
 
 
-func on_hit(pos, _hitter):
+func on_hit(pos, _hitter, damage=1):
 	G.make_particle("splinter", pos, 1)
-	damage(1)
+	damage(damage)
 
 
 func damage(dmg):
@@ -35,8 +38,7 @@ func damage(dmg):
 
 
 func die():
-	for state in states:
-		state.die()
+	status.die()
 	queue_free()
 
 
@@ -59,11 +61,8 @@ func check_workdone():
 
 
 func _process(delta):
+	status.update(delta)
 	frame += delta
-	if frame > 2:
-		frame -= 2
+	if frame > 1:
+		frame -= 1
 		check_workdone()
-		for state in states:
-			if state.update():
-				states.remove(state)
-				state.queue_free()

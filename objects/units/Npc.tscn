@@ -12,81 +12,107 @@ var rng = RandomNumberGenerator.new()
 var world
 var target
 var state = \"idle\"
-var sight_range = 800
+var sight_range = 40
 var faction = 2
 var frame = 0
+var last_pos
 
-var Pathing = load(\"res://objects/units/Pathing.gd\")
+var Pathing = preload(\"res://objects/units/Pathing.gd\")
 var pathing
 
 
 func _ready():
 	world = G.world
-	pathing = Pathing.new()
-	target = G.younit
+	pathing = Pathing.new(world)
+	last_pos = unit.get_position()
 
 
 func update_target():
 	if target != null:
-		var unit_pos = unit.get_position() + Vector3.UP
-		var target_pos = target.get_position() + Vector3.UP
+		var unit_pos = unit.get_interact_position()
+		var target_pos = target.get_interact_position()
 		var collision = G.space.intersect_ray(unit_pos, target_pos, [unit, target], 32)
 		if not collision and abs(unit_pos.y - target_pos.y) < 5:
-			collision = G.space.intersect_ray(unit_pos, target_pos, [unit, target], 1)
-			if collision:
-				state = \"idle\"
-				var strafe = unit_pos.cross(target_pos) * (40 * rng.randi_range(0, 1) - 20)
-				pilot.set_task([\"move\", rng.randi_range(20, 40), unit_pos + strafe, 0])
-				pilot.add_task([\"move\", -1, target_pos, 1])
-				pilot.add_task([\"attack\", -1, target_pos])
-			else:
+			var front = unit_pos + unit_pos.direction_to(target_pos)*6
+			var land_collision = G.space.intersect_ray(front, front+Vector3(0,-4,0))
+			if land_collision:
 				state = \"hunt\"
-				pilot.set_task([\"move\", -1, target_pos, 0])
+				pilot.set_task([\"move\", 999999, target_pos, 0])
+				return
+		var path
+		if len(pilot.tasks) == 0 or frame % 160 == 0:
+			pathing.result = []
+			path = pathing.update(unit_pos, target_pos)
 		else:
-			if collision:
-				var col_faction = collision.collider.get(\"faction\")
-				if collision and col_faction and col_faction != faction:
-					state = \"hunt\"
-					pilot.set_task([\"attack\", -1, collision.position])
-					return
-			if G.world.get_tile_at(unit_pos + Vector3(0,-3,0)) != G.world.tilemap.hillslope:
-				var path = pathing.update(unit_pos, target_pos)
-				if path:
-					state = \"path\"
-					pilot.set_task([\"idle\", 0])
-					for p in path:
-						pilot.add_task([\"move\", -1, p, 1])
-				else:
-					unit.motion_target = Vector2()
-					pilot.set_task()
-					state = \"idle\"
+			path = pathing.update_nodes(unit_pos)
+		if path:
+			state = \"path\"
+			pilot.set_task([\"idle\", 0])
+			for p in path:
+				pilot.add_task([\"move\", 999999, p, 1.4])
+			pilot.next_task()
 	else:
 		state = \"idle\"
 
 
-func find_player(playerunit):
-	var collision = G.check_collision(unit.get_position(), playerunit.get_position(), [unit])
-	if collision and collision.collider == playerunit:
-		var dist = unit.get_position().distance_to(playerunit.get_position())
-		if dist < sight_range:
-			target = playerunit
+func unstuck():
+	var unit_pos = unit.get_interact_position()
+	var target_pos = target.get_interact_position()
+	var collision = G.space.intersect_ray(unit_pos, target_pos, [unit, target], 32)
+	if collision and collision.collider is StaticBody:
+		var col_faction = collision.collider.get_parent().get(\"faction\")
+		if collision and col_faction and col_faction != faction and col_faction != 0:
+			state = \"destroy\"
+			pilot.set_task([\"attack\", 999999, collision.position])
+			return
+	var building = G.world.get_item_type_at(\"furniture\", unit.get_interact_position(), 6)
+	if !building:
+		building = G.world.get_item_type_at(\"building\", unit.get_interact_position(), 6)
+	if building:
+		state = \"destroy\"
+		pilot.set_task([\"attack\", 999999, building.global_transform.origin])
+	else:
+		var strafe = unit_pos.cross(target_pos) * (40 * rng.randi_range(0, 1) - 20)
+		pilot.set_task([\"move\", rng.randi_range(20, 40), unit_pos + strafe, 0])
+		pilot.add_task([\"move\", 999999, target_pos, 1])
+		pilot.add_task([\"attack\", 999999, target_pos])
+
+
+func perceive():
+	for obj in G.world.units.get_children():
+		if obj != self:
+			var dist = unit.get_position().distance_to(obj.unit.get_position())
+			if dist < sight_range:
+				target = obj.unit
 
 
 func _physics_process(_delta):
-	if state == \"hunt\":
-		var target_pos = target.get_position()
-		if pilot.task[0] == \"move\":
-			if (target_pos - unit.get_position()).length() < 4:
-				pilot.set_task([\"attack\", 40, target_pos])
-			else:
+	if unit.health <= 0:
+		if unit.state == \"dead\":
+			unit.die()
+			queue_free()
+	else:
+		if state == \"hunt\":
+			var target_pos = target.get_position()
+			if pilot.task[0] == \"move\":
+				if (target_pos - unit.get_position()).length() < 4:
+					pilot.set_task([\"attack\", 999999, target_pos])
+				else:
+					pilot.task[2] = target_pos
+			elif pilot.task[0] == \"attack\":
 				pilot.task[2] = target_pos
-		elif pilot.task[0] == \"attack\":
-			pilot.task[2] = target_pos
-	frame += 1
-	if frame >= 80:
-		pathing.result = []
-		frame = 0
-		update_target()
+		frame += 1
+		if frame % 25 == 0:
+			if frame >= 300:
+				perceive()
+				frame = 0
+				if target:
+					var new_pos = unit.get_position()
+					if pilot.task[0] == \"move\" and (new_pos - last_pos).length() < 2:
+						unstuck()
+					last_pos = new_pos
+			else:
+				update_target()
 "
 
 [node name="Npc" type="Spatial"]

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/dirt3corner.obj-2d14cb90a0a9ceed6b62d1affc170c67.mesh"
+
+[deps]
+
+files=[ "res://.import/dirt3corner.obj-2d14cb90a0a9ceed6b62d1affc170c67.mesh" ]
+
+source_file="res://assets/meshlib/Nature/dirt3corner.obj"
+dest_files=[ "res://.import/dirt3corner.obj-2d14cb90a0a9ceed6b62d1affc170c67.mesh", "res://.import/dirt3corner.obj-2d14cb90a0a9ceed6b62d1affc170c67.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

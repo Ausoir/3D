@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallWoodSlope.obj-8a46fb12a81906607d963397c531dcdd.mesh"
+
+[deps]
+
+files=[ "res://.import/wallWoodSlope.obj-8a46fb12a81906607d963397c531dcdd.mesh" ]
+
+source_file="res://assets/meshlib/Building/wallWoodSlope.obj"
+dest_files=[ "res://.import/wallWoodSlope.obj-8a46fb12a81906607d963397c531dcdd.mesh", "res://.import/wallWoodSlope.obj-8a46fb12a81906607d963397c531dcdd.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

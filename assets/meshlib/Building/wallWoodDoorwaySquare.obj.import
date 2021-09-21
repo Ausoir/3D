@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallWoodDoorwaySquare.obj-4c5020ee5f4741fa4d40401b3ead4f73.mesh"
+
+[deps]
+
+files=[ "res://.import/wallWoodDoorwaySquare.obj-4c5020ee5f4741fa4d40401b3ead4f73.mesh" ]
+
+source_file="res://assets/meshlib/Building/wallWoodDoorwaySquare.obj"
+dest_files=[ "res://.import/wallWoodDoorwaySquare.obj-4c5020ee5f4741fa4d40401b3ead4f73.mesh", "res://.import/wallWoodDoorwaySquare.obj-4c5020ee5f4741fa4d40401b3ead4f73.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

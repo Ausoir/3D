@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/treeHighRound.obj-54876e8892829091608951f10dcb1103.mesh"
+
+[deps]
+
+files=[ "res://.import/treeHighRound.obj-54876e8892829091608951f10dcb1103.mesh" ]
+
+source_file="res://assets/meshlib/Building/treeHighRound.obj"
+dest_files=[ "res://.import/treeHighRound.obj-54876e8892829091608951f10dcb1103.mesh", "res://.import/treeHighRound.obj-54876e8892829091608951f10dcb1103.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

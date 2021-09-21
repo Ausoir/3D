@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hill_4corner.obj-98cd88473d6ff7f2ce5cc5f5b65e1708.mesh"
+
+[deps]
+
+files=[ "res://.import/hill_4corner.obj-98cd88473d6ff7f2ce5cc5f5b65e1708.mesh" ]
+
+source_file="res://assets/meshlib/Nature/hill_4corner.obj"
+dest_files=[ "res://.import/hill_4corner.obj-98cd88473d6ff7f2ce5cc5f5b65e1708.mesh", "res://.import/hill_4corner.obj-98cd88473d6ff7f2ce5cc5f5b65e1708.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -8,15 +8,28 @@ const particles = {
 	"repair": preload("res://objects/particles/Repair.tscn"),
 }
 const class_item = preload("res://objects/Item.gd")
-const command = preload("res://objects/Command.gd")
+const command = preload("res://Command.gd")
 onready var item = preload("res://objects/Spawn.gd").new()
+var enemy
 var you
 var younit
 var world
 var space
 var resource = {"mana": 10, "food": 10}
+var tick_events = []
+var frame = 0
 
 var rng = RandomNumberGenerator.new()
+
+
+func _process(_delta):
+	frame += 1
+	if frame > 8:
+		if len(tick_events) > 0:
+			var event = tick_events.pop_back()
+			if event.is_valid():
+				event.call_func()
+		frame = 0
 
 
 func make_particle(arg, pos, lifetime):
@@ -46,11 +59,29 @@ func drop(arg, exc):
 	return arg
 
 
-func spawn_and_add(arg, pos):
-	var newitem = item.make_unit(arg)
-	newitem.transform.origin = pos
-	world.units.add_child(newitem)
-	return newitem
+func dir_to_offset(orientation, rot):
+	var offsetx
+	var offsetz
+	if orientation == 0:
+		offsetx = 0
+		offsetz = 1
+	elif orientation == 16:
+		offsetx = -1
+		offsetz = 0
+	elif orientation == 10:
+		offsetx = 0
+		offsetz = -1
+	elif orientation == 22:
+		offsetx = 1
+		offsetz = 0
+	if rot == 0:
+		return Vector2(offsetx, offsetz)
+	elif rot == -1:
+		return Vector2(offsetz, -offsetx)
+	elif rot == 1:
+		return Vector2(-offsetz, offsetx)
+	elif rot == 2:
+		return Vector2(-offsetx, -offsetz)
 
 
 func add_resource(mana, food):
@@ -66,9 +97,11 @@ func require_resource(spend, mana, food):
 			if spend:
 				add_resource(-mana, -food)
 			return true
-		message("Not enough food!")
+		if spend:
+			message("Not enough food!")
 		return false
-	message("Not enough mana!")
+	if spend:
+		message("Not enough mana!")
 	return false
 
 

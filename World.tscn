@@ -1,10 +1,10 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
-[ext_resource path="res://assets/meshlib_objects.tres" type="MeshLibrary" id=1]
-[ext_resource path="res://assets/meshlib_terrain.tres" type="MeshLibrary" id=2]
+[ext_resource path="res://assets/meshlib_terrain.tres" type="MeshLibrary" id=1]
+[ext_resource path="res://assets/meshlib_objects.tres" type="MeshLibrary" id=2]
 [ext_resource path="res://objects/units/Player.tscn" type="PackedScene" id=3]
-[ext_resource path="res://assets/skyfinal.png" type="Texture" id=4]
-[ext_resource path="res://assets/water.jpg" type="Texture" id=5]
+[ext_resource path="res://assets/textures/skyfinal.png" type="Texture" id=4]
+[ext_resource path="res://assets/textures/water.jpg" type="Texture" id=5]
 [ext_resource path="res://objects/particles/Leaves.tscn" type="PackedScene" id=7]
 
 [sub_resource type="GDScript" id=1]
@@ -20,15 +20,18 @@ var occluder = preload(\"res://objects/Occluder.tscn\")
 
 var rng = RandomNumberGenerator.new()
 var map_size = Vector2(0, 0)
+var dirtmap = []
+var spawnpoints = []
 
 var aggro_turn = 0
 
 
 func _ready():
 	G.world = self
-	G.you = $Player
-	G.younit = $Player/Pilot/Unit
 	G.space = get_world().direct_space_state
+	G.you = $Units/Player
+	G.younit = $Units/Player/Pilot/Unit
+	G.enemy = $Enemy
 	generate()
 
 
@@ -48,84 +51,142 @@ func set_heightmap(size, map):
 
 func generate():
 	#rng.randomize()
-	rng.set_seed(12345)
+	rng.set_seed(11111)
+	tilemap.rng = rng
 	objectmap.rng = rng
 	var elevation_map
 	var biome_map
-	map_size = Vector2(30, 30)
+	map_size = Vector2(40, 30)
 	biome_map = make_perlin(map_size.x, map_size.y)
 	elevation_map = make_perlin(map_size.x, map_size.y)
 	elevation_map = radialize(elevation_map)
 	set_heightmap(map_size, elevation_map)
 	#elevation_map = smooth_edges(elevation_map, 3)
 
-	var spawn
 	var highest = 1
 	for x in range(map_size.x):
+		var row = []
 		for z in range(map_size.y):
-			var biome = biome_map[z][x]
 			var y = elevation_map[z][x]
-			var height = floor(y * 4)
-			if height <= 0:
-				var occ = occluder.instance()
-				occ.translate(tilemap.map_to_world(x, height+1, z))
-				occluders.add_child(occ)
-			else:
-				var ox = x * 2 + rng.randi_range(0, 1)
-				var oy = height * 2
-				var oz = z * 2 + rng.randi_range(0, 1)
+			var height = floor(y * 4.5)
+			row.append(height)
+			if height > 0:
 				if height > highest:
 					highest = height
 				if height == 1:
 					tilemap.set_cell_item(x, height-1, z, tilemap.beach)
-					if y < .28:
-						objectmap.make(\"palm\", ox, oy, oz)
-						if spawn == null or rng.randf() > .9:
-							spawn = get_pos(Vector3(x, y, z))
-					else:
-						var val = rng.randf()
-						if val > .9:
-							objectmap.make(\"rocks\", ox, oy, oz)
-						elif val > .89:
-							objectmap.make(\"rock\", ox, oy, oz)
-						elif val > .7:
-							objectmap.make(\"weed\", ox, oy, oz)
 				elif height == 2:
-					tilemap.set_cell_item(x, height-1, z, tilemap.hill)
-					if biome > .7:
-						objectmap.make(\"tree\", ox, oy, oz)
-					elif biome > .65:
-						objectmap.make(\"weed\", ox, oy, oz)
-					elif biome > .64:
-						objectmap.make(\"flower\", ox, oy, oz)
-					elif biome > .635:
-						objectmap.make(\"rock\", ox, oy, oz)
-					elif biome > .63:
-						objectmap.make(\"mineral\", ox, 2, oz)
-					elif biome > .4:
-						if rng.randf() > .4:
-							objectmap.make(\"weed\", ox, oy, oz)
-						else:
-							objectmap.make(\"tree\", ox, oy, oz)
-					elif biome < .4:
-						if rng.randf() > .4:
-							objectmap.make(\"weed\", ox, oy, oz)
-					var cliff = int(y * 20) % 20
-					if cliff == 0 or cliff == 20:
-						if rng.randf() > .1:
-							objectmap.make(\"rock\", ox, oy, oz)
-						else:
-							objectmap.make(\"mineral\", ox, oy, oz)
+					tilemap.set_cell_item(x, 1, z, tilemap.dirt)
+					tilemap.set_cell_item(x, 0, z, tilemap.beach)
 				else:
-					tilemap.set_cell_item(x, height-1, z, tilemap.hill)
-					if rng.randf() > .4:
-						objectmap.make(\"weed\", ox, oy, oz)
-					else:
-						objectmap.make(\"rock\", ox, oy, oz)
+					tilemap.set_cell_item(x, height-1, z, tilemap.dirt)
+					tilemap.set_cell_item(x, height-2, z, tilemap.dirt)
+		dirtmap.append(row)
 	
 	tilemap.autotile_map(map_size.x, highest+1, map_size.y)
-	$Player/Pilot/Unit.transform.origin = spawn
 
+	var buildings = []
+	for x in range(map_size.x):
+		for z in range(map_size.y):
+			var biome = biome_map[z][x]
+			var height = dirtmap[x][z]
+			if height > 0:
+				var ox = x * 2 + rng.randi_range(0, 1)
+				var oy = height * 2
+				var oz = z * 2 + rng.randi_range(0, 1)
+				if height == 1:
+					var val = rng.randf()
+					if val > .95:
+						objectmap.make(\"rocks\", ox, oy, oz)
+					elif val > .89:
+						objectmap.make(\"rock\", ox, oy, oz)
+					elif val > .7:
+						objectmap.make(\"weed\", ox, oy, oz)
+					elif val > .5:
+						objectmap.make(\"palm\", ox, oy, oz)
+					elif val > .48:
+						spawnpoints.append(Vector3(ox*3, height*6, oz*3))
+				elif tilemap.get_cell_item(x,height-1,z) == tilemap.dirt:
+					if height == 2:
+						if biome > .7:
+							objectmap.make(\"tree\", ox, oy, oz)
+						elif biome > .65:
+							objectmap.make(\"weed\", ox, oy, oz)
+						elif biome > .64:
+							objectmap.make(\"flower\", ox, oy, oz)
+						elif biome > .635:
+							objectmap.make(\"rock\", ox, oy, oz)
+						elif biome > .63:
+							tilemap.make(\"mineral\", x, 2, z)
+						if biome > .5:
+							buildings.append([x, height, z])
+							build(x,height,z)
+						else:
+							if rng.randf() > .4:
+								objectmap.make(\"weed\", ox, oy, oz)
+								if rng.randf() < .2:
+									spawnpoints.append(Vector3(ox*3, height*6, oz*3))
+							else:
+								objectmap.make(\"tree\", ox, oy, oz)
+					else:
+						if rng.randf() > .4:
+							objectmap.make(\"weed\", ox, oy, oz)
+						else:
+							objectmap.make(\"rock\", ox, oy, oz)
+	autotile_buildings(buildings)
+	$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
+	$Enemy.place_units()
+
+
+func autotile_buildings(buildings):
+	for building in buildings:
+		var x = building[0]
+		var y = building[1]
+		var z = building[2]
+		var dir = 0
+		for i in [[-1,0],[1,0],[0,-1],[0,1]]:
+			if tilemap.get_cell_item(x+i[0],y,z+i[1]) >= 990 and \\
+				tilemap.get_cell_item(x-i[0],y+1,z-i[1]) >= 990 and \\
+				tilemap.get_cell_item(x,y+1,z) == -1:
+					var pos = tilemap.map_to_world(x,y,z)
+					G.cmds([[\"t\",pos],[\"getobj\",\"building\"],[\"damage\",9]], null)
+					pos = tilemap.map_to_world(x,y+1,z)
+					G.cmds([[\"t\",pos],[\"getobj\",\"building\"],[\"damage\",9]], null)
+					make_building(\"stairs\",x,y,z,dir)
+					continue
+			dir += 1
+
+
+func build(x,y,z):
+	var height = y
+	for _times in range(rng.randi_range(0, 3)):
+		if tilemap.get_cell_item(x,height-1,z) != -1:
+			make_building(\"building\",x,height,z,rng.randi_range(0, 3))
+			height += 1
+
+
+func make_building(building,x,y,z,dir):
+	var pos = tilemap.map_to_world(x,y,z)
+	var ortho = [Vector3.LEFT,Vector3.RIGHT,Vector3.FORWARD,Vector3.BACK][dir]
+	return G.cmds([[\"t\",pos],[\"tilespace\",false],[\"t\",Transform().translated(pos).looking_at(ortho+pos, Vector3.UP)],[\"make\",building]], null)
+
+
+func fill_occluders(elevation_map):
+	for x in range(map_size.x):
+		for z in range(map_size.y):
+			var y = elevation_map[z][x]
+			var height = floor(y * 4)
+			var tile = tilemap.get_cell_item(x, height, z)
+			if height <= 0:
+				if tile != -1 and tile != tilemap.beach:
+					var occ = occluder.instance()
+					occ.translate(tilemap.map_to_world(x, height+1, z))
+					occluders.add_child(occ)
+			else:
+				if tile != -1 and tile != tilemap.dirt:
+					var occ = occluder.instance()
+					occ.translate(tilemap.map_to_world(x, height+1, z))
+					occluders.add_child(occ)
 
 func get_object_at(vec):
 	var pos = objectmap.world_to_map(vec)
@@ -143,17 +204,28 @@ func get_object_near(vec):
 			return obj
 	return null
 
-func is_vacant(vec):
-	var r = get_tile_at(vec) == -1
-	r = r and get_object_near(vec) == null
-	var down = get_tile_at(vec + Vector3(0, -6, 0))
-	r = r and (down == tilemap.hill or down == tilemap.beach)
+
+func is_tile_vacant(vec):
+	var pos = tilemap.world_to_map(vec)
+	var pos2 = pos * 2
+	var r = tilemap.get_cell_item(pos.x, pos.y, pos.z) == -1
+	r = r and objectmap.get_object_at(pos2) == null
+	r = r and objectmap.get_object_at(pos2 + Vector3(1, 0, 0)) == null
+	r = r and objectmap.get_object_at(pos2 + Vector3(0, 0, 1)) == null
+	r = r and objectmap.get_object_at(pos2 + Vector3(1, 0, 1)) == null
+	var down = tilemap.get_cell_item(pos.x, pos.y-1, pos.z)
+	r = r and (down == tilemap.dirt or down == tilemap.beach or down >= 990)
 	return r
 
 
 func get_tile_at(vec):
 	var pos = tilemap.world_to_map(vec)# + Vector3(0, 1, 0))
 	return tilemap.get_cell_item(pos.x, pos.y, pos.z)
+
+
+func set_tile_at(vec, tile, orientation=0):
+	var pos = tilemap.world_to_map(vec)# + Vector3(0, 1, 0))
+	return tilemap.set_cell_item(pos.x, pos.y, pos.z, tile, orientation)
 
 
 func snap_to_tile(vec):
@@ -193,21 +265,6 @@ func get_site(vec):
 
 func get_pos(vec):
 	return tilemap.map_to_world(vec.x, vec.y+.5, vec.z)
-
-
-func get_routes(pos):
-	var r = []
-	for i in [[-1, 0], [1, 0], [0, -1], [0, 1]]:
-		var px = pos.x + i[0]
-		var pz = pos.z + i[1]
-		if tilemap.get_cell_item(px, pos.y, pz) == tilemap.hillslope:
-			r.append([pos.x + i[0]*2, pos.y+1, pos.z + i[1]*2, 1])
-		elif tilemap.get_cell_item(px, pos.y, pz) != tilemap.hill:
-			if tilemap.get_cell_item(px, pos.y-1, pz) == tilemap.hill:
-				r.append([px, pos.y, pz, 0])
-			if tilemap.get_cell_item(px, pos.y-1, pz) == tilemap.hillslope:
-				r.append([pos.x + i[0]*2, pos.y-1, pos.z + i[1]*2, 1])
-	return r
 
 
 func get_spawn_point():
@@ -320,7 +377,7 @@ func invert(base):
 [sub_resource type="GDScript" id=2]
 script/source = "extends GridMap
 
-const orientations = [0, 10, 16, 22]
+const orientations = [0, 10, 16, 22]#Z-,Z+,X-,X+
 
 const autotile_dict = [
 	[[-1,2,-3,4,-5,6,-7,8]],
@@ -331,14 +388,21 @@ const autotile_dict = [
 	[[1, -3, 5, 7], [1, 3, 5, -7], [-1, 3, 5, 7], [1, 3, -5, 7]],
 	[[1, -3, 4, -5, 7], [-1, 3, 5, -7, 8], [-1, 2, -3, 5, 7], [1, 3, -5, 6, -7]],
 	[[1, -3, -5, 7], [-1, 3, 5, -7], [-1, -3, 5, 7], [1, 3, -5, -7]],
+	[[2, -3, 4, 7], [3, 6, -7, 8], [-1, 2, 5, 8], [1, 4, -5, 6]],
 	[[-3, 4, 7], [3, -7, 8], [-1, 2, 5], [1, -5, 6]],
 	[[2, -3, 7], [3, 6, -7], [-1, 5, 8], [1, 4, -5]],
 	[[3, 7], [3, 7], [1, 5], [1, 5]],
 	[[-3, 7], [3, -7], [-1, 5], [1, -5]],
 ]
+const dirt_autotile_dict = [
+	[[1, -3, 5, 7], [1, 3, 5, -7], [-1, 3, 5, 7], [1, 3, -5, 7]],
+	[[1, -3, -5, 7], [-1, 3, 5, -7], [-1, -3, 5, 7], [1, 3, -5, -7]],
+	[[1, -3, 5, -7], [1, -3, 5, -7], [-1, 3, -5, 7], [-1, 3, -5, 7]],
+	[[-1, -3, -5, 7], [-1, 3, -5, -7], [-1, -3, 5, -7], [1, -3, -5, -7]],
+	[[1, 3, 5, 7]],
+	[[-1, -3, -5, -7]],
+]
 var tileset = preload(\"res://assets/meshlib_terrain.tres\")
-var grass = tileset.find_item_by_name(\"grass\")
-var water = tileset.find_item_by_name(\"occluder\")
 var beach = tileset.find_item_by_name(\"beach\")
 var beachs = [
 	tileset.find_item_by_name(\"beach4corner\"),
@@ -349,59 +413,73 @@ var beachs = [
 	tileset.find_item_by_name(\"beach3sides\"),
 	tileset.find_item_by_name(\"beachcurvecorner\"),
 	tileset.find_item_by_name(\"beachcurve\"),
+	tileset.find_item_by_name(\"beachside2corner\"),
 	tileset.find_item_by_name(\"beachsidecorner2\"),
 	tileset.find_item_by_name(\"beachsidecorner\"),
 	tileset.find_item_by_name(\"beachsides\"),
 	tileset.find_item_by_name(\"beachside\"),
 ]
-var hill = tileset.find_item_by_name(\"hill\")
-var hillslope = tileset.find_item_by_name(\"hillwallslope\")
-var hills = [
-	tileset.find_item_by_name(\"hill4corner\"),
-	tileset.find_item_by_name(\"hill2corner\"),
-	tileset.find_item_by_name(\"hill2corner2\"),
-	tileset.find_item_by_name(\"hillcorner\"),
-	hill,
-	hillslope,
-	tileset.find_item_by_name(\"hillcurvecorner\"),
-	tileset.find_item_by_name(\"hillcurve\"),
-	tileset.find_item_by_name(\"hillsidecorner2\"),
-	tileset.find_item_by_name(\"hillsidecorner\"),
-	tileset.find_item_by_name(\"hillsides\"),
-	tileset.find_item_by_name(\"hillside\"),
+var dirt = tileset.find_item_by_name(\"dirt\")
+var dirtslope = tileset.find_item_by_name(\"dirtslope\")
+var dirttunnel = tileset.find_item_by_name(\"dirt2side2\")
+var dirts = [
+	tileset.find_item_by_name(\"dirt1side\"),
+	tileset.find_item_by_name(\"dirt2side\"),
+	dirttunnel,
+	dirtslope,
+	dirt,
+	-1,
 ]
-var buildings = [
-	tileset.find_item_by_name(\"floor\"),
-	tileset.find_item_by_name(\"wall\"),
-	tileset.find_item_by_name(\"door\"),
-	tileset.find_item_by_name(\"window\"),
-]
+var models = {
+	\"mineral\": [
+		tileset.find_item_by_name(\"mineral1\"),
+		tileset.find_item_by_name(\"mineral2\"),
+		tileset.find_item_by_name(\"mineral3\"),
+		tileset.find_item_by_name(\"mineral4\"),
+		tileset.find_item_by_name(\"mineral5\"),
+		tileset.find_item_by_name(\"mineral6\"),
+		tileset.find_item_by_name(\"mineral7\"),
+		tileset.find_item_by_name(\"mineral8\"),
+	]
+}
+
+var rng
+
+
+func make(item, x, y, z):
+	if item == null:
+		set_cell_item(x, y, z, -1)
+	else:
+		var items = models[item]
+		set_cell_item(x, y, z, items[rng.randi_range(0, items.size()-1)], orientations[rng.randi_range(0, 3)])
 
 
 func autotile_map(sx, sy, sz):
 	var item
-	var hill_autotiles = []
+	var dirt_autotiles = []
 	var beach_autotiles = []
 	var autotile
 	for x in range(-sx, sx):
-		for y in range(sy):
+		for y in range(1, sy):
 			for z in range(-sz, sz):
 				item = get_cell_item(x, y, z)
-				if item == -1:
-					if y == 0:
-						autotile = set_autotile(beach, x, y, z)
-						if autotile:
-							beach_autotiles.append(autotile)
-					else:
-						autotile = set_autotile(hill, x, y, z)
-						if autotile:
-							hill_autotiles.append(autotile)
+				if item != -1:
+					autotile = set_autotile(dirt, x, y, z, dirt_autotile_dict)
+					if autotile:
+						dirt_autotiles.append(autotile)
+	for x in range(-sx, sx):
+		for z in range(-sz, sz):
+			item = get_cell_item(x, 0, z)
+			if item == -1:
+				autotile = set_autotile(beach, x, 0, z, autotile_dict)
+				if autotile:
+					beach_autotiles.append(autotile)
 	for cell in beach_autotiles:
 		set_cell_item(cell[0], cell[1], cell[2], beachs[cell[3]], orientations[cell[4]])
-	for cell in hill_autotiles:
-		set_cell_item(cell[0], cell[1], cell[2], hills[cell[3]], orientations[cell[4]])
+	for cell in dirt_autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], dirts[cell[3]], orientations[cell[4]])
 
-func set_autotile(compare, x, y, z):
+func set_autotile(compare, x, y, z, dict):
 	var adj = [-1, -2, -3, -4, -5, -6, -7, -8]
 	if get_cell_item(x+1, y, z) == compare:
 		adj[0] *= -1
@@ -421,10 +499,10 @@ func set_autotile(compare, x, y, z):
 		adj[7] *= -1
 	var count = 0
 	var orientation
-	for v in autotile_dict:
+	for v in dict:
 		orientation = 0
 		for sidereqs in v:
-			if is_matching(adj, sidereqs) and get_cell_item(x, y+1, z) == -1:
+			if is_matching(adj, sidereqs):
 				return [x, y, z, count, orientation]
 			orientation += 1
 		count += 1
@@ -574,21 +652,19 @@ func get_object_at(vec):
 [sub_resource type="PlaneMesh" id=4]
 
 [sub_resource type="SpatialMaterial" id=5]
-params_specular_mode = 4
-params_depth_draw_mode = 3
-albedo_color = Color( 0, 0.211765, 0.545098, 1 )
-metallic = 0.4
-roughness = 0.8
+albedo_color = Color( 0.180392, 0.282353, 0.815686, 1 )
+metallic = 1.0
+roughness = 0.79
 normal_enabled = true
 normal_scale = -2.0
 normal_texture = ExtResource( 5 )
 depth_enabled = true
-depth_scale = 4.0
+depth_scale = 5.0
 depth_deep_parallax = false
 depth_flip_tangent = false
 depth_flip_binormal = false
 depth_texture = ExtResource( 5 )
-uv1_scale = Vector3( 24, 6, 1 )
+uv1_scale = Vector3( 12, 24, 1 )
 
 [sub_resource type="GDScript" id=6]
 script/source = "extends MeshInstance
@@ -601,7 +677,7 @@ var material
 
 
 func _ready():
-	player = get_parent().get_node(\"Player/Pilot/Unit\")
+	player = get_parent().get_node(\"Units/Player/Pilot/Unit\")
 	material = get_surface_material(0)
 
 
@@ -611,7 +687,7 @@ func _physics_process(delta):
 	movement.z = fluctuation
 	material.normal_scale += fluctuation
 	material.depth_scale += fluctuation
-	if (player.transform.origin - transform.origin).length() > 60:
+	if (player.transform.origin - transform.origin).length() > 80:
 		transform.origin.x = player.transform.origin.x
 		transform.origin.z = player.transform.origin.z
 	global_transform.origin.y = 5.8 + sin(frame*sin(delta*100)*100) * .1
@@ -628,8 +704,7 @@ background_sky = SubResource( 7 )
 background_color = Color( 0.545098, 0.866667, 0.952941, 1 )
 fog_color = Color( 0, 0, 0, 1 )
 fog_sun_color = Color( 1, 1, 1, 1 )
-fog_depth_begin = 60.0
-fog_depth_end = 80.0
+fog_depth_begin = 80.0
 fog_depth_curve = 0.34151
 auto_exposure_enabled = true
 glow_bloom = 0.2
@@ -657,7 +732,7 @@ func _ready():
 	light.rotate_x(-.8)
 
 func _physics_process(delta):
-	var tick = delta * .008
+	var tick = delta * .005
 	light.rotate_x(-tick)
 	light.translate(light.transform.basis.y)
 	var sun_rot = -light.rotation.z #0 to PI
@@ -703,21 +778,42 @@ size = Vector2( 4, 4 )
 
 [sub_resource type="SpatialMaterial" id=11]
 
+[sub_resource type="GDScript" id=12]
+script/source = "extends Timer
+
+var start_size = 1
+var workers = []
+var soldiers = []
+var resource = {\"mana\": 10, \"food\": 10}
+var frame = 0
+
+
+func _ready():
+	var _a = connect(\"timeout\", self, \"update\")
+
+
+func place_units():
+	for _i in range(start_size):
+		var vec = G.world.spawnpoints.pop_back()
+		workers.append(G.cmds([[\"t\",vec],[\"spawn\",\"worker\"]], null))
+
+
+func update():
+	print(\"asd\")
+"
+
 [node name="World" type="Spatial"]
 script = SubResource( 1 )
 
-[node name="Player" parent="." instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 0 )
-
 [node name="GridTerrain" type="GridMap" parent="."]
-mesh_library = ExtResource( 2 )
+mesh_library = ExtResource( 1 )
 cell_size = Vector3( 6, 6, 6 )
 cell_center_y = false
 cell_scale = 6.0
 collision_layer = 35
 collision_mask = 3
 data = {
-"cells": PoolIntArray( 65536, 0, 14, 131071, 0, 0, 65536, 65535, 0, 131071, 65535, 0 )
+"cells": PoolIntArray( 0, 0, 655360, 1, 0, 655360, 2, 0, 655360, 3, 0, 655360, 4, 0, 655360, 65537, 0, 1048576, 65538, 0, 1048576, 0, 1, 655360, 1, 1, 655360, 2, 1, 655360, 3, 1, 655360, 4, 1, 655360, 65537, 1, 1048576, 0, 2, 655360, 1, 2, 655360, 2, 2, 655360, 3, 2, 655360, 4, 2, 655360, 65537, 2, 1048576, 65540, 2, 1048576, 0, 3, 655360, 1, 3, 655360, 2, 3, 655360, 3, 3, 655360, 4, 3, 655360, 65537, 3, 1048576, 65538, 3, 1048576, 65539, 3, 1048576, 65540, 3, 1048576, 0, 4, 655360, 1, 4, 655360, 2, 4, 655360, 3, 4, 655360, 4, 4, 655360, 65536, 4, 0, 65538, 4, 0, 0, 5, 655360, 1, 5, 655360, 2, 5, 655360, 3, 5, 655360, 4, 5, 655360, 65536, 5, 0, 65537, 5, 0, 65538, 5, 0 )
 }
 script = SubResource( 2 )
 __meta__ = {
@@ -726,7 +822,7 @@ __meta__ = {
 }
 
 [node name="GridObjects" type="GridMap" parent="."]
-mesh_library = ExtResource( 1 )
+mesh_library = ExtResource( 2 )
 cell_size = Vector3( 3, 3, 3 )
 cell_octant_size = 16
 cell_center_y = false
@@ -743,7 +839,7 @@ __meta__ = {
 }
 
 [node name="Water" type="MeshInstance" parent="."]
-transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 160, 0, -4, 0 )
+transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 160, 0, 4, 0 )
 mesh = SubResource( 4 )
 material/0 = SubResource( 5 )
 script = SubResource( 6 )
@@ -751,6 +847,9 @@ script = SubResource( 6 )
 [node name="Objects" type="Spatial" parent="."]
 
 [node name="Units" type="Spatial" parent="."]
+
+[node name="Player" parent="Units" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 0 )
 
 [node name="Occluders" type="Spatial" parent="."]
 
@@ -766,8 +865,13 @@ light_energy = 0.1
 shadow_enabled = true
 
 [node name="Map" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 10, 10 )
+transform = Transform( 1, 0, 0, 0, 0.80599, -0.591929, 0, 0.591929, 0.80599, 10, 10, 10 )
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
 
 [node name="Particle" parent="." instance=ExtResource( 7 )]
+
+[node name="Enemy" type="Timer" parent="."]
+wait_time = 8.0
+autostart = true
+script = SubResource( 12 )

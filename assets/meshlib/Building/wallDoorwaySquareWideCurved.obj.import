@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallDoorwaySquareWideCurved.obj-8689b58c2602f3a93f2dd0d9a0130987.mesh"
+
+[deps]
+
+files=[ "res://.import/wallDoorwaySquareWideCurved.obj-8689b58c2602f3a93f2dd0d9a0130987.mesh" ]
+
+source_file="res://assets/meshlib/Building/wallDoorwaySquareWideCurved.obj"
+dest_files=[ "res://.import/wallDoorwaySquareWideCurved.obj-8689b58c2602f3a93f2dd0d9a0130987.mesh", "res://.import/wallDoorwaySquareWideCurved.obj-8689b58c2602f3a93f2dd0d9a0130987.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

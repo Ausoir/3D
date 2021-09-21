@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/stairsWoodHandrail.obj-a683ab6e51f0179bce7c6c748e21c7f6.mesh"
+
+[deps]
+
+files=[ "res://.import/stairsWoodHandrail.obj-a683ab6e51f0179bce7c6c748e21c7f6.mesh" ]
+
+source_file="res://assets/meshlib/Building/stairsWoodHandrail.obj"
+dest_files=[ "res://.import/stairsWoodHandrail.obj-a683ab6e51f0179bce7c6c748e21c7f6.mesh", "res://.import/stairsWoodHandrail.obj-a683ab6e51f0179bce7c6c748e21c7f6.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

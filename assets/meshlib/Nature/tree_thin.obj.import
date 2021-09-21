@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/tree_thin.obj-48c9e479ab06ce08253d00a7449a790e.mesh"
+
+[deps]
+
+files=[ "res://.import/tree_thin.obj-48c9e479ab06ce08253d00a7449a790e.mesh" ]
+
+source_file="res://assets/meshlib/Nature/tree_thin.obj"
+dest_files=[ "res://.import/tree_thin.obj-48c9e479ab06ce08253d00a7449a790e.mesh", "res://.import/tree_thin.obj-48c9e479ab06ce08253d00a7449a790e.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

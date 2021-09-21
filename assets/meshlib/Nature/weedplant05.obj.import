@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh"
+
+[deps]
+
+files=[ "res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh" ]
+
+source_file="res://assets/meshlib/Nature/weedplant05.obj"
+dest_files=[ "res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh", "res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

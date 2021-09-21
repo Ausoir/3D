@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh"
+
+[deps]
+
+files=[ "res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh" ]
+
+source_file="res://assets/meshlib/Nature/threeleaf01.obj"
+dest_files=[ "res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh", "res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

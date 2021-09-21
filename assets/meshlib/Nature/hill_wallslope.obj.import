@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh"
+
+[deps]
+
+files=[ "res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh" ]
+
+source_file="res://assets/meshlib/Nature/hill_wallslope.obj"
+dest_files=[ "res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh", "res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

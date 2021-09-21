@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/pillarWood.obj-5d5a31c1d55bb01aa8736cec80c146a5.mesh"
+
+[deps]
+
+files=[ "res://.import/pillarWood.obj-5d5a31c1d55bb01aa8736cec80c146a5.mesh" ]
+
+source_file="res://assets/meshlib/Building/pillarWood.obj"
+dest_files=[ "res://.import/pillarWood.obj-5d5a31c1d55bb01aa8736cec80c146a5.mesh", "res://.import/pillarWood.obj-5d5a31c1d55bb01aa8736cec80c146a5.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

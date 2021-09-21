@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh"
+
+[deps]
+
+files=[ "res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh" ]
+
+source_file="res://assets/meshlib/Nature/hillside.obj"
+dest_files=[ "res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh", "res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

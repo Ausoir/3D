@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hill_side_corner2.obj-7847343c8212381f34d4ff186fe33046.mesh"
+
+[deps]
+
+files=[ "res://.import/hill_side_corner2.obj-7847343c8212381f34d4ff186fe33046.mesh" ]
+
+source_file="res://assets/meshlib/Nature/hill_side_corner2.obj"
+dest_files=[ "res://.import/hill_side_corner2.obj-7847343c8212381f34d4ff186fe33046.mesh", "res://.import/hill_side_corner2.obj-7847343c8212381f34d4ff186fe33046.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

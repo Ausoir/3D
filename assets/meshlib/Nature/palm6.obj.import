@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh"
+
+[deps]
+
+files=[ "res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh" ]
+
+source_file="res://assets/meshlib/Nature/palm6.obj"
+dest_files=[ "res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh", "res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

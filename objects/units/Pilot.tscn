@@ -58,8 +58,6 @@ func _physics_process(delta):
 	on_task_update()
 
 func on_task_set(newtask):
-	if newtask[0] == \"menu\":
-		get_parent().ui.display(newtask[2], unit)
 	task = newtask
 	task_timer = newtask[1]
 
@@ -79,8 +77,10 @@ func on_task_update():
 	elif task[0] == \"move\":
 		unit.set_state(\"move\")
 		var dist = face(task[2])
-		if dist.length() < 1:
-			unit.motion_target = Vector2()
+		var proximity = 1
+		if len(task) > 3:
+			proximity = task[3]
+		if dist.length() <= proximity:
 			task_timer = 0
 		else:
 			unit.motion_target = Vector2(0, 1)
@@ -109,11 +109,12 @@ func on_task_finish():
 		G.add_resource(task[2][0], task[2][1])
 	elif task[0] == \"damage\":
 		task[2].damage(task[3])
+	elif task[0] == \"cmd\":
+		G.cmds(task[2], unit)
 	elif task[0] == \"interact\":
-		if !interact(G.world.get_object_at(unit.get_interact_position())):
-			if !interact(G.world.get_item_type_at(\"object\", unit.get_interact_position())):
-				if !interact(G.world.get_item_type_at(\"furniture\", unit.get_interact_position())):
-					interact(G.world.get_item_type_at(\"building\", unit.get_interact_position()))
+		if !interact(G.world.get_item_type_at(\"object\", unit.get_interact_position())):
+			if !interact(G.world.get_object_at(unit.get_interact_position())):
+				interact(G.world.get_item_type_at(\"furniture\", unit.get_interact_position()))
 		return false
 	elif task[0] == \"work\":
 		if is_instance_valid(task[2]): #Check if node was freed
@@ -130,23 +131,16 @@ func on_task_finish():
 func face(to):
 	var diff = unit.get_position() - to
 	var dir = diff.normalized()
-	unit.anim_tree[\"parameters/head_v/add_amount\"] = dir.y * 1.5
 	dir.y = 0
 	unit.view_z = dir
 	return diff
-
-func check_vacancy(x=0, y=2):
-	var target_pos = unit.get_adjacent(x, y)
-	return G.world.get_tile_at(target_pos) == -1 and \\
-		!G.world.get_item_at(target_pos) and \\
-		!G.world.get_object_at(target_pos)
 
 
 func interact(object):
 	if object != null:
 		if object is String:
-			if object in G.item.interactions:
-				set_tasks(G.item.interactions[object])
+			if object in G.item.decor_interactions:
+				set_tasks(G.item.decor_interactions[object])
 		elif object.onuse:
 			set_tasks(object.onuse)
 		return true
