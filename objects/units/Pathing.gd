@@ -123,7 +123,6 @@ func update(hostposv, targetv):
 				done = done.parent
 				if done.pos == hostpos:
 					break
-				#G.make_particle("smoke", to_tile_pos(done.pos), 3)
 				result.insert(0, to_tile_pos(done.pos))
 		return result
 
@@ -244,20 +243,18 @@ func routes_check_receive(pos, direction):
 			(tile_orientation == 22 and direction[0] == -1):
 			return [newpos[0], newpos[1]-1, newpos[2]]
 	else:
-		var heightmap = world.dirtmap[newpos[0]][newpos[2]]
-		var tileunder = world.tilemap.get_cell_item(newpos[0], newpos[1]-1, newpos[2])
-		if heightmap == newpos[1]:
-			if tileunder == world.tilemap.dirtslope:
-				return [newpos[0], newpos[1]-1, newpos[2]]
-			else:
-				return newpos
-		elif receiver == world.tilemap.dirttunnel: #Check if tunnel
+		if receiver == world.tilemap.dirttunnel: #Check if tunnel
 			var tileunder_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
 			if ((tileunder_orientation == 0 or tileunder_orientation == 10) and\
 				(direction == [0,0,-1] or direction==[0,0,1])) or\
 				((tileunder_orientation == 16 or tileunder_orientation == 22) and\
 				(direction==[1,0,0] or direction==[-1,0,0])):
-				return [newpos[0], newpos[1], newpos[2]]
-		elif receiver == -1: #Check if landable
-			if tileunder >= 980:
+				return newpos
+		else:
+			var tileunder = world.tilemap.get_cell_item(newpos[0], newpos[1]-1, newpos[2])
+			if tileunder == -1:
+				return
+			elif tileunder == world.tilemap.dirtslope or tileunder == 980:
+				return [newpos[0], newpos[1]-1, newpos[2]]
+			elif tileunder >= 990 or tileunder == world.tilemap.beach or tileunder in world.tilemap.dirts:
 				return newpos

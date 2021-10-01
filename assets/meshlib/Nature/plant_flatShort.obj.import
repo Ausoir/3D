@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/plant_flatShort.obj-5f37efc45e67a33f544351e7bf4de2e3.mesh"
+path="res://.import/plant_flatShort.obj-17baa8de264c22bdcc0dbaab8dab04d1.mesh"
 
 [deps]
 
-files=[ "res://.import/plant_flatShort.obj-5f37efc45e67a33f544351e7bf4de2e3.mesh" ]
+files=[ "res://.import/plant_flatShort.obj-17baa8de264c22bdcc0dbaab8dab04d1.mesh" ]
 
-source_file="res://assets/meshlib/Nature/plant_flatShort.obj"
-dest_files=[ "res://.import/plant_flatShort.obj-5f37efc45e67a33f544351e7bf4de2e3.mesh", "res://.import/plant_flatShort.obj-5f37efc45e67a33f544351e7bf4de2e3.mesh" ]
+source_file="res://assets/meshlib/nature/plant_flatShort.obj"
+dest_files=[ "res://.import/plant_flatShort.obj-17baa8de264c22bdcc0dbaab8dab04d1.mesh", "res://.import/plant_flatShort.obj-17baa8de264c22bdcc0dbaab8dab04d1.mesh" ]
 
 [params]
 

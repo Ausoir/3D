@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/stone_largeF.obj-c5e19dd1e508b8c00380eedaec166e03.mesh"
+path="res://.import/stone_largeF.obj-3326f0beea0d654330e4f30805ec87b8.mesh"
 
 [deps]
 
-files=[ "res://.import/stone_largeF.obj-c5e19dd1e508b8c00380eedaec166e03.mesh" ]
+files=[ "res://.import/stone_largeF.obj-3326f0beea0d654330e4f30805ec87b8.mesh" ]
 
-source_file="res://assets/meshlib/Nature/stone_largeF.obj"
-dest_files=[ "res://.import/stone_largeF.obj-c5e19dd1e508b8c00380eedaec166e03.mesh", "res://.import/stone_largeF.obj-c5e19dd1e508b8c00380eedaec166e03.mesh" ]
+source_file="res://assets/meshlib/nature/stone_largeF.obj"
+dest_files=[ "res://.import/stone_largeF.obj-3326f0beea0d654330e4f30805ec87b8.mesh", "res://.import/stone_largeF.obj-3326f0beea0d654330e4f30805ec87b8.mesh" ]
 
 [params]
 

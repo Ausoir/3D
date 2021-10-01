@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/stairsStoneRound.obj-5d5f906f47bfd99530d52465ebbacc29.mesh"
+
+[deps]
+
+files=[ "res://.import/stairsStoneRound.obj-5d5f906f47bfd99530d52465ebbacc29.mesh" ]
+
+source_file="res://assets/models/buildings/stairsStoneRound.obj"
+dest_files=[ "res://.import/stairsStoneRound.obj-5d5f906f47bfd99530d52465ebbacc29.mesh", "res://.import/stairsStoneRound.obj-5d5f906f47bfd99530d52465ebbacc29.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

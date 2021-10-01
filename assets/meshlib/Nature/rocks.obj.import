@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/rocks.obj-4f92fdd6b6c109bcd6f45fec9c1aa9ed.mesh"
+path="res://.import/rocks.obj-f11b653415d2f047a197ae09d7a731c7.mesh"
 
 [deps]
 
-files=[ "res://.import/rocks.obj-4f92fdd6b6c109bcd6f45fec9c1aa9ed.mesh" ]
+files=[ "res://.import/rocks.obj-f11b653415d2f047a197ae09d7a731c7.mesh" ]
 
-source_file="res://assets/meshlib/Nature/rocks.obj"
-dest_files=[ "res://.import/rocks.obj-4f92fdd6b6c109bcd6f45fec9c1aa9ed.mesh", "res://.import/rocks.obj-4f92fdd6b6c109bcd6f45fec9c1aa9ed.mesh" ]
+source_file="res://assets/meshlib/nature/rocks.obj"
+dest_files=[ "res://.import/rocks.obj-f11b653415d2f047a197ae09d7a731c7.mesh", "res://.import/rocks.obj-f11b653415d2f047a197ae09d7a731c7.mesh" ]
 
 [params]
 

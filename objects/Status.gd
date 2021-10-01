@@ -19,16 +19,26 @@ func add_state(host, statename, time):
 	states.append(State.new(host, statename, time))
 
 
+func remove_state(statename):
+	for state in states:
+		if state.name == statename:
+			state.lifetime = 0
+			state.die()
+			states.erase(state)
+			return
+
+
 func update(delta):
-	var second = false
-	frame += delta
-	if frame > 1:
-		frame -= 1
-		second = true
-	for i in range(len(states)-1, -1, -1):
-		if states[i].update(delta, second):
-			states[i].die()
-			states.remove(i)
+	if !states.empty():
+		var second = false
+		frame += delta
+		if frame > 1:
+			frame -= 1
+			second = true
+		for i in range(len(states)-1, -1, -1):
+			if states[i].update(delta, second):
+				states[i].die()
+				states.remove(i)
 
 
 func die():

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh"
+path="res://.import/palm6.obj-0d7e3fcb3a8f4c39ac39cc1fdb2f17d3.mesh"
 
 [deps]
 
-files=[ "res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh" ]
+files=[ "res://.import/palm6.obj-0d7e3fcb3a8f4c39ac39cc1fdb2f17d3.mesh" ]
 
-source_file="res://assets/meshlib/Nature/palm6.obj"
-dest_files=[ "res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh", "res://.import/palm6.obj-5058b36225a542bf4051b356553801db.mesh" ]
+source_file="res://assets/meshlib/nature/palm6.obj"
+dest_files=[ "res://.import/palm6.obj-0d7e3fcb3a8f4c39ac39cc1fdb2f17d3.mesh", "res://.import/palm6.obj-0d7e3fcb3a8f4c39ac39cc1fdb2f17d3.mesh" ]
 
 [params]
 

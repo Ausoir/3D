@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/watermill.obj-24533e1f068464d004d0cb16816bd1a8.mesh"
+
+[deps]
+
+files=[ "res://.import/watermill.obj-24533e1f068464d004d0cb16816bd1a8.mesh" ]
+
+source_file="res://assets/models/buildings/watermill.obj"
+dest_files=[ "res://.import/watermill.obj-24533e1f068464d004d0cb16816bd1a8.mesh", "res://.import/watermill.obj-24533e1f068464d004d0cb16816bd1a8.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

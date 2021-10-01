@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh"
+path="res://.import/weedplant05.obj-adee49fd5e10217f1d27d88a76da6528.mesh"
 
 [deps]
 
-files=[ "res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh" ]
+files=[ "res://.import/weedplant05.obj-adee49fd5e10217f1d27d88a76da6528.mesh" ]
 
-source_file="res://assets/meshlib/Nature/weedplant05.obj"
-dest_files=[ "res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh", "res://.import/weedplant05.obj-2c68fcc3360c6688a5fb4aeb554c0d3f.mesh" ]
+source_file="res://assets/meshlib/nature/weedplant05.obj"
+dest_files=[ "res://.import/weedplant05.obj-adee49fd5e10217f1d27d88a76da6528.mesh", "res://.import/weedplant05.obj-adee49fd5e10217f1d27d88a76da6528.mesh" ]
 
 [params]
 

@@ -24,7 +24,7 @@ func update(delta, second):
 		host.motion_target *= 100*delta
 	elif name == "slowfall":
 		if host.velocity.y < 0:
-			host.velocity.y *= .9
+			host.velocity.y *= .5
 
 	if second:
 		if particle:

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh"
+path="res://.import/hillside.obj-e59b8e8d80d6ded7aeb32927ab17996b.mesh"
 
 [deps]
 
-files=[ "res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh" ]
+files=[ "res://.import/hillside.obj-e59b8e8d80d6ded7aeb32927ab17996b.mesh" ]
 
-source_file="res://assets/meshlib/Nature/hillside.obj"
-dest_files=[ "res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh", "res://.import/hillside.obj-f86fb3afdd07e534d5289dbbb29eb31c.mesh" ]
+source_file="res://assets/meshlib/nature/hillside.obj"
+dest_files=[ "res://.import/hillside.obj-e59b8e8d80d6ded7aeb32927ab17996b.mesh", "res://.import/hillside.obj-e59b8e8d80d6ded7aeb32927ab17996b.mesh" ]
 
 [params]
 

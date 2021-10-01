@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh"
+path="res://.import/threeleaf01.obj-efe14f7a46fa5581186bad51588ad420.mesh"
 
 [deps]
 
-files=[ "res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh" ]
+files=[ "res://.import/threeleaf01.obj-efe14f7a46fa5581186bad51588ad420.mesh" ]
 
-source_file="res://assets/meshlib/Nature/threeleaf01.obj"
-dest_files=[ "res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh", "res://.import/threeleaf01.obj-82e345882a0e7d3ce039ccd31ff3658e.mesh" ]
+source_file="res://assets/meshlib/nature/threeleaf01.obj"
+dest_files=[ "res://.import/threeleaf01.obj-efe14f7a46fa5581186bad51588ad420.mesh", "res://.import/threeleaf01.obj-efe14f7a46fa5581186bad51588ad420.mesh" ]
 
 [params]
 

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/Weed03.obj-5c864d9456a6e373e4404d49ae3bd754.mesh"
+path="res://.import/Weed03.obj-9ee9c74bd6bbcaceee75dc38fa101c5d.mesh"
 
 [deps]
 
-files=[ "res://.import/Weed03.obj-5c864d9456a6e373e4404d49ae3bd754.mesh" ]
+files=[ "res://.import/Weed03.obj-9ee9c74bd6bbcaceee75dc38fa101c5d.mesh" ]
 
-source_file="res://assets/meshlib/Nature/Weed03.obj"
-dest_files=[ "res://.import/Weed03.obj-5c864d9456a6e373e4404d49ae3bd754.mesh", "res://.import/Weed03.obj-5c864d9456a6e373e4404d49ae3bd754.mesh" ]
+source_file="res://assets/meshlib/nature/Weed03.obj"
+dest_files=[ "res://.import/Weed03.obj-9ee9c74bd6bbcaceee75dc38fa101c5d.mesh", "res://.import/Weed03.obj-9ee9c74bd6bbcaceee75dc38fa101c5d.mesh" ]
 
 [params]
 

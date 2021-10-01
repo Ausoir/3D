@@ -1,9 +1,6 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://objects/units/Pilot.tscn" type="PackedScene" id=1]
-[ext_resource path="res://assets/mat_interface.tres" type="Material" id=2]
-[ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=3]
-[ext_resource path="res://assets/Baumans-Regular.ttf" type="DynamicFontData" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
@@ -21,19 +18,26 @@ onready var springarm = $CameraBase/SpringArm
 onready var camera = $CameraBase
 onready var pilot = $Pilot
 onready var unit = $Pilot/Unit
-onready var ui = $Interface
-onready var interaction_tip = $Interface/Interaction
 
 # Variables (public members)
 var mouse_motion = Vector2()
 var mouse_captured = true
+var item_type = \"unit\"
 
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	springarm.add_excluded_object(self)
-	var mat = load(\"res://assets/mat_dirt.tres\")
+	unit.controller = self
+	unit.hit_glance = true
+	G.factions[1].add(self)
+	var mat = load(\"res://assets/materials/mat_dirt.tres\")
 	unit.set_skin(3, mat)
+	unit.item_name = \"player\"
+
+
+func set_faction(faction):
+	pilot.faction = faction
 
 
 func capture_mouse(mode = -1):
@@ -59,7 +63,7 @@ func _input(event):
 		OS.window_fullscreen = !OS.window_fullscreen
 	elif Input.is_action_just_pressed(\"ui_mouse\"):
 		capture_mouse()
-	else:
+	elif event is InputEventKey:
 		show_interactable_tip()
 
 
@@ -74,15 +78,12 @@ func _physics_process(_delta):
 	if mouse_captured:
 		if Input.is_action_just_pressed(\"special\"):
 			unit.set_state(\"jump\")
-			unit.move_and_slide(unit.transform.basis.z*10, Vector3.UP)
-			unit.velocity.y = 10
-			G.cmds([[\"v\",\"host\"],[\"state\",\"haste\",24],[\"v\",\"host\"],[\"state\",\"slowfall\",5]],unit)
+			unit.move_and_slide(unit.transform.basis.z*20, Vector3.UP)
+			unit.velocity.y = 20
+			G.cmds([[\"v\",\"host\"],[\"state\",\"haste\",24],[\"v\",\"host\"],[\"state\",\"slowfall\",2]],unit)
 		elif Input.is_action_just_pressed(\"interact\"):
-			if unit.weapon:
-				if unit.weapon.onswing:
-					pilot.set_tasks(unit.weapon.onswing)
-			elif G.world.get_item_type_at(\"item\", unit.get_interact_position()):
-				pilot.set_task([\"grab\", 6])
+			if unit.weapon and unit.weapon.onswing:
+				pilot.set_tasks(unit.weapon.onswing)
 			else:
 				pilot.set_task([\"interact\", 0])
 		elif Input.is_action_just_pressed(\"item\"):
@@ -93,7 +94,7 @@ func _physics_process(_delta):
 			if unit.weapon:
 				pilot.set_task([\"drop\", 6])
 			else:
-				pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]]])
+				pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
 
 		var camera_basis = camera.global_transform.basis
 		var camera_z = camera_basis.z
@@ -114,181 +115,23 @@ func _physics_process(_delta):
 
 
 func show_interactable_tip():
-	var text = \"\"
-	var interactable = G.world.get_item_type_at(\"item\", unit.get_interact_position())
-	if interactable:
-		text = \"Pick up \"+interactable.item_name.capitalize()
+	var item = pilot.get_interactable()
+	if item:
+		if item.item_type == \"item\":
+			G.ui.set_tooltip(\"Pick up \" + item.item_name)
+		elif item.item_type == \"building\":
+			G.ui.set_tooltip(\"Use \" + item.item_name)
 	else:
-		interactable = G.world.get_item_type_at(\"object\", unit.get_interact_position())
-		if interactable and interactable.item_name:
-			text = \"Use \"+interactable.item_name.capitalize()
-		else:
-			interactable = G.world.get_object_at(unit.get_interact_position())
-			if interactable and interactable in G.item.decor_interactions:
-				text = \"Interact with \"+interactable.capitalize()
-			else:
-				interactable = G.world.get_item_type_at(\"furniture\", unit.get_interact_position())
-				if interactable:
-					text = \"Use \"+interactable.item_name.capitalize()
-	interaction_tip.set_text(text)
-	if text != \"\":
-		interaction_tip.show()
-		interaction_tip.rect_position = get_viewport().size / 2 - interaction_tip.rect_size / 2 + Vector2(0, 160)
-	else:
-		interaction_tip.hide()
+		G.ui.set_tooltip(\"\")
+
+
+func on_hit(_pos, _hitter, _damage):
+	pass
+
+
+func die():
+	pass
 "
-
-[sub_resource type="GDScript" id=2]
-script/source = "extends CanvasLayer
-
-
-onready var menu = $Menu
-onready var tint = $Menu/Tint
-var on = false
-var b_pos
-var menubutton = preload(\"res://interface/button_resource.tscn\")
-var unit
-
-
-func _ready():
-	tint.connect(\"gui_input\", self, \"on_background_click\")
-	update_resources()
-
-
-func on_background_click(event):
-	if event is InputEventMouseButton and !event.pressed:
-		clear()
-
-
-func toggle(arg, caller):
-	if !on:
-		display(arg, caller)
-	else:
-		clear()
-		
-
-func update_resources():
-	$Resources/ManaAmount.set_text(str(G.resource[\"mana\"]))
-	$Resources/FoodAmount.set_text(str(G.resource[\"food\"]))
-
-
-func display(arg, caller):
-	if on:
-		clear()
-	get_parent().capture_mouse(0)
-	on = true
-	tint.show()
-	tint.set_size(get_viewport().size)
-	menu.show()
-	unit = caller
-	b_pos = Vector2(200, 120)
-	var items = G.item.craftables[arg]
-	for item in items:
-		add_button(item[0], item[1], item[2])
-		if b_pos[1] > 540:
-			b_pos = Vector2(700, 120)
-
-
-func clear():
-	get_parent().capture_mouse(1)
-	on = false
-	tint.hide()
-	menu.hide()
-	for child in $Menu/Buttons.get_children():
-		child.queue_free()
-
-
-func add_button(name, reqs, args):
-	var button = menubutton.instance()
-	button.get_node(\"Name\").set_text(name)
-	button.set_reqs(reqs[0], reqs[1])
-	button.set_position(b_pos)
-	button.set_size(Vector2(380, 80))
-	button.connect(\"pressed\", self, \"button_pressed\", [args])
-	button.set_use_parent_material(true)
-	if !G.require_resource(false, reqs[0], reqs[1]):
-		button.disabled = true
-	$Menu/Buttons.add_child(button)
-	b_pos.y += 140
-
-
-func button_pressed(args):
-	G.cmds(args, unit)
-	clear()
-
-
-func display_gather(mana, food):
-	var plus = \"\"
-	if mana != 0:
-		if mana > 0:
-			plus = \"+\"
-		message(plus+str(mana) + \" Mana\")
-	if food != 0:
-		if food > 0:
-			plus = \"+\"
-		message(plus+str(food) + \" Food\")
-
-
-func message(msg):
-	$Messages.add(str(msg))
-"
-
-[sub_resource type="GDScript" id=3]
-script/source = "extends Control
-
-var pos_v = 0
-var timeout = 0
-
-
-func add(msg):
-	set_position(Vector2(64, get_viewport().size.y - 64))
-	var label = Label.new()
-	label.set_text(msg)
-	label.set_scale(Vector2(2, 2))
-	for child in get_children():
-		var pos = child.get_position()
-		child.set_position(Vector2(pos.x, pos.y - 40))
-		var color = child.get(\"custom_colors/font_color\")
-		if color == null:
-			child.set(\"custom_colors/font_color\", Color(1, 1, 1, 1))
-		elif color.a > .2:
-			child.set(\"custom_colors/font_color\", Color(color.r, color.g, color.b, color.a-.2))
-		else:
-			child.queue_free()
-	label.set_use_parent_material(true)
-	add_child(label)
-	timeout = 120
-
-
-func _physics_process(_delta):
-	if timeout > 0:
-		timeout -= 1
-	else:
-		for child in get_children():
-			var color = child.get(\"custom_colors/font_color\")
-			if color == null:
-				child.set(\"custom_colors/font_color\", Color(1, 1, 1, 1))
-			elif color.a > .2:
-				child.set(\"custom_colors/font_color\", Color(color.r, color.g, color.b, color.a-.01))
-			else:
-				child.queue_free()
-"
-
-[sub_resource type="CanvasItemMaterial" id=4]
-blend_mode = 3
-light_mode = 1
-
-[sub_resource type="StyleBoxFlat" id=5]
-bg_color = Color( 0, 0, 0, 0.392157 )
-
-[sub_resource type="StyleBoxFlat" id=8]
-bg_color = Color( 0.352941, 0.352941, 0.352941, 0.470588 )
-
-[sub_resource type="DynamicFont" id=7]
-size = 24
-outline_size = 1
-outline_color = Color( 0.282353, 0.282353, 0.282353, 1 )
-font_data = ExtResource( 4 )
 
 [node name="Player" type="Spatial"]
 script = SubResource( 1 )
@@ -306,98 +149,3 @@ spring_length = 3.6
 [node name="Camera" type="Camera" parent="CameraBase/SpringArm"]
 current = true
 far = 120.0
-
-[node name="Interface" type="CanvasLayer" parent="."]
-script = SubResource( 2 )
-
-[node name="Messages" type="Control" parent="Interface"]
-material = ExtResource( 2 )
-script = SubResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Menu" type="Control" parent="Interface"]
-visible = false
-material = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Tint" type="Panel" parent="Interface/Menu"]
-material = SubResource( 4 )
-margin_right = 1024.0
-margin_bottom = 600.0
-input_pass_on_modal_close_click = false
-
-[node name="Buttons" type="Control" parent="Interface/Menu"]
-use_parent_material = true
-margin_right = 40.0
-margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Resources" type="Panel" parent="Interface"]
-margin_right = 280.0
-margin_bottom = 40.0
-custom_styles/panel = SubResource( 5 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ManaAmount" type="Label" parent="Interface/Resources"]
-use_parent_material = true
-margin_left = 48.0
-margin_top = 8.0
-margin_right = 96.0
-margin_bottom = 24.0
-rect_scale = Vector2( 2, 2 )
-text = "0"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ManaIcon" type="Sprite" parent="Interface/Resources/ManaAmount"]
-use_parent_material = true
-position = Vector2( -20, -2 )
-scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 3 )
-centered = false
-region_enabled = true
-region_rect = Rect2( 0, 0, 32, 32 )
-
-[node name="FoodAmount" type="Label" parent="Interface/Resources"]
-use_parent_material = true
-margin_left = 192.0
-margin_top = 8.0
-margin_right = 240.0
-margin_bottom = 24.0
-rect_scale = Vector2( 2, 2 )
-text = "0"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FoodIcon" type="Sprite" parent="Interface/Resources/FoodAmount"]
-use_parent_material = true
-position = Vector2( -20, -2 )
-scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 3 )
-centered = false
-region_enabled = true
-region_rect = Rect2( 32, 0, 32, 32 )
-
-[node name="Interaction" type="Button" parent="Interface"]
-margin_left = 506.0
-margin_top = 282.0
-margin_right = 518.0
-margin_bottom = 317.0
-mouse_filter = 1
-custom_styles/disabled = SubResource( 8 )
-custom_fonts/font = SubResource( 7 )
-disabled = true
-button_mask = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}

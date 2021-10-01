@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/flower_redC.obj-f2456af46523fa2f706b91e949227b4c.mesh"
+path="res://.import/flower_redC.obj-cf3a025896ef9ff45e8fb91294c2870d.mesh"
 
 [deps]
 
-files=[ "res://.import/flower_redC.obj-f2456af46523fa2f706b91e949227b4c.mesh" ]
+files=[ "res://.import/flower_redC.obj-cf3a025896ef9ff45e8fb91294c2870d.mesh" ]
 
-source_file="res://assets/meshlib/Nature/flower_redC.obj"
-dest_files=[ "res://.import/flower_redC.obj-f2456af46523fa2f706b91e949227b4c.mesh", "res://.import/flower_redC.obj-f2456af46523fa2f706b91e949227b4c.mesh" ]
+source_file="res://assets/meshlib/nature/flower_redC.obj"
+dest_files=[ "res://.import/flower_redC.obj-cf3a025896ef9ff45e8fb91294c2870d.mesh", "res://.import/flower_redC.obj-cf3a025896ef9ff45e8fb91294c2870d.mesh" ]
 
 [params]
 

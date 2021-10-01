@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=1]
-[ext_resource path="res://assets/mat_interface.tres" type="Material" id=2]
+[ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Button
@@ -16,8 +16,9 @@ func set_reqs(mana, food):
 material = ExtResource( 2 )
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = -644.0
+margin_right = -544.0
 margin_bottom = -480.0
+rect_min_size = Vector2( 380, 120 )
 script = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -33,9 +34,9 @@ region_rect = Rect2( 64, 64, 32, 32 )
 
 [node name="Name" type="Label" parent="."]
 use_parent_material = true
-margin_left = 128.0
+margin_left = 20.0
 margin_top = 16.0
-margin_right = 168.0
+margin_right = 68.0
 margin_bottom = 32.0
 rect_scale = Vector2( 2, 2 )
 text = "Name"
@@ -45,7 +46,7 @@ __meta__ = {
 
 [node name="ManaIcon" type="Sprite" parent="."]
 use_parent_material = true
-position = Vector2( 120, 64 )
+position = Vector2( 20, 64 )
 texture = ExtResource( 1 )
 centered = false
 region_enabled = true
@@ -53,9 +54,9 @@ region_rect = Rect2( 0, 0, 32, 32 )
 
 [node name="ManaAmount" type="Label" parent="."]
 use_parent_material = true
-margin_left = 160.0
+margin_left = 64.0
 margin_top = 68.0
-margin_right = 190.0
+margin_right = 92.0
 margin_bottom = 84.0
 rect_scale = Vector2( 2, 2 )
 text = "0"
@@ -65,7 +66,7 @@ __meta__ = {
 
 [node name="FoodIcon" type="Sprite" parent="."]
 use_parent_material = true
-position = Vector2( 200, 64 )
+position = Vector2( 104, 64 )
 texture = ExtResource( 1 )
 centered = false
 region_enabled = true
@@ -73,12 +74,25 @@ region_rect = Rect2( 32, 0, 32, 32 )
 
 [node name="FoodAmount" type="Label" parent="."]
 use_parent_material = true
-margin_left = 240.0
+margin_left = 144.0
 margin_top = 68.0
-margin_right = 270.0
+margin_right = 174.0
 margin_bottom = 84.0
 rect_scale = Vector2( 2, 2 )
 text = "0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Reqs" type="Label" parent="."]
+use_parent_material = true
+margin_left = 220.0
+margin_top = 64.0
+margin_right = 380.0
+margin_bottom = 96.0
+rect_scale = Vector2( 1.5, 1.5 )
+custom_colors/font_color = Color( 1, 0, 0, 1 )
+autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/polesHorizontal.obj-48320fb6665e3be91d7f3d05eb837482.mesh"
+
+[deps]
+
+files=[ "res://.import/polesHorizontal.obj-48320fb6665e3be91d7f3d05eb837482.mesh" ]
+
+source_file="res://assets/models/buildings/polesHorizontal.obj"
+dest_files=[ "res://.import/polesHorizontal.obj-48320fb6665e3be91d7f3d05eb837482.mesh", "res://.import/polesHorizontal.obj-48320fb6665e3be91d7f3d05eb837482.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/plant_bush.obj-06ecf5717a30a613c10705ea47e68aa4.mesh"
+path="res://.import/plant_bush.obj-1b45dd27a2b002b1a9fdd6bc7652b84d.mesh"
 
 [deps]
 
-files=[ "res://.import/plant_bush.obj-06ecf5717a30a613c10705ea47e68aa4.mesh" ]
+files=[ "res://.import/plant_bush.obj-1b45dd27a2b002b1a9fdd6bc7652b84d.mesh" ]
 
-source_file="res://assets/meshlib/Nature/plant_bush.obj"
-dest_files=[ "res://.import/plant_bush.obj-06ecf5717a30a613c10705ea47e68aa4.mesh", "res://.import/plant_bush.obj-06ecf5717a30a613c10705ea47e68aa4.mesh" ]
+source_file="res://assets/meshlib/nature/plant_bush.obj"
+dest_files=[ "res://.import/plant_bush.obj-1b45dd27a2b002b1a9fdd6bc7652b84d.mesh", "res://.import/plant_bush.obj-1b45dd27a2b002b1a9fdd6bc7652b84d.mesh" ]
 
 [params]
 

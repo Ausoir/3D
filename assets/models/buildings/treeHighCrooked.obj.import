@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/treeHighCrooked.obj-a076e1d146a4212c281fa09d95bb4044.mesh"
+
+[deps]
+
+files=[ "res://.import/treeHighCrooked.obj-a076e1d146a4212c281fa09d95bb4044.mesh" ]
+
+source_file="res://assets/models/buildings/treeHighCrooked.obj"
+dest_files=[ "res://.import/treeHighCrooked.obj-a076e1d146a4212c281fa09d95bb4044.mesh", "res://.import/treeHighCrooked.obj-a076e1d146a4212c281fa09d95bb4044.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

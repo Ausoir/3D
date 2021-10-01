@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/roofCornerInner.obj-5cdb9b6a71af95f474e005e52da7664a.mesh"
+
+[deps]
+
+files=[ "res://.import/roofCornerInner.obj-5cdb9b6a71af95f474e005e52da7664a.mesh" ]
+
+source_file="res://assets/models/buildings/roofCornerInner.obj"
+dest_files=[ "res://.import/roofCornerInner.obj-5cdb9b6a71af95f474e005e52da7664a.mesh", "res://.import/roofCornerInner.obj-5cdb9b6a71af95f474e005e52da7664a.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

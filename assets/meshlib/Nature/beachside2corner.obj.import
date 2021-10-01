@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/beachside2corner.obj-61a27cce88688bb2d23acccc5a617eff.mesh"
+path="res://.import/beachside2corner.obj-df0c5f8dc4cbbf093b2b83f6303a8548.mesh"
 
 [deps]
 
-files=[ "res://.import/beachside2corner.obj-61a27cce88688bb2d23acccc5a617eff.mesh" ]
+files=[ "res://.import/beachside2corner.obj-df0c5f8dc4cbbf093b2b83f6303a8548.mesh" ]
 
-source_file="res://assets/meshlib/Nature/beachside2corner.obj"
-dest_files=[ "res://.import/beachside2corner.obj-61a27cce88688bb2d23acccc5a617eff.mesh", "res://.import/beachside2corner.obj-61a27cce88688bb2d23acccc5a617eff.mesh" ]
+source_file="res://assets/meshlib/nature/beachside2corner.obj"
+dest_files=[ "res://.import/beachside2corner.obj-df0c5f8dc4cbbf093b2b83f6303a8548.mesh", "res://.import/beachside2corner.obj-df0c5f8dc4cbbf093b2b83f6303a8548.mesh" ]
 
 [params]
 

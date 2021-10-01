@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/beach.obj-843c5fe7b4246f35a85280f2eda67d74.mesh"
+path="res://.import/beach.obj-537a942cd7fd201a146d2b216dc9e537.mesh"
 
 [deps]
 
-files=[ "res://.import/beach.obj-843c5fe7b4246f35a85280f2eda67d74.mesh" ]
+files=[ "res://.import/beach.obj-537a942cd7fd201a146d2b216dc9e537.mesh" ]
 
-source_file="res://assets/meshlib/Nature/beach.obj"
-dest_files=[ "res://.import/beach.obj-843c5fe7b4246f35a85280f2eda67d74.mesh", "res://.import/beach.obj-843c5fe7b4246f35a85280f2eda67d74.mesh" ]
+source_file="res://assets/meshlib/nature/beach.obj"
+dest_files=[ "res://.import/beach.obj-537a942cd7fd201a146d2b216dc9e537.mesh", "res://.import/beach.obj-537a942cd7fd201a146d2b216dc9e537.mesh" ]
 
 [params]
 

@@ -1,0 +1,143 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://assets/models/crops_dirtRow.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/models/crops_cornStageA.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/models/crops_dirtRowEnd.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/materials/mat_dirt.tres" type="Material" id=4]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Item.gd\"
+const stages = [
+	preload(\"res://assets/models/crops_cornStageA.obj\"),
+	preload(\"res://assets/models/crops_cornStageB.obj\"),
+	preload(\"res://assets/models/crops_cornStageC.obj\"),
+	preload(\"res://assets/models/crops_cornStageD.obj\")
+]
+var stage = 0
+
+
+func check_workdone():
+	if progress_bar:
+		var percentage = float(work_max - work) / work_max
+		print(percentage)
+		if percentage < .25:
+			grow(0)
+		elif percentage < .5:
+			grow(1)
+		elif percentage < .75:
+			grow(2)
+		else:
+			grow(3)
+	.check_workdone()
+
+
+func grow(to):
+	if to != stage:
+		stage = to
+		for child in $Corns.get_children():
+			child.mesh = stages[stage]
+"
+
+[node name="Spatial" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="Plot1" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 2, 0, 0 )
+mesh = ExtResource( 3 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot2" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0 )
+mesh = ExtResource( 1 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot3" type="MeshInstance" parent="."]
+transform = Transform( -2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, -2, 0, 0 )
+mesh = ExtResource( 3 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot4" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 2, 0, -2 )
+mesh = ExtResource( 3 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot5" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, -2 )
+mesh = ExtResource( 1 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot6" type="MeshInstance" parent="."]
+transform = Transform( -2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, -2, 0, -2 )
+mesh = ExtResource( 3 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot7" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 2, 0, 2 )
+mesh = ExtResource( 3 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot8" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2 )
+mesh = ExtResource( 1 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Plot9" type="MeshInstance" parent="."]
+transform = Transform( -2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, -2, 0, 2 )
+mesh = ExtResource( 3 )
+material/0 = ExtResource( 4 )
+material/1 = ExtResource( 4 )
+
+[node name="Corns" type="Spatial" parent="."]
+
+[node name="Corn" type="MeshInstance" parent="Corns"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 1.6, 0, 0 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn2" type="MeshInstance" parent="Corns"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn3" type="MeshInstance" parent="Corns"]
+transform = Transform( -2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, -1.6, 0, -6.03984e-08 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn4" type="MeshInstance" parent="Corns"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 1.6, 0, -2 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn5" type="MeshInstance" parent="Corns"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, -2 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn6" type="MeshInstance" parent="Corns"]
+transform = Transform( -2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, -1.6, 0, -2 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn7" type="MeshInstance" parent="Corns"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 1.6, 0, 2 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn8" type="MeshInstance" parent="Corns"]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 2 )
+mesh = ExtResource( 2 )
+material/0 = null
+
+[node name="Corn9" type="MeshInstance" parent="Corns"]
+transform = Transform( -2, 0, -3.01992e-07, 0, 2, 0, 3.01992e-07, 0, -2, -1.6, 0, 2 )
+mesh = ExtResource( 2 )
+material/0 = null

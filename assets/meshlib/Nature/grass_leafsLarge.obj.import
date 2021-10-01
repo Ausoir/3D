@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/grass_leafsLarge.obj-4c99a21f50e08b0da996f1d1e5ab9f83.mesh"
+path="res://.import/grass_leafsLarge.obj-704d402f4252d539afcb82c75a34ba90.mesh"
 
 [deps]
 
-files=[ "res://.import/grass_leafsLarge.obj-4c99a21f50e08b0da996f1d1e5ab9f83.mesh" ]
+files=[ "res://.import/grass_leafsLarge.obj-704d402f4252d539afcb82c75a34ba90.mesh" ]
 
-source_file="res://assets/meshlib/Nature/grass_leafsLarge.obj"
-dest_files=[ "res://.import/grass_leafsLarge.obj-4c99a21f50e08b0da996f1d1e5ab9f83.mesh", "res://.import/grass_leafsLarge.obj-4c99a21f50e08b0da996f1d1e5ab9f83.mesh" ]
+source_file="res://assets/meshlib/nature/grass_leafsLarge.obj"
+dest_files=[ "res://.import/grass_leafsLarge.obj-704d402f4252d539afcb82c75a34ba90.mesh", "res://.import/grass_leafsLarge.obj-704d402f4252d539afcb82c75a34ba90.mesh" ]
 
 [params]
 

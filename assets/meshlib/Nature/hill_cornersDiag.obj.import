@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/hill_cornersDiag.obj-8b255732dd5a5ac970e833d95690acbc.mesh"
+path="res://.import/hill_cornersDiag.obj-036d6fc492618b1f4d831607a8b90cee.mesh"
 
 [deps]
 
-files=[ "res://.import/hill_cornersDiag.obj-8b255732dd5a5ac970e833d95690acbc.mesh" ]
+files=[ "res://.import/hill_cornersDiag.obj-036d6fc492618b1f4d831607a8b90cee.mesh" ]
 
-source_file="res://assets/meshlib/Nature/hill_cornersDiag.obj"
-dest_files=[ "res://.import/hill_cornersDiag.obj-8b255732dd5a5ac970e833d95690acbc.mesh", "res://.import/hill_cornersDiag.obj-8b255732dd5a5ac970e833d95690acbc.mesh" ]
+source_file="res://assets/meshlib/nature/hill_cornersDiag.obj"
+dest_files=[ "res://.import/hill_cornersDiag.obj-036d6fc492618b1f4d831607a8b90cee.mesh", "res://.import/hill_cornersDiag.obj-036d6fc492618b1f4d831607a8b90cee.mesh" ]
 
 [params]
 

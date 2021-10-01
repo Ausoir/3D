@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallCurved.obj-112b2a64863876a915acaacb539459ac.mesh"
+
+[deps]
+
+files=[ "res://.import/wallCurved.obj-112b2a64863876a915acaacb539459ac.mesh" ]
+
+source_file="res://assets/models/buildings/wallCurved.obj"
+dest_files=[ "res://.import/wallCurved.obj-112b2a64863876a915acaacb539459ac.mesh", "res://.import/wallCurved.obj-112b2a64863876a915acaacb539459ac.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

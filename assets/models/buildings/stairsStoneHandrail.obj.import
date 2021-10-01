@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/stairsStoneHandrail.obj-af3f09752ee199511dee35d250a3e64a.mesh"
+
+[deps]
+
+files=[ "res://.import/stairsStoneHandrail.obj-af3f09752ee199511dee35d250a3e64a.mesh" ]
+
+source_file="res://assets/models/buildings/stairsStoneHandrail.obj"
+dest_files=[ "res://.import/stairsStoneHandrail.obj-af3f09752ee199511dee35d250a3e64a.mesh", "res://.import/stairsStoneHandrail.obj-af3f09752ee199511dee35d250a3e64a.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/tree_oak.obj-a735d4d546af5dba617666f7e7e38243.mesh"
+path="res://.import/tree_oak.obj-6c1003ded198adaaa1ade23e9353f87a.mesh"
 
 [deps]
 
-files=[ "res://.import/tree_oak.obj-a735d4d546af5dba617666f7e7e38243.mesh" ]
+files=[ "res://.import/tree_oak.obj-6c1003ded198adaaa1ade23e9353f87a.mesh" ]
 
-source_file="res://assets/meshlib/Nature/tree_oak.obj"
-dest_files=[ "res://.import/tree_oak.obj-a735d4d546af5dba617666f7e7e38243.mesh", "res://.import/tree_oak.obj-a735d4d546af5dba617666f7e7e38243.mesh" ]
+source_file="res://assets/meshlib/nature/tree_oak.obj"
+dest_files=[ "res://.import/tree_oak.obj-6c1003ded198adaaa1ade23e9353f87a.mesh", "res://.import/tree_oak.obj-6c1003ded198adaaa1ade23e9353f87a.mesh" ]
 
 [params]
 

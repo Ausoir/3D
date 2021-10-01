@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/dirtslope.obj-ce7e33d350d27aad6d3ccc6b67f67752.mesh"
+path="res://.import/dirtslope.obj-4f0de0f33fef49b1d50f788d5f53bb9e.mesh"
 
 [deps]
 
-files=[ "res://.import/dirtslope.obj-ce7e33d350d27aad6d3ccc6b67f67752.mesh" ]
+files=[ "res://.import/dirtslope.obj-4f0de0f33fef49b1d50f788d5f53bb9e.mesh" ]
 
-source_file="res://assets/meshlib/Nature/dirtslope.obj"
-dest_files=[ "res://.import/dirtslope.obj-ce7e33d350d27aad6d3ccc6b67f67752.mesh", "res://.import/dirtslope.obj-ce7e33d350d27aad6d3ccc6b67f67752.mesh" ]
+source_file="res://assets/meshlib/nature/dirtslope.obj"
+dest_files=[ "res://.import/dirtslope.obj-4f0de0f33fef49b1d50f788d5f53bb9e.mesh", "res://.import/dirtslope.obj-4f0de0f33fef49b1d50f788d5f53bb9e.mesh" ]
 
 [params]
 

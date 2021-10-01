@@ -1,25 +1,51 @@
 extends Spatial
 
 const particles = {
-	"blood": preload("res://objects/particles/Blood.tscn"),
-	"dust": preload("res://objects/particles/Dust.tscn"),
-	"smoke": preload("res://objects/particles/Smoke.tscn"),
-	"splinter": preload("res://objects/particles/Splinter.tscn"),
-	"repair": preload("res://objects/particles/Repair.tscn"),
+	"blood": preload("res://assets/particles/Blood.tscn"),
+	"dust": preload("res://assets/particles/Dust.tscn"),
+	"smoke": preload("res://assets/particles/Smoke.tscn"),
+	"splinter": preload("res://assets/particles/Splinter.tscn"),
+	"repair": preload("res://assets/particles/Repair.tscn"),
 }
 const class_item = preload("res://objects/Item.gd")
-const command = preload("res://Command.gd")
-onready var item = preload("res://objects/Spawn.gd").new()
+const command = preload("res://classes/Command.gd")
+var ui
+var factory
+var FACTION = preload("res://classes/Faction.gd")
 var enemy
 var you
 var younit
 var world
 var space
-var resource = {"mana": 10, "food": 10}
 var tick_events = []
+var factions = [
+	FACTION.new(0),
+	FACTION.new(1),
+	FACTION.new(2),
+]
 var frame = 0
 
 var rng = RandomNumberGenerator.new()
+
+
+func _init():
+	factory = preload("res://classes/Factory.gd").new()
+
+
+func initialize(pworld):
+	ui = preload("res://interface/Interface.tscn").instance()
+	G.world = pworld
+	G.space = pworld.get_world().direct_space_state
+	G.you = pworld.get_node("Units/Player")
+	G.younit = G.you.get_node("Pilot/Unit")
+	G.enemy = pworld.get_node("Enemy")
+	factory._ready()
+	pworld.others.add_child(ui)
+
+
+func on_hour(hour):
+	for faction in factions:
+		faction.on_hour(hour)
 
 
 func _process(_delta):
@@ -53,27 +79,22 @@ func rid(arg, remove=true):
 func drop(arg, exc):
 	var pos = arg.transform.origin
 	var r = space.intersect_ray(pos + Vector3(0, 1, 0), pos + Vector3(0, -40, 0), exc, 0b00000000000000000011)
-	world.objects.add_child(arg)
 	if r and r.position:
 		arg.transform.origin = r.position
 	return arg
 
 
 func dir_to_offset(orientation, rot):
-	var offsetx
-	var offsetz
+	var offsetx = 0
+	var offsetz = 0
 	if orientation == 0:
-		offsetx = 0
 		offsetz = 1
 	elif orientation == 16:
 		offsetx = -1
-		offsetz = 0
 	elif orientation == 10:
-		offsetx = 0
 		offsetz = -1
 	elif orientation == 22:
 		offsetx = 1
-		offsetz = 0
 	if rot == 0:
 		return Vector2(offsetx, offsetz)
 	elif rot == -1:
@@ -84,29 +105,8 @@ func dir_to_offset(orientation, rot):
 		return Vector2(-offsetx, -offsetz)
 
 
-func add_resource(mana, food):
-	resource["mana"] += mana
-	resource["food"] += food
-	you.get_node("Interface").display_gather(mana, food)
-	you.get_node("Interface").update_resources()
-
-
-func require_resource(spend, mana, food):
-	if resource["mana"] - mana >= 0:
-		if resource["food"] - food >= 0:
-			if spend:
-				add_resource(-mana, -food)
-			return true
-		if spend:
-			message("Not enough food!")
-		return false
-	if spend:
-		message("Not enough mana!")
-	return false
-
-
 func message(msg):
-	you.get_node("Interface").message(msg)
+	ui.message(msg)
 
 
 func cmds(args, host):

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/crystal_2.obj-c9d43ac644e7851029247e2a8e98deae.mesh"
+path="res://.import/crystal_2.obj-746bac5ce9cf8b1a031f446474aa01de.mesh"
 
 [deps]
 
-files=[ "res://.import/crystal_2.obj-c9d43ac644e7851029247e2a8e98deae.mesh" ]
+files=[ "res://.import/crystal_2.obj-746bac5ce9cf8b1a031f446474aa01de.mesh" ]
 
-source_file="res://assets/meshlib/Item/crystal_2.obj"
-dest_files=[ "res://.import/crystal_2.obj-c9d43ac644e7851029247e2a8e98deae.mesh", "res://.import/crystal_2.obj-c9d43ac644e7851029247e2a8e98deae.mesh" ]
+source_file="res://assets/meshlib/item/crystal_2.obj"
+dest_files=[ "res://.import/crystal_2.obj-746bac5ce9cf8b1a031f446474aa01de.mesh", "res://.import/crystal_2.obj-746bac5ce9cf8b1a031f446474aa01de.mesh" ]
 
 [params]
 

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/stall.obj-4d90da981e1d9e904349b2b396e55d93.mesh"
+
+[deps]
+
+files=[ "res://.import/stall.obj-4d90da981e1d9e904349b2b396e55d93.mesh" ]
+
+source_file="res://assets/models/buildings/stall.obj"
+dest_files=[ "res://.import/stall.obj-4d90da981e1d9e904349b2b396e55d93.mesh", "res://.import/stall.obj-4d90da981e1d9e904349b2b396e55d93.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

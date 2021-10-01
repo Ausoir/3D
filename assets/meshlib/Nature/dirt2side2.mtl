@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
 # Material Count: 2
 
-newmtl dirt.003
+newmtl dirt.002
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.257487 0.033462
@@ -11,7 +11,7 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl grass.003
+newmtl grass.002
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.162160 0.800000 0.023850

@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/platform_grass.obj-7c7ef58a248631756c54ef0ac9088839.mesh"
+path="res://.import/platform_grass.obj-2628654231355f2c76410e13cd1a47f2.mesh"
 
 [deps]
 
-files=[ "res://.import/platform_grass.obj-7c7ef58a248631756c54ef0ac9088839.mesh" ]
+files=[ "res://.import/platform_grass.obj-2628654231355f2c76410e13cd1a47f2.mesh" ]
 
-source_file="res://assets/meshlib/Nature/platform_grass.obj"
-dest_files=[ "res://.import/platform_grass.obj-7c7ef58a248631756c54ef0ac9088839.mesh", "res://.import/platform_grass.obj-7c7ef58a248631756c54ef0ac9088839.mesh" ]
+source_file="res://assets/meshlib/nature/platform_grass.obj"
+dest_files=[ "res://.import/platform_grass.obj-2628654231355f2c76410e13cd1a47f2.mesh", "res://.import/platform_grass.obj-2628654231355f2c76410e13cd1a47f2.mesh" ]
 
 [params]
 

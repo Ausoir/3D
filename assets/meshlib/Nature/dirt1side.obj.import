@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/dirt1side.obj-1d5aaee2f014c3a5e135274f46281bd4.mesh"
+path="res://.import/dirt1side.obj-8dc30e84c33d3785a719ab21a6ef6f0f.mesh"
 
 [deps]
 
-files=[ "res://.import/dirt1side.obj-1d5aaee2f014c3a5e135274f46281bd4.mesh" ]
+files=[ "res://.import/dirt1side.obj-8dc30e84c33d3785a719ab21a6ef6f0f.mesh" ]
 
-source_file="res://assets/meshlib/Nature/dirt1side.obj"
-dest_files=[ "res://.import/dirt1side.obj-1d5aaee2f014c3a5e135274f46281bd4.mesh", "res://.import/dirt1side.obj-1d5aaee2f014c3a5e135274f46281bd4.mesh" ]
+source_file="res://assets/meshlib/nature/dirt1side.obj"
+dest_files=[ "res://.import/dirt1side.obj-8dc30e84c33d3785a719ab21a6ef6f0f.mesh", "res://.import/dirt1side.obj-8dc30e84c33d3785a719ab21a6ef6f0f.mesh" ]
 
 [params]
 

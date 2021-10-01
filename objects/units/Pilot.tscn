@@ -7,17 +7,20 @@ script/source = "extends Node
 
 onready var unit = $Unit
 var build_queue = []
-var interactions
+var tgt #for use in cmd
 var tasks
 var task
 var task_timer
+var faction = 0
 
 
 func _ready():
-	interactions = G.world
 	set_task()
 
-func set_task(newtask=[\"idle\", 999999]):
+func get_team():
+	return G.factions[faction]
+
+func set_task(newtask=[\"idle\", 0]):
 	tasks = []
 	on_task_set(newtask)
 	task_timer = task[1]
@@ -44,22 +47,23 @@ func change_task(newtask):
 func next_task():
 	var newtask = tasks.pop_back()
 	if newtask == null:
-		unit.set_state()
-		newtask = [\"idle\", 999999]
+		newtask = [\"idle\", 9999]
 	on_task_set(newtask)
 
 func _physics_process(delta):
-	if task_timer <= 0:
-		if on_task_finish():
-			next_task()
-		return
-	elif task_timer < 999999:
-		task_timer -= delta * 10
+	if !unit.state_lock:
+		if task_timer <= 0:
+			if on_task_finish():
+				next_task()
+			return
+		elif task_timer < 9999:
+			task_timer -= delta * 10
 	on_task_update()
 
 func on_task_set(newtask):
 	task = newtask
 	task_timer = newtask[1]
+	on_task_update()
 
 func on_task_update():
 	if task[0] == \"idle\":
@@ -92,39 +96,32 @@ func on_task_update():
 		unit.set_state(\"attack\")
 
 func on_task_finish():
-	if task[0] == \"grab\":
-		var item
-		if len(task) > 2:
-			item = task[2]
-			unit.set_weapon(item)
-		else:
-			item = G.world.get_item_type_at(\"item\", unit.get_interact_position())
-			unit.set_weapon(item)
-	elif task[0] == \"drop\":
+	if task[0] == \"drop\":
 		unit.set_weapon(null)
 	elif task[0] == \"find\":
-		var item = G.item.make(task[2])
+		var item = G.factory.make(task[2])
 		unit.set_weapon(item)
-	elif task[0] == \"gather\":
-		G.add_resource(task[2][0], task[2][1])
 	elif task[0] == \"damage\":
 		task[2].damage(task[3])
 	elif task[0] == \"cmd\":
-		G.cmds(task[2], unit)
+		if len(task) > 3:
+			tgt = task[3]
+		G.cmds([[\"t\",tgt]]+task[2], unit)
 	elif task[0] == \"interact\":
-		if !interact(G.world.get_item_type_at(\"object\", unit.get_interact_position())):
-			if !interact(G.world.get_object_at(unit.get_interact_position())):
-				interact(G.world.get_item_type_at(\"furniture\", unit.get_interact_position()))
+		var item = get_interactable()
+		if item:
+			interact(item)
+		return false
+	elif task[0] == \"find\":
+		interact(G.world.get_object_at(unit.get_interact_position()))
 		return false
 	elif task[0] == \"work\":
-		if is_instance_valid(task[2]): #Check if node was freed
-			if task[2].work > 0:
-				task_timer = G.item.WORK_DELAY
-				task[2].work -= 1
-				task[2].check_workdone()
+		if is_instance_valid(tgt): #Check if node was freed
+			if tgt.work > 0:
+				task_timer = G.factory.WORK_DELAY
+				tgt.work -= 1
+				tgt.check_workdone()
 				return false
-	elif task[0] == \"spawn\":
-		G.spawn_and_add(task[2], unit.get_adjacent(0, 1))
 	unit.set_state()
 	return true
 
@@ -136,12 +133,29 @@ func face(to):
 	return diff
 
 
+func get_interactable():
+	var items = G.world.get_items_at(unit.get_interact_position())
+	var r
+	if items:
+		for item in items:
+			if item.item_name and item.onuse:
+				if item.item_type == \"item\":
+					return item
+				elif item.item_type == \"object\":
+					r = item
+				elif item.item_type == \"building\":
+					r = item
+	return r
+
+
 func interact(object):
 	if object != null:
 		if object is String:
-			if object in G.item.decor_interactions:
-				set_tasks(G.item.decor_interactions[object])
+			if object in G.factory.decor_interactions:
+				tgt = object
+				set_tasks(G.factory.decor_interactions[object])
 		elif object.onuse:
+			tgt = object
 			set_tasks(object.onuse)
 		return true
 "

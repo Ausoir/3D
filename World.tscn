@@ -1,80 +1,66 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://assets/meshlib_terrain.tres" type="MeshLibrary" id=1]
 [ext_resource path="res://assets/meshlib_objects.tres" type="MeshLibrary" id=2]
 [ext_resource path="res://objects/units/Player.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/textures/skyfinal.png" type="Texture" id=4]
-[ext_resource path="res://assets/textures/water.jpg" type="Texture" id=5]
-[ext_resource path="res://objects/particles/Leaves.tscn" type="PackedScene" id=7]
+[ext_resource path="res://assets/materials/mat_water.tres" type="Material" id=5]
+[ext_resource path="res://assets/textures/shilling.png" type="Texture" id=6]
+[ext_resource path="res://assets/particles/Leaves.tscn" type="PackedScene" id=7]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
+const Generator = preload(\"res://classes/Generator.gd\")
+const FLOORHEIGHT = 4.5
 onready var tilemap = $GridTerrain
 onready var objectmap = $GridObjects
 onready var objects = $Objects
-onready var occluders = $Occluders
 onready var others = $Others
 onready var units = $Units
-var occluder = preload(\"res://objects/Occluder.tscn\")
 
 var rng = RandomNumberGenerator.new()
 var map_size = Vector2(0, 0)
 var dirtmap = []
+var pois = {\"blanks\":[],
+			\"crystals\":[],
+			\"sites\":[],
+			\"camps\":[]}
 var spawnpoints = []
 
 var aggro_turn = 0
 
 
 func _ready():
-	G.world = self
-	G.space = get_world().direct_space_state
-	G.you = $Units/Player
-	G.younit = $Units/Player/Pilot/Unit
-	G.enemy = $Enemy
+	G.initialize(self)
 	generate()
 
 
-func set_heightmap(size, map):
-	var texture = ImageTexture.new()
-	var image = Image.new()
-	image.create(size.x, size.y, false, 4)
-	image.fill(Color(0, 0, 0))
-	image.lock()
-	for x in range(size.x):
-		for y in range(size.y):
-			var val = float(floor(map[y][x] * 3)) / 3
-			image.set_pixel(x, y, Color(val, val, val))
-	texture.create_from_image(image)
-	$Map.get_surface_material(0).albedo_texture = texture
-
-
 func generate():
-	#rng.randomize()
-	rng.set_seed(11111)
+	rng.randomize()
+	#rng.set_seed(21311)
 	tilemap.rng = rng
 	objectmap.rng = rng
 	var elevation_map
 	var biome_map
 	map_size = Vector2(40, 30)
-	biome_map = make_perlin(map_size.x, map_size.y)
-	elevation_map = make_perlin(map_size.x, map_size.y)
-	elevation_map = radialize(elevation_map)
-	set_heightmap(map_size, elevation_map)
-	#elevation_map = smooth_edges(elevation_map, 3)
+	var generator = Generator.new(rng, map_size)
+	biome_map = generator.make_perlin(map_size.x, map_size.y)
+	elevation_map = generator.make_perlin(map_size.x, map_size.y)
+	elevation_map = generator.radialize(elevation_map)
 
 	var highest = 1
 	for x in range(map_size.x):
 		var row = []
 		for z in range(map_size.y):
 			var y = elevation_map[z][x]
-			var height = floor(y * 4.5)
+			var height = floor(y * FLOORHEIGHT)
 			row.append(height)
 			if height > 0:
 				if height > highest:
 					highest = height
 				if height == 1:
-					tilemap.set_cell_item(x, height-1, z, tilemap.beach)
+					tilemap.set_cell_item(x, 0, z, tilemap.beach)
 				elif height == 2:
 					tilemap.set_cell_item(x, 1, z, tilemap.dirt)
 					tilemap.set_cell_item(x, 0, z, tilemap.beach)
@@ -82,31 +68,31 @@ func generate():
 					tilemap.set_cell_item(x, height-1, z, tilemap.dirt)
 					tilemap.set_cell_item(x, height-2, z, tilemap.dirt)
 		dirtmap.append(row)
-	
-	tilemap.autotile_map(map_size.x, highest+1, map_size.y)
 
-	var buildings = []
+	generate_poi()
+	tilemap.autotile_map(map_size.x, highest, map_size.y)
+
 	for x in range(map_size.x):
 		for z in range(map_size.y):
 			var biome = biome_map[z][x]
 			var height = dirtmap[x][z]
-			if height > 0:
+			if height > 0 and tilemap.get_cell_item(x, height, z) == -1:
 				var ox = x * 2 + rng.randi_range(0, 1)
 				var oy = height * 2
 				var oz = z * 2 + rng.randi_range(0, 1)
 				if height == 1:
-					var val = rng.randf()
-					if val > .95:
-						objectmap.make(\"rocks\", ox, oy, oz)
-					elif val > .89:
-						objectmap.make(\"rock\", ox, oy, oz)
-					elif val > .7:
-						objectmap.make(\"weed\", ox, oy, oz)
-					elif val > .5:
+					var val = elevation_map[z][x] * FLOORHEIGHT
+					if val < 1.2:
 						objectmap.make(\"palm\", ox, oy, oz)
-					elif val > .48:
-						spawnpoints.append(Vector3(ox*3, height*6, oz*3))
-				elif tilemap.get_cell_item(x,height-1,z) == tilemap.dirt:
+					elif val < 1.22:
+						objectmap.make(\"rocks\", ox, oy, oz)
+					elif val > 1.7:
+						objectmap.make(\"weed\", ox, oy, oz)
+					elif val > 1.8:
+						objectmap.make(\"cactus\", ox, oy, oz)
+					elif val > 1.9:
+						objectmap.make(\"rock\", ox, oy, oz)
+				elif tilemap.get_cell_item(x,height-1,z) == tilemap.dirt and tilemap.get_cell_item(x,height,z) == -1:
 					if height == 2:
 						if biome > .7:
 							objectmap.make(\"tree\", ox, oy, oz)
@@ -114,18 +100,11 @@ func generate():
 							objectmap.make(\"weed\", ox, oy, oz)
 						elif biome > .64:
 							objectmap.make(\"flower\", ox, oy, oz)
-						elif biome > .635:
-							objectmap.make(\"rock\", ox, oy, oz)
 						elif biome > .63:
-							tilemap.make(\"mineral\", x, 2, z)
-						if biome > .5:
-							buildings.append([x, height, z])
-							build(x,height,z)
+							objectmap.make(\"rock\", ox, oy, oz)
 						else:
 							if rng.randf() > .4:
 								objectmap.make(\"weed\", ox, oy, oz)
-								if rng.randf() < .2:
-									spawnpoints.append(Vector3(ox*3, height*6, oz*3))
 							else:
 								objectmap.make(\"tree\", ox, oy, oz)
 					else:
@@ -133,60 +112,48 @@ func generate():
 							objectmap.make(\"weed\", ox, oy, oz)
 						else:
 							objectmap.make(\"rock\", ox, oy, oz)
-	autotile_buildings(buildings)
 	$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
-	$Enemy.place_units()
 
 
-func autotile_buildings(buildings):
-	for building in buildings:
-		var x = building[0]
-		var y = building[1]
-		var z = building[2]
-		var dir = 0
-		for i in [[-1,0],[1,0],[0,-1],[0,1]]:
-			if tilemap.get_cell_item(x+i[0],y,z+i[1]) >= 990 and \\
-				tilemap.get_cell_item(x-i[0],y+1,z-i[1]) >= 990 and \\
-				tilemap.get_cell_item(x,y+1,z) == -1:
-					var pos = tilemap.map_to_world(x,y,z)
-					G.cmds([[\"t\",pos],[\"getobj\",\"building\"],[\"damage\",9]], null)
-					pos = tilemap.map_to_world(x,y+1,z)
-					G.cmds([[\"t\",pos],[\"getobj\",\"building\"],[\"damage\",9]], null)
-					make_building(\"stairs\",x,y,z,dir)
-					continue
-			dir += 1
+func generate_poi():
+	var gx = int(map_size.x / 8)
+	var gz = int(map_size.y / 8)
+	for x in range(gx):
+		for z in range(gz):
+			var ox = x * 8 + rng.randi_range(0, 7)
+			var oz = z * 8 + rng.randi_range(0, 7)
+			var poiPos = Vector3(ox, dirtmap[ox][oz], oz)
+			if dirtmap[ox][oz] > 0 and !poi_near(poiPos, 5):
+				pois[\"blanks\"].append(poiPos)
+	var crystals = rng.randi_range(1, int(len(pois[\"blanks\"])/8) + 2)
+	var next = pois[\"blanks\"].pop_back()
+	while next != null:
+		if crystals > 0:
+			pois[\"crystals\"].append(next)
+			crystals -= 1
+		else:
+			pois[\"sites\"].append(next)
+		next = pois[\"blanks\"].pop_front()
+	for v in pois[\"crystals\"]:
+		var terrain = tilemap.beach
+		if v.y > 1:
+			terrain = tilemap.dirt
+		tilemap.make(\"mineral\", v.x, v.y, v.z)
+		for xx in range(-1, 2):
+			for zz in range(-1, 2):
+				var adj = Vector3(v.x+xx, v.y, v.z+zz)
+				tilemap.set_cell_item(adj.x, adj.y-1, adj.z, terrain)
+				if dirtmap[adj.x][adj.z] == v.y:
+					spawnpoints.append(adj * 6 + Vector3(3,0,3))
+	for v in pois[\"sites\"]:
+		build(v)
 
 
-func build(x,y,z):
-	var height = y
-	for _times in range(rng.randi_range(0, 3)):
-		if tilemap.get_cell_item(x,height-1,z) != -1:
-			make_building(\"building\",x,height,z,rng.randi_range(0, 3))
-			height += 1
+func build(pos):
+	var mappos = tilemap.map_to_world(pos.x,pos.y,pos.z)
+	var building = [\"camp\", \"house\"][rng.randi_range(0, 1)]
+	G.cmds([[\"build\",building,mappos,rng.randi_range(0, 3)]], null)
 
-
-func make_building(building,x,y,z,dir):
-	var pos = tilemap.map_to_world(x,y,z)
-	var ortho = [Vector3.LEFT,Vector3.RIGHT,Vector3.FORWARD,Vector3.BACK][dir]
-	return G.cmds([[\"t\",pos],[\"tilespace\",false],[\"t\",Transform().translated(pos).looking_at(ortho+pos, Vector3.UP)],[\"make\",building]], null)
-
-
-func fill_occluders(elevation_map):
-	for x in range(map_size.x):
-		for z in range(map_size.y):
-			var y = elevation_map[z][x]
-			var height = floor(y * 4)
-			var tile = tilemap.get_cell_item(x, height, z)
-			if height <= 0:
-				if tile != -1 and tile != tilemap.beach:
-					var occ = occluder.instance()
-					occ.translate(tilemap.map_to_world(x, height+1, z))
-					occluders.add_child(occ)
-			else:
-				if tile != -1 and tile != tilemap.dirt:
-					var occ = occluder.instance()
-					occ.translate(tilemap.map_to_world(x, height+1, z))
-					occluders.add_child(occ)
 
 func get_object_at(vec):
 	var pos = objectmap.world_to_map(vec)
@@ -205,6 +172,13 @@ func get_object_near(vec):
 	return null
 
 
+func clean_tile(vec):
+	var pos = tilemap.world_to_map(vec) * 2
+	objectmap.set_cell_item(pos.x, pos.y, pos.z, -1)
+	objectmap.set_cell_item(pos.x+1, pos.y, pos.z, -1)
+	objectmap.set_cell_item(pos.x, pos.y, pos.z+1, -1)
+	objectmap.set_cell_item(pos.x+1, pos.y, pos.z+1, -1)
+
 func is_tile_vacant(vec):
 	var pos = tilemap.world_to_map(vec)
 	var pos2 = pos * 2
@@ -214,7 +188,7 @@ func is_tile_vacant(vec):
 	r = r and objectmap.get_object_at(pos2 + Vector3(0, 0, 1)) == null
 	r = r and objectmap.get_object_at(pos2 + Vector3(1, 0, 1)) == null
 	var down = tilemap.get_cell_item(pos.x, pos.y-1, pos.z)
-	r = r and (down == tilemap.dirt or down == tilemap.beach or down >= 990)
+	r = r and (down == tilemap.beach or down >= 981 or down in tilemap.dirts)
 	return r
 
 
@@ -231,6 +205,14 @@ func set_tile_at(vec, tile, orientation=0):
 func snap_to_tile(vec):
 	var r = tilemap.world_to_map(vec)
 	return tilemap.map_to_world(r.x, r.y, r.z)
+
+
+func get_units_near(vec, radius=2):
+	var r = []
+	for i in units.get_children():
+		if (i.transform.origin - vec).length() <= radius:
+			r.append(i)
+	return r
 
 
 func get_items_at(vec, radius=2):
@@ -267,111 +249,13 @@ func get_pos(vec):
 	return tilemap.map_to_world(vec.x, vec.y+.5, vec.z)
 
 
-func get_spawn_point():
-	var viable = false
-	var pos
-	while not viable:
-		pos = Vector2(rng.randi_range(1, map_size.x-1), rng.randi_range(1, map_size.y-1))
-		viable = tilemap.get_cell_item(pos.x, pos.y) == tilemap.grass
-	return pos * 64 + Vector2(32, 32)
-
-
-func make_base(sx, sy):
-	var base = []
-	for _y in range(sy):
-		var row = []
-		for _x in range(sx):
-			row.append(0)
-		base.append(row)
-	return base
-
-
-func make_random(sx, sy):
-	var base = []
-	for _y in range(sy):
-		var row = []
-		for _x in range(sx):
-			row.append(rng.randf())
-		base.append(row)
-	return base
-
-
-func make_smooth(base, level):
-	var w = len(base[0])
-	var h = len(base)
-	var map = []
-	var period = 2 << level
-	var frequency = 1.0 / period
-	for y in range(h):
-		var sample1 = int(y / period) * period
-		var sample2 = int((sample1 + period) % h)
-		var horizontal_blend = (y - sample1) * frequency
-		var row = []
-		for x in range(w):
-			var sample3 = int(x / period) * period
-			var sample4 = int((sample3 + period) % w)
-			var vertical_blend = (x - sample3) * frequency
-			var top = interpolate(base[sample1][sample3], base[sample2][sample3], horizontal_blend)
-			var bot = interpolate(base[sample1][sample4], base[sample2][sample4], horizontal_blend)
-			row.append(interpolate(top, bot, vertical_blend))
-		map.append(row)
-	return map
-		
-func interpolate(arg1, arg2, alpha):
-	return arg1 * (1 - alpha) + alpha * arg2
-
-func make_perlin(sx, sy):
-	var base = make_random(sx, sy)
-	var map = make_base(sx, sy)
-	var levels = 4
-	var max_value = 0
-	for i in range(1, levels):
-		max_value += float(1)/i
-	for level in range(1, levels):
-		var graph = make_smooth(base, level)
-		for y in range(sy):
-			for x in range(sx):
-				map[y][x] += graph[y][x] * 1/level
-	for y in range(sy):
-		for x in range(sx):
-			map[y][x] /= max_value
-	return map
-
-func smooth_edges(base, val):
-	var width = len(base[0])
-	var height = len(base)
-	for y in range(height):
-		for i in range(val):
-			base[y][i] *= float(i)/val
-			base[y][width-i-1] *= float(i)/val
-	for x in range(width):
-		for i in range(val):
-			base[i][x] *= float(i)/val
-			base[height-i-1][x] *= float(i)/val
-	return base
-
-
-func radialize(base):
-	var width = len(base[0])
-	var height = len(base)
-	var center_x = int(width * .5)
-	var center_y = int(height * .5)
-	for i in range(height):
-		for j in range(width):
-			var val_y = pow(float(i - center_y) / center_y, 2)
-			var val_x = pow(float(j - center_x) / center_x, 2)
-			var val = min(1, (1-sqrt(val_x+val_y)) * 4)
-			base[i][j] = val * base[i][j]
-	return base
-
-
-func invert(base):
-	var width = len(base[0])
-	var height = len(base)
-	for i in range(height):
-		for j in range(width):
-			base[i][j] = 1 - base[i][j]
-	return base
+func poi_near(pos, radius):
+	var diffY = Vector3(1, 2, 1)
+	for v in pois.values():
+		for poiPos in v:
+			if (poiPos * diffY).distance_to(pos * diffY) < radius:
+				return true
+	return false
 "
 
 [sub_resource type="GDScript" id=2]
@@ -395,6 +279,7 @@ const autotile_dict = [
 	[[-3, 7], [3, -7], [-1, 5], [1, -5]],
 ]
 const dirt_autotile_dict = [
+	#[[1, 2, -3, 4, 5, 7], [1,3,5,6,-7,8], [-1,2,3,5,7,8], [1,3,4,-5,6,7]],
 	[[1, -3, 5, 7], [1, 3, 5, -7], [-1, 3, 5, 7], [1, 3, -5, 7]],
 	[[1, -3, -5, 7], [-1, 3, 5, -7], [-1, -3, 5, 7], [1, 3, -5, -7]],
 	[[1, -3, 5, -7], [1, -3, 5, -7], [-1, 3, -5, 7], [-1, 3, -5, 7]],
@@ -423,12 +308,13 @@ var dirt = tileset.find_item_by_name(\"dirt\")
 var dirtslope = tileset.find_item_by_name(\"dirtslope\")
 var dirttunnel = tileset.find_item_by_name(\"dirt2side2\")
 var dirts = [
+	#tileset.find_item_by_name(\"dirtwallslope\"),
 	tileset.find_item_by_name(\"dirt1side\"),
 	tileset.find_item_by_name(\"dirt2side\"),
 	dirttunnel,
 	dirtslope,
 	dirt,
-	-1,
+	-1
 ]
 var models = {
 	\"mineral\": [
@@ -439,7 +325,6 @@ var models = {
 		tileset.find_item_by_name(\"mineral5\"),
 		tileset.find_item_by_name(\"mineral6\"),
 		tileset.find_item_by_name(\"mineral7\"),
-		tileset.find_item_by_name(\"mineral8\"),
 	]
 }
 
@@ -463,7 +348,7 @@ func autotile_map(sx, sy, sz):
 		for y in range(1, sy):
 			for z in range(-sz, sz):
 				item = get_cell_item(x, y, z)
-				if item != -1:
+				if item == dirt:
 					autotile = set_autotile(dirt, x, y, z, dirt_autotile_dict)
 					if autotile:
 						dirt_autotiles.append(autotile)
@@ -615,6 +500,9 @@ var models = {
 		tileset.find_item_by_name(\"palm4\"),
 		tileset.find_item_by_name(\"palm5\"),
 		tileset.find_item_by_name(\"palm6\"),
+	], \"cactus\": [
+		tileset.find_item_by_name(\"cactus1\"),
+		tileset.find_item_by_name(\"cactus2\"),
 	], \"mineral\": [
 		tileset.find_item_by_name(\"mineral1\"),
 		tileset.find_item_by_name(\"mineral2\"),
@@ -649,24 +537,13 @@ func get_object_at(vec):
 	return null
 "
 
-[sub_resource type="PlaneMesh" id=4]
+[sub_resource type="CylinderMesh" id=4]
+top_radius = 150.0
+height = 0.001
+radial_segments = 16
+rings = 1
 
-[sub_resource type="SpatialMaterial" id=5]
-albedo_color = Color( 0.180392, 0.282353, 0.815686, 1 )
-metallic = 1.0
-roughness = 0.79
-normal_enabled = true
-normal_scale = -2.0
-normal_texture = ExtResource( 5 )
-depth_enabled = true
-depth_scale = 5.0
-depth_deep_parallax = false
-depth_flip_tangent = false
-depth_flip_binormal = false
-depth_texture = ExtResource( 5 )
-uv1_scale = Vector3( 12, 24, 1 )
-
-[sub_resource type="GDScript" id=6]
+[sub_resource type="GDScript" id=5]
 script/source = "extends MeshInstance
 
 
@@ -682,25 +559,40 @@ func _ready():
 
 
 func _physics_process(delta):
-	var fluctuation = sin(frame) * .01
-	movement.x = fluctuation
-	movement.z = fluctuation
-	material.normal_scale += fluctuation
-	material.depth_scale += fluctuation
-	if (player.transform.origin - transform.origin).length() > 80:
-		transform.origin.x = player.transform.origin.x
-		transform.origin.z = player.transform.origin.z
-	global_transform.origin.y = 5.8 + sin(frame*sin(delta*100)*100) * .1
-	global_translate(movement)
-	frame += delta * .3 * sin(delta)
+	transform.origin = player.transform.origin
+	transform.origin.y = 5.9 + sin(frame*sin(delta)*30) * .12
+	frame += delta
 "
 
-[sub_resource type="PanoramaSky" id=7]
+[sub_resource type="CubeMesh" id=6]
+size = Vector3( 107.99, 0.1, 101.99 )
+
+[sub_resource type="SpatialMaterial" id=7]
+metallic = 0.5
+roughness = 0.2
+normal_enabled = true
+normal_scale = 1.0
+normal_texture = ExtResource( 6 )
+depth_enabled = true
+depth_scale = 0.05
+depth_deep_parallax = false
+depth_flip_tangent = false
+depth_flip_binormal = false
+depth_texture = ExtResource( 6 )
+uv1_scale = Vector3( 100, 100, 100 )
+
+[sub_resource type="ConcavePolygonShape" id=8]
+data = PoolVector3Array( -54, 0.05, 50, 54, 0.05, 50, -54, -0.05, 50, 54, 0.05, 50, 54, -0.05, 50, -54, -0.05, 50, 54, 0.05, -50, -54, 0.05, -50, 54, -0.05, -50, -54, 0.05, -50, -54, -0.05, -50, 54, -0.05, -50, 54, 0.05, 50, 54, 0.05, -50, 54, -0.05, 50, 54, 0.05, -50, 54, -0.05, -50, 54, -0.05, 50, -54, 0.05, -50, -54, 0.05, 50, -54, -0.05, -50, -54, 0.05, 50, -54, -0.05, 50, -54, -0.05, -50, 54, 0.05, 50, -54, 0.05, 50, 54, 0.05, -50, -54, 0.05, 50, -54, 0.05, -50, 54, 0.05, -50, -54, -0.05, 50, 54, -0.05, 50, -54, -0.05, -50, 54, -0.05, 50, 54, -0.05, -50, -54, -0.05, -50 )
+
+[sub_resource type="ConcavePolygonShape" id=9]
+data = PoolVector3Array( -54, 0.05, 50, 54, 0.05, 50, -54, -0.05, 50, 54, 0.05, 50, 54, -0.05, 50, -54, -0.05, 50, 54, 0.05, -50, -54, 0.05, -50, 54, -0.05, -50, -54, 0.05, -50, -54, -0.05, -50, 54, -0.05, -50, 54, 0.05, 50, 54, 0.05, -50, 54, -0.05, 50, 54, 0.05, -50, 54, -0.05, -50, 54, -0.05, 50, -54, 0.05, -50, -54, 0.05, 50, -54, -0.05, -50, -54, 0.05, 50, -54, -0.05, 50, -54, -0.05, -50, 54, 0.05, 50, -54, 0.05, 50, 54, 0.05, -50, -54, 0.05, 50, -54, 0.05, -50, 54, 0.05, -50, -54, -0.05, 50, 54, -0.05, 50, -54, -0.05, -50, 54, -0.05, 50, 54, -0.05, -50, -54, -0.05, -50 )
+
+[sub_resource type="PanoramaSky" id=10]
 panorama = ExtResource( 4 )
 
-[sub_resource type="Environment" id=8]
+[sub_resource type="Environment" id=11]
 background_mode = 2
-background_sky = SubResource( 7 )
+background_sky = SubResource( 10 )
 background_color = Color( 0.545098, 0.866667, 0.952941, 1 )
 fog_color = Color( 0, 0, 0, 1 )
 fog_sun_color = Color( 1, 1, 1, 1 )
@@ -711,13 +603,14 @@ glow_bloom = 0.2
 adjustment_enabled = true
 adjustment_saturation = 1.25
 
-[sub_resource type="GDScript" id=9]
+[sub_resource type="GDScript" id=12]
 script/source = "extends WorldEnvironment
 
 
 const SIDE = Vector3(0, 1, 0)
 onready var light = $DirectionalLight
 var sky
+var current_time = 0
 var frame = 0
 var light_time = [
 	Color(0, 0, 0),
@@ -731,11 +624,19 @@ func _ready():
 	sky = get_environment()
 	light.rotate_x(-.8)
 
+
+func time_pass(time):
+	if current_time != time:
+		current_time = time
+		G.on_hour(time)
+
+
 func _physics_process(delta):
 	var tick = delta * .005
 	light.rotate_x(-tick)
 	light.translate(light.transform.basis.y)
 	var sun_rot = -light.rotation.z #0 to PI
+	time_pass(int(sun_rot * 100.0 / PI))
 	if sun_rot > 0:
 		#G.message(str(player.transform.basis.y) + \" \" + str(sun_rot))
 		if sun_rot < .1:
@@ -773,33 +674,36 @@ func set_target_color(target, weight):
 	sky.fog_color = light.light_color
 "
 
-[sub_resource type="PlaneMesh" id=10]
-size = Vector2( 4, 4 )
-
-[sub_resource type="SpatialMaterial" id=11]
-
-[sub_resource type="GDScript" id=12]
+[sub_resource type="GDScript" id=13]
 script/source = "extends Timer
 
 var start_size = 1
-var workers = []
-var soldiers = []
-var resource = {\"mana\": 10, \"food\": 10}
 var frame = 0
+var build_order = [\"\", \"\"]
+var team
 
 
 func _ready():
 	var _a = connect(\"timeout\", self, \"update\")
+	team = G.factions[2]
+	G.tick_events.append(funcref(self, 'place_units'))
 
 
 func place_units():
 	for _i in range(start_size):
 		var vec = G.world.spawnpoints.pop_back()
-		workers.append(G.cmds([[\"t\",vec],[\"spawn\",\"worker\"]], null))
+		G.cmds([[\"t\",vec],[\"spawn\",\"worker\",2]], null)
 
 
 func update():
-	print(\"asd\")
+	pass
+
+
+func get_unit_type(type):
+	if type == \"worker\":
+		for unit in team.units:
+			if unit.weapon != \"spear\":
+				return unit
 "
 
 [node name="World" type="Spatial"]
@@ -813,12 +717,12 @@ cell_scale = 6.0
 collision_layer = 35
 collision_mask = 3
 data = {
-"cells": PoolIntArray( 0, 0, 655360, 1, 0, 655360, 2, 0, 655360, 3, 0, 655360, 4, 0, 655360, 65537, 0, 1048576, 65538, 0, 1048576, 0, 1, 655360, 1, 1, 655360, 2, 1, 655360, 3, 1, 655360, 4, 1, 655360, 65537, 1, 1048576, 0, 2, 655360, 1, 2, 655360, 2, 2, 655360, 3, 2, 655360, 4, 2, 655360, 65537, 2, 1048576, 65540, 2, 1048576, 0, 3, 655360, 1, 3, 655360, 2, 3, 655360, 3, 3, 655360, 4, 3, 655360, 65537, 3, 1048576, 65538, 3, 1048576, 65539, 3, 1048576, 65540, 3, 1048576, 0, 4, 655360, 1, 4, 655360, 2, 4, 655360, 3, 4, 655360, 4, 4, 655360, 65536, 4, 0, 65538, 4, 0, 0, 5, 655360, 1, 5, 655360, 2, 5, 655360, 3, 5, 655360, 4, 5, 655360, 65536, 5, 0, 65537, 5, 0, 65538, 5, 0 )
+"cells": PoolIntArray( 0, 0, 5, 1, 0, 5, 2, 0, 5, 3, 0, 5, 65532, 0, 5, 65533, 0, 5, 65534, 0, 5, 65535, 0, 5, 0, 1, 5, 3, 1, 5, 65534, 1, 5, 65535, 1, 5, 3, 2, 5, 65535, 2, 5, -65532, 2, 5, 3, 3, 5, 3, 4, 5, 3, 5, 5, 3, 6, 5, 4, 6, 5, 5, 6, 5, 6, 6, 5, 3, 7, 5, 4, 7, 5, 5, 7, 5, 6, 7, 5, 6, 8, 5, 7, 8, 5, 6, 9, 5, 7, 9, 5, 8, 9, 5, 9, 9, 5, 10, 9, 5, 11, 9, 5, 8, 10, 5, 9, 10, 5, 10, 10, 5, 11, 10, 5, 8, 11, 5, 9, 11, 5, 10, 11, 5, 11, 11, 5, 8, 12, 5, 9, 12, 5, 10, 12, 5, 11, 12, 5, 11, 13, 5, 131053, 65514, 26, 131054, 65514, 26, 131055, 65514, 26, 131056, 65514, 26, 131057, 65514, 26, 131058, 65514, 26, 131059, 65514, 26, 131060, 65514, 26, 131061, 65514, 26, 131062, 65514, 26, 131063, 65514, 26, 131064, 65514, 26, 131065, 65514, 26, 131066, 65514, 26, 131067, 65514, 26, 131068, 65514, 26, 131069, 65514, 26, 131070, 65514, 26, 196589, 65514, 26, 196590, 65514, 26, 196591, 65514, 26, 196592, 65514, 26, 196593, 65514, 26, 196594, 65514, 26, 196595, 65514, 26, 196596, 65514, 26, 196597, 65514, 26, 196598, 65514, 26, 196599, 65514, 26, 196600, 65514, 26, 196601, 65514, 26, 196602, 65514, 26, 196603, 65514, 26, 196604, 65514, 26, 196605, 65514, 26, 196606, 65514, 26, 131053, 65515, 26, 131070, 65515, 26, 196589, 65515, 26, 196606, 65515, 26, 131053, 65516, 26, 131070, 65516, 26, 196589, 65516, 26, 196606, 65516, 26, 131053, 65517, 26, 131070, 65517, 26, 196589, 65517, 26, 196606, 65517, 26, 131053, 65518, 26, 131070, 65518, 26, 196589, 65518, 26, 196606, 65518, 26, 131053, 65519, 26, 131055, 65519, 26, 131056, 65519, 26, 131057, 65519, 26, 131058, 65519, 26, 131059, 65519, 26, 131060, 65519, 26, 131061, 65519, 26, 131062, 65519, 26, 131063, 65519, 26, 131064, 65519, 26, 131065, 65519, 26, 131066, 65519, 26, 131067, 65519, 26, 131068, 65519, 26, 131069, 65519, 26, 131070, 65519, 26, 196589, 65519, 26, 196591, 65519, 26, 196592, 65519, 26, 196593, 65519, 26, 196594, 65519, 26, 196595, 65519, 26, 196596, 65519, 26, 196597, 65519, 26, 196598, 65519, 26, 196599, 65519, 26, 196600, 65519, 26, 196601, 65519, 26, 196602, 65519, 26, 196603, 65519, 26, 196604, 65519, 26, 196605, 65519, 26, 196606, 65519, 26, 131053, 65520, 26, 131055, 65520, 26, 131059, 65520, 26, 131070, 65520, 26, 196589, 65520, 26, 196591, 65520, 26, 196595, 65520, 26, 196606, 65520, 26, 131053, 65521, 26, 131055, 65521, 26, 131059, 65521, 26, 131066, 65521, 26, 131070, 65521, 26, 196589, 65521, 26, 196591, 65521, 26, 196595, 65521, 26, 196602, 65521, 26, 196606, 65521, 26, 131053, 65522, 26, 131055, 65522, 26, 131059, 65522, 26, 131060, 65522, 26, 131061, 65522, 26, 131062, 65522, 26, 131066, 65522, 26, 131070, 65522, 26, 196589, 65522, 26, 196591, 65522, 26, 196595, 65522, 26, 196596, 65522, 26, 196597, 65522, 26, 196598, 65522, 26, 196602, 65522, 26, 196606, 65522, 26, 65526, 65523, 26, 131053, 65523, 26, 131055, 65523, 26, 131062, 65523, 26, 131066, 65523, 26, 131067, 65523, 26, 131070, 65523, 26, 196589, 65523, 26, 196591, 65523, 26, 196598, 65523, 26, 196602, 65523, 26, 196603, 65523, 26, 196606, 65523, 26, 131053, 65524, 26, 131055, 65524, 26, 131056, 65524, 26, 131058, 65524, 26, 131062, 65524, 26, 131067, 65524, 26, 131070, 65524, 26, 196589, 65524, 26, 196591, 65524, 26, 196592, 65524, 26, 196594, 65524, 26, 196598, 65524, 26, 196603, 65524, 26, 196606, 65524, 26, 131053, 65525, 26, 131055, 65525, 26, 131058, 65525, 26, 131059, 65525, 26, 131062, 65525, 26, 131067, 65525, 26, 131070, 65525, 26, 196589, 65525, 26, 196591, 65525, 26, 196594, 65525, 26, 196595, 65525, 26, 196598, 65525, 26, 196603, 65525, 26, 196606, 65525, 26, 65527, 65526, 26, 131053, 65526, 26, 131055, 65526, 26, 131059, 65526, 26, 131062, 65526, 26, 131063, 65526, 26, 131064, 65526, 26, 131067, 65526, 26, 131068, 65526, 26, 131070, 65526, 26, 196589, 65526, 26, 196591, 65526, 26, 196595, 65526, 26, 196598, 65526, 26, 196599, 65526, 26, 196600, 65526, 26, 196603, 65526, 26, 196604, 65526, 26, 196606, 65526, 26, 131053, 65527, 26, 131059, 65527, 26, 131062, 65527, 26, 131064, 65527, 26, 131070, 65527, 26, 196589, 65527, 26, 196595, 65527, 26, 196598, 65527, 26, 196600, 65527, 26, 196606, 65527, 26, 65526, 65528, 26, 131053, 65528, 26, 131055, 65528, 26, 131059, 65528, 26, 131062, 65528, 26, 131063, 65528, 26, 131064, 65528, 26, 131066, 65528, 26, 131067, 65528, 26, 131068, 65528, 26, 131070, 65528, 26, 196589, 65528, 26, 196591, 65528, 26, 196595, 65528, 26, 196598, 65528, 26, 196599, 65528, 26, 196600, 65528, 26, 196602, 65528, 26, 196603, 65528, 26, 196604, 65528, 26, 196606, 65528, 26, 65521, 65529, 26, 65534, 65529, 5, 65535, 65529, 5, 131053, 65529, 26, 131055, 65529, 26, 131059, 65529, 26, 131070, 65529, 26, 196589, 65529, 26, 196591, 65529, 26, 196595, 65529, 26, 196606, 65529, 26, 0, 65530, 5, 65534, 65530, 5, 65535, 65530, 5, 131053, 65530, 26, 131054, 65530, 26, 131055, 65530, 26, 131056, 65530, 26, 131057, 65530, 26, 131058, 65530, 26, 131059, 65530, 26, 131060, 65530, 26, 131061, 65530, 26, 131062, 65530, 26, 131063, 65530, 26, 131064, 65530, 26, 131065, 65530, 26, 131066, 65530, 26, 131068, 65530, 26, 131069, 65530, 26, 131070, 65530, 26, 196589, 65530, 26, 196590, 65530, 26, 196591, 65530, 26, 196592, 65530, 26, 196593, 65530, 26, 196594, 65530, 26, 196595, 65530, 26, 196596, 65530, 26, 196597, 65530, 26, 196598, 65530, 26, 196599, 65530, 26, 196600, 65530, 26, 196601, 65530, 26, 196602, 65530, 26, 196603, 65530, 26, 196604, 65530, 26, 196605, 65530, 26, 196606, 65530, 26, 0, 65531, 5, 65526, 65531, 5, 65527, 65531, 5, 65528, 65531, 5, 65529, 65531, 5, 65530, 65531, 5, 65531, 65531, 5, 65532, 65531, 5, 65533, 65531, 5, 65534, 65531, 5, 65535, 65531, 5, 0, 65532, 5, 65528, 65532, 5, 65529, 65532, 5, 65530, 65532, 5, 65531, 65532, 5, 65532, 65532, 5, 65533, 65532, 5, 65534, 65532, 5, 65535, 65532, 5, 0, 65533, 5, 1, 65533, 5, 2, 65533, 5, 65529, 65533, 5, 65530, 65533, 5, 65531, 65533, 5, 65532, 65533, 5, 65533, 65533, 5, 65534, 65533, 5, 65535, 65533, 5, 0, 65534, 5, 1, 65534, 5, 2, 65534, 5, 65530, 65534, 5, 65531, 65534, 5, 65532, 65534, 5, 65533, 65534, 5, 65534, 65534, 5, 65535, 65534, 5, 0, 65535, 5, 1, 65535, 5, 2, 65535, 5, 3, 65535, 5, 65531, 65535, 5, 65532, 65535, 5, 65533, 65535, 5, 65534, 65535, 5, 65535, 65535, 5 )
 }
 script = SubResource( 2 )
 __meta__ = {
 "_editor_clip_": 0,
-"_editor_floor_": Vector3( 0, 1, 0 )
+"_editor_floor_": Vector3( 0, 0, 0 )
 }
 
 [node name="GridObjects" type="GridMap" parent="."]
@@ -835,14 +739,14 @@ data = {
 script = SubResource( 3 )
 __meta__ = {
 "_editor_clip_": 0,
-"_editor_floor_": Vector3( 0, 4, 0 )
+"_editor_floor_": Vector3( 0, 2, 0 )
 }
 
 [node name="Water" type="MeshInstance" parent="."]
-transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 160, 0, 4, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0 )
 mesh = SubResource( 4 )
-material/0 = SubResource( 5 )
-script = SubResource( 6 )
+material/0 = ExtResource( 5 )
+script = SubResource( 5 )
 
 [node name="Objects" type="Spatial" parent="."]
 
@@ -851,27 +755,44 @@ script = SubResource( 6 )
 [node name="Player" parent="Units" instance=ExtResource( 3 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 16, 0 )
 
-[node name="Occluders" type="Spatial" parent="."]
-
 [node name="Others" type="Spatial" parent="."]
 
+[node name="Ground" type="MeshInstance" parent="Others"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 6, -80.99 )
+mesh = SubResource( 6 )
+material/0 = SubResource( 7 )
+
+[node name="StaticBody" type="StaticBody" parent="Others/Ground"]
+collision_layer = 35
+collision_mask = 3
+
+[node name="CollisionShape" type="CollisionShape" parent="Others/Ground/StaticBody"]
+shape = SubResource( 8 )
+
+[node name="Cover" type="MeshInstance" parent="Others"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 18, -81 )
+mesh = SubResource( 6 )
+material/0 = SubResource( 7 )
+
+[node name="StaticBody" type="StaticBody" parent="Others/Cover"]
+collision_layer = 35
+collision_mask = 3
+
+[node name="CollisionShape" type="CollisionShape" parent="Others/Cover/StaticBody"]
+shape = SubResource( 9 )
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 8 )
-script = SubResource( 9 )
+environment = SubResource( 11 )
+script = SubResource( 12 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( 0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0, 0, 0 )
 light_energy = 0.1
 shadow_enabled = true
 
-[node name="Map" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.80599, -0.591929, 0, 0.591929, 0.80599, 10, 10, 10 )
-mesh = SubResource( 10 )
-material/0 = SubResource( 11 )
-
 [node name="Particle" parent="." instance=ExtResource( 7 )]
 
 [node name="Enemy" type="Timer" parent="."]
 wait_time = 8.0
 autostart = true
-script = SubResource( 12 )
+script = SubResource( 13 )

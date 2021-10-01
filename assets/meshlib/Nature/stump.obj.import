@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/stump.obj-012a40cdadccf2026b3cfdfa9e3e0af7.mesh"
+path="res://.import/stump.obj-e573d57b581974bd998d0aecd253403b.mesh"
 
 [deps]
 
-files=[ "res://.import/stump.obj-012a40cdadccf2026b3cfdfa9e3e0af7.mesh" ]
+files=[ "res://.import/stump.obj-e573d57b581974bd998d0aecd253403b.mesh" ]
 
-source_file="res://assets/meshlib/Nature/stump.obj"
-dest_files=[ "res://.import/stump.obj-012a40cdadccf2026b3cfdfa9e3e0af7.mesh", "res://.import/stump.obj-012a40cdadccf2026b3cfdfa9e3e0af7.mesh" ]
+source_file="res://assets/meshlib/nature/stump.obj"
+dest_files=[ "res://.import/stump.obj-e573d57b581974bd998d0aecd253403b.mesh", "res://.import/stump.obj-e573d57b581974bd998d0aecd253403b.mesh" ]
 
 [params]
 

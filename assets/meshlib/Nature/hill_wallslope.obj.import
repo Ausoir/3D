@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh"
+path="res://.import/hill_wallslope.obj-73a0bed567312475f7926c3edeb245e8.mesh"
 
 [deps]
 
-files=[ "res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh" ]
+files=[ "res://.import/hill_wallslope.obj-73a0bed567312475f7926c3edeb245e8.mesh" ]
 
-source_file="res://assets/meshlib/Nature/hill_wallslope.obj"
-dest_files=[ "res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh", "res://.import/hill_wallslope.obj-e32d6c830b8407b91c7687d00f49d07d.mesh" ]
+source_file="res://assets/meshlib/nature/hill_wallslope.obj"
+dest_files=[ "res://.import/hill_wallslope.obj-73a0bed567312475f7926c3edeb245e8.mesh", "res://.import/hill_wallslope.obj-73a0bed567312475f7926c3edeb245e8.mesh" ]
 
 [params]
 

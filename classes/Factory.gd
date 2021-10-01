@@ -1,0 +1,231 @@
+const WORK_DELAY = 5
+const Blueprint = preload("res://assets/materials/mat_blueprint.tres")
+const Despawn = preload("res://assets/materials/mat_despawn.tres")
+const Progress = preload("res://interface/progress_bar.tscn")
+const Status = preload("res://objects/Status.gd")
+const Ai = preload("res://objects/units/Ai.tscn")
+const types = {
+	"object": preload("res://objects/Object.tscn"),
+	"item": preload("res://objects/Item.tscn"),
+	"lamp": preload("res://objects/Lamp.tscn"),
+}
+
+const unit_data = {
+	"worker": ["unit", Ai, {}, "pickaxe"],
+	"warrior": ["unit", Ai, {}, "spear"],
+}
+
+const data = {
+	"lantern": ["lamp", preload("res://assets/models/lantern.obj"), {},{}],
+
+	"branch": ["item", preload("res://assets/models/branch.obj"),
+		{onswing=[["wait", 12, "work"],["cmd", 0, [["menu","branch"]]]]},{}],
+	"stone": ["item", preload("res://assets/models/stone.obj"),
+		{onswing=[["wait", 12, "work"],["cmd", 0, [["menu","stone"]]]]},{}],
+	"axe": ["item", preload("res://assets/models/axe.obj"),
+		{onswing=[["swing", 9999]]}, {attack="slash", damage="1d4"}],
+	"shovel": ["item", preload("res://assets/models/shovel.obj"),
+		{onswing=[["swing", 9999]]}, {attack="bash", damage="1d4"}],
+	"hammer": ["item", preload("res://assets/models/hammer.obj"),
+		{onswing=[["wait", 9, "work"],["cmd", 0, [["menu","hammer"]]]]},{}],
+	"spear": ["item", preload("res://assets/models/spear.obj"),
+		{onswing=[["swing", 9999]]}, {attack="pierce", damage="1d6"}],
+	"pickaxe": ["item", preload("res://assets/models/pickaxe.obj"),
+		{onswing=[["swing", 9999]]}, {attack="hack", damage="1d8"}],
+
+	"site": ["building", preload("res://assets/buildings/Site.tscn"),
+		{onmake=[["v", "host"], ["state", "work", 9999], ["setwork", 2, "Constructing..."]],
+		 onwork=[["v","transform"], ["make","building"], ["v","host"], ["damage",1]]},{}],
+	"room": ["building", preload("res://assets/buildings/Room.tscn"), {},{}],
+	"stairs": ["building", preload("res://assets/buildings/Stairs.tscn"), {},{}],
+	"post": ["building", preload("res://assets/buildings/Post.tscn"), {},{}],
+	"kitchen": ["building", preload("res://assets/buildings/Table.tscn"), {},{}],
+	"workshop": ["building", preload("res://assets/buildings/Workshop.tscn"),
+		{onuse=[["cmd", 0, [["menu","workshop"]]]]},{}],
+	"farm": ["building", preload("res://assets/buildings/Farm.tscn"),
+		{onmake=[["v","pos"],["tile",900],["v", "host"], ["state", "work", 9999], ["setwork", 5, "Growing..."]],
+		 onwork=[["v","transform"], ["make", "crops"],["claim"], ["v","host"], ["damage", 1]]},{}],
+	"crops": ["building", preload("res://assets/buildings/FarmGrown.tscn"),
+		{onuse=[["work", WORK_DELAY]],
+		 onwork=[["cost",0,-3,true], ["v","transform"], ["make", "farm"],["claim"], ["v","host"], ["damage", 1]]},{}],
+	"bed": ["building", preload("res://assets/buildings/Bed.tscn"),
+		{onuse=[["cmd", 0, [["menu","hire"]]]]},{}],
+	"camp": ["building", preload("res://assets/buildings/Camp.tscn"),
+		{onmake=[["v","spawnpoint",0],["spawn","warrior"], ["claim",2],
+				 ["v","spawnpoint",1],["spawn","warrior"], ["claim",2],
+				 ["v","spawnpoint",2],["make","pickaxe"], ["drop"]]},{}],
+	"house": ["building", preload("res://assets/buildings/House.tscn"),
+		{onmake=[["v","spawnpoint",0],["spawn","warrior"], ["claim",2],
+				 ["v","spawnpoint",1],["spawn","warrior"], ["claim",2]]},{}],
+}
+
+const decor_interactions = {
+	"rocks": [["wait", 3, "work"], ["cmd", 0, [["v","pos"],["make","stone"],["equip"]]]],
+	"palm": [["wait", 8, "work"], ["cmd", 0, [["cost",0,-1]]]],
+}
+
+var descriptions = {
+	"Build Bedroom": "Hire units",
+	"Build Room": "Build an empty room",
+	"Build Farm": "Grow food",
+	"Build Workshop": "Craft tools",
+	"Build Lab": "Research items",
+}
+
+onready var craftables = {
+	"hand": [
+		["Deconstruct", [0,0,[]], [["v","parent"],["task",[["wait", 3, "work"], ["cmd",0,
+			[["v","usepos"],["v","snap"],["getobj","building"],["!if",null],["run",
+				[["v","host"],["state","work",9999],["setwork",3,"Deconstructing..."],["oncall","onwork",[["v","host"],["damage",1]]]]
+			]]
+		]]]]],
+		["Build Bedroom", [1,0], [["v","usepos"],["v","snap"], ["prepare","bed",2],["!if",null],["claim"],["cost",1,0]]],
+		["Build Room", [1,0,["bed"]], [["v","usepos"],["v","snap"], ["prepare","room",2,1],["!if",null],["claim"],["cost",1,0]]],
+		["Build Farm", [1,0,["bed"]], [["v","usepos"],["v","snap"],["v","add",Vector3(0,-6,0)],["iftile",G.world.get_node("GridTerrain").dirt],["v","usepos"],["v","snap"],["prepare","farm",2,1],["!if",null],["claim"],["cost",1,0]]],
+		["Build Camp", [1,0,["farm"]], [["v","usepos"],["v","snap"], ["prepare","camp",2,0]]],
+		["Build Kitchen", [1,0,["farm"]], [["v","usepos"],["v","snap"], ["prepare","kitchen",2,0]]],
+		["Build Workshop", [1,0,["bed"]], [["v","usepos"],["v","snap"], ["prepare","workshop",2,0]]],
+		["Wield Axe", [1,0], [["v","pos",1], ["make","axe"],["equip"],["cost",1,0]]],
+		["Wield Spear", [1,0], [["v","pos",1], ["make","spear"],["equip"],["cost",1,0]]],
+		["Spawn Friend", [1,0], [["v","pos"], ["spawn","warrior"], ["claim"]]],
+		["Spawn Enemy", [1,0], [["v","pos"], ["spawn","warrior"], ["claim",2]]],
+	],
+	"hammer": [
+		["Build Post", [1,0,["room"]], [["v","pos"],["v","snap"], ["prepare","post",3,1],["!if",null],["claim"],["cost",1,0]]],
+		["Build Stairs", [1,0,["room"]], [["v","pos"],["v","snap"], ["prepare","stairs",2,1],["!if",null],["claim"],["cost",1,0]]],
+		["Build Lab", [1,0,["workshop","farm"]], [["v","pos"],["v","snap"], ["prepare","lab",2,0]]],
+	],
+	"workshop": [
+		["Craft Lantern", [1,0], [["v","pos",1], ["blueprint","lantern",2],["cost",1,0]]],
+		["Craft Axe", [1,0], [["v","pos",1], ["blueprint","axe",2],["cost",1,0]]],
+		["Craft Spear", [1,0], [["v","pos",1], ["blueprint","spear",5],["cost",1,0]]],
+		["Craft Hammer", [1,0], [["v","pos",1], ["blueprint","hammer",5],["cost",1,0]]],
+		["Craft Pickaxe", [1,0], [["v","pos",1], ["blueprint","pickaxe",5],["cost",1,0]]],
+	],
+	"lab": [
+		["Research Armory", [1,1], [["cost",1,1],
+			["v","lab"],["set","unlock","armory"],
+			["v","lab"],["run",[["v","host"],["state", "work", 9999],["setwork", 2, "Researching..."]]]]],
+	],
+	"armory": [
+		["Craft Headband", [1,1], [["v","frontpos",1], ["blueprint","lantern",2]]],
+	],
+	"hire": [
+		["Summon Miner", [0,0], [["v","host"], ["state","work",9999], ["setwork",3,"Summoning..."],
+			["oncall", "onwork", [["req",0,1], ["v","host"], ["trigger","worker"],["v","host"],["unstate","work"], ["cost",0,1]]]]],
+		["Summon Warrior", [0,0,"workshop"], [["v","host"], ["state","work",9999], ["setwork",3,"Summoning..."],
+			["oncall", "onwork", [["req",0,1], ["v","host"], ["trigger","warrior"],["v","host"],["unstate","work"], ["cost",0,1]]]]],
+	],
+}
+
+var uncraftables = {
+	"armory": ["Construct Armory", [1,1], [["v","usepos"],["v","snap"], ["prepare","bed",2,1]]],
+	"tower": ["Build Tower", [1,1], [["v","usepos"],["v","snap"], ["prepare","tower",5,1], ["if",true], ["v","weapon"], ["damage",1], ["cost",1,1]]],
+}
+
+
+func get_description(name):
+	if name in descriptions:
+		return descriptions[name]
+	return ""
+
+
+func make_unit(arg):
+	var item = unit_data[arg]
+	var itemdata = item[2]
+	var r = item[1].instance()
+	var unit = r.get_node("Pilot/Unit")
+	unit.item_name = arg
+	if itemdata.has("health"):
+		unit.health = itemdata.health
+	var weapon = G.cmds([["v","transform"],["make", item[3]]], unit)
+	if weapon:
+		unit.set_weapon(weapon)
+	unit.rotate_y(G.rng.randf() * PI)
+	return r
+
+
+func make_blueprint(arg, worktime):
+	var item = data[arg]
+	var r
+	if item[1] is Mesh:
+		r = types["object"].instance()
+		r.mesh = item[1]
+		r.set_material_override(Blueprint)
+	else:
+		r = item[1].instance()
+		for child in r.get_children():
+			if child is MeshInstance:
+				child.set_material_override(Blueprint)
+			elif child is StaticBody:
+				child.set_collision_layer(0b00000000000000000100)
+				child.set_collision_mask(0)
+	r.set_progress_bar()
+	r.item_type = "object"
+	r.item_name = arg
+	r.set_work(worktime)
+	r.health = 1
+	r.onuse = [["work", WORK_DELAY]]
+	r.onwork = [["v","transform"], ["make", arg],["claim"], ["v","host"], ["damage", 1]]
+	return r
+
+
+func make(arg):
+	var item = data[arg]
+	var r
+	if item[1] is PackedScene:
+		r = item[1].instance()
+	else:
+		if item[0] in types:
+			r = types[item[0]].instance()
+		else:
+			r = types["object"].instance()
+	r.item_name = arg
+	r.item_type = item[0]
+	if r.item_type == "object":
+		r.mesh = item[1]
+		r.create_trimesh_collision()
+	elif r.item_type == "item":
+		r.mesh = item[1]
+		r.onuse = [["wait", 6, "grab"],["cmd", 0, [["equip"]]]]
+	elif r.item_type == "lamp":
+		r.mesh = item[1]
+		r.item_type = "item"
+	var itemdata = item[2]
+	if itemdata.has("health"):
+		r.health = itemdata.health
+	if itemdata.has("reach"):
+		r.reach = itemdata.reach
+	if itemdata.has("req"):
+		r.req = itemdata.req
+	if itemdata.has("attack"):
+		r.attack = itemdata.attack
+	if itemdata.has("onmake"):
+		r.onmake = []
+		for i in itemdata.onmake:
+			r.onmake.append(get_duplicate(r, i))
+	if itemdata.has("onuse"):
+		r.onuse = []
+		for i in itemdata.onuse:
+			r.onuse.append(get_duplicate(r, i))
+	if itemdata.has("onswing"):
+		r.onswing = []
+		for i in itemdata.onswing:
+			r.onswing.append(get_duplicate(r, i))
+	if itemdata.has("onwork"):
+		r.onwork = []
+		for i in itemdata.onwork:
+			r.onwork.append(get_duplicate(r, i))
+	for i in item[3].keys():
+		r.properties[i] = item[3][i]
+	return r
+
+
+func get_duplicate(this, arr):
+	var r = []
+	for i in arr:
+		if i == null:
+			r.append(this)
+		else:
+			r.append(i)
+	return r

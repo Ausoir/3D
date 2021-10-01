@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/plant_bushTriangle.obj-e9659efdd759b7db8ee2b955a490b554.mesh"
+path="res://.import/plant_bushTriangle.obj-6ac1604912a39cd2fd5397d262722b9c.mesh"
 
 [deps]
 
-files=[ "res://.import/plant_bushTriangle.obj-e9659efdd759b7db8ee2b955a490b554.mesh" ]
+files=[ "res://.import/plant_bushTriangle.obj-6ac1604912a39cd2fd5397d262722b9c.mesh" ]
 
-source_file="res://assets/meshlib/Nature/plant_bushTriangle.obj"
-dest_files=[ "res://.import/plant_bushTriangle.obj-e9659efdd759b7db8ee2b955a490b554.mesh", "res://.import/plant_bushTriangle.obj-e9659efdd759b7db8ee2b955a490b554.mesh" ]
+source_file="res://assets/meshlib/nature/plant_bushTriangle.obj"
+dest_files=[ "res://.import/plant_bushTriangle.obj-6ac1604912a39cd2fd5397d262722b9c.mesh", "res://.import/plant_bushTriangle.obj-6ac1604912a39cd2fd5397d262722b9c.mesh" ]
 
 [params]
 

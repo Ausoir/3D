@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/fountainSquareDetail.obj-5e04e951b8d8131cd6618758b48ed202.mesh"
+
+[deps]
+
+files=[ "res://.import/fountainSquareDetail.obj-5e04e951b8d8131cd6618758b48ed202.mesh" ]
+
+source_file="res://assets/models/buildings/fountainSquareDetail.obj"
+dest_files=[ "res://.import/fountainSquareDetail.obj-5e04e951b8d8131cd6618758b48ed202.mesh", "res://.import/fountainSquareDetail.obj-5e04e951b8d8131cd6618758b48ed202.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
