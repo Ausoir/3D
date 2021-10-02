@@ -13,6 +13,7 @@ script/source = "extends Spatial
 
 const Generator = preload(\"res://classes/Generator.gd\")
 const FLOORHEIGHT = 4.5
+const POI_DISTANCE = 10
 onready var tilemap = $GridTerrain
 onready var objectmap = $GridObjects
 onready var objects = $Objects
@@ -116,42 +117,35 @@ func generate():
 
 
 func generate_poi():
-	var gx = int(map_size.x / 8)
-	var gz = int(map_size.y / 8)
+	var gx = int(map_size.x / POI_DISTANCE)
+	var gz = int(map_size.y / POI_DISTANCE)
 	for x in range(gx):
 		for z in range(gz):
-			var ox = x * 8 + rng.randi_range(0, 7)
-			var oz = z * 8 + rng.randi_range(0, 7)
+			var ox = x * POI_DISTANCE + rng.randi_range(0, POI_DISTANCE-1)
+			var oz = z * POI_DISTANCE + rng.randi_range(0, POI_DISTANCE-1)
 			var poiPos = Vector3(ox, dirtmap[ox][oz], oz)
 			if dirtmap[ox][oz] > 0 and !poi_near(poiPos, 5):
 				pois[\"blanks\"].append(poiPos)
-	var crystals = rng.randi_range(1, int(len(pois[\"blanks\"])/8) + 2)
+	var crystals = rng.randi_range(1, int(len(pois[\"blanks\"])/8.0) + 2)
 	var next = pois[\"blanks\"].pop_back()
+	var spawns = 1
 	while next != null:
-		if crystals > 0:
+		if spawns > 0:
+			spawnpoints.append(next * 6 + Vector3(3,0,3))
+			spawns -= 1
+		elif crystals > 0:
 			pois[\"crystals\"].append(next)
 			crystals -= 1
 		else:
 			pois[\"sites\"].append(next)
 		next = pois[\"blanks\"].pop_front()
-	for v in pois[\"crystals\"]:
-		var terrain = tilemap.beach
-		if v.y > 1:
-			terrain = tilemap.dirt
-		tilemap.make(\"mineral\", v.x, v.y, v.z)
-		for xx in range(-1, 2):
-			for zz in range(-1, 2):
-				var adj = Vector3(v.x+xx, v.y, v.z+zz)
-				tilemap.set_cell_item(adj.x, adj.y-1, adj.z, terrain)
-				if dirtmap[adj.x][adj.z] == v.y:
-					spawnpoints.append(adj * 6 + Vector3(3,0,3))
 	for v in pois[\"sites\"]:
 		build(v)
 
 
 func build(pos):
 	var mappos = tilemap.map_to_world(pos.x,pos.y,pos.z)
-	var building = [\"camp\", \"house\"][rng.randi_range(0, 1)]
+	var building = [\"camp\", \"house\", \"graveyard\"][rng.randi_range(0, 2)]
 	G.cmds([[\"build\",building,mappos,rng.randi_range(0, 3)]], null)
 
 
@@ -686,7 +680,7 @@ var team
 func _ready():
 	var _a = connect(\"timeout\", self, \"update\")
 	team = G.factions[2]
-	G.tick_events.append(funcref(self, 'place_units'))
+	#G.tick_events.append(funcref(self, 'place_units'))
 
 
 func place_units():

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/greatmace.obj-d1dfca64b63ed81505c14209a1908533.mesh"
+
+[deps]
+
+files=[ "res://.import/greatmace.obj-d1dfca64b63ed81505c14209a1908533.mesh" ]
+
+source_file="res://assets/models/greatmace.obj"
+dest_files=[ "res://.import/greatmace.obj-d1dfca64b63ed81505c14209a1908533.mesh", "res://.import/greatmace.obj-d1dfca64b63ed81505c14209a1908533.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

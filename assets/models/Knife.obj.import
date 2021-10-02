@@ -2,14 +2,14 @@
 
 importer="wavefront_obj"
 type="Mesh"
-path="res://.import/Knife.obj-59864ff3b54d6ee12dceb89c1196026e.mesh"
+path="res://.import/knife.obj-a5d111187203bcb493248fe1079a0383.mesh"
 
 [deps]
 
-files=[ "res://.import/Knife.obj-59864ff3b54d6ee12dceb89c1196026e.mesh" ]
+files=[ "res://.import/knife.obj-a5d111187203bcb493248fe1079a0383.mesh" ]
 
-source_file="res://assets/models/Knife.obj"
-dest_files=[ "res://.import/Knife.obj-59864ff3b54d6ee12dceb89c1196026e.mesh", "res://.import/Knife.obj-59864ff3b54d6ee12dceb89c1196026e.mesh" ]
+source_file="res://assets/models/knife.obj"
+dest_files=[ "res://.import/knife.obj-a5d111187203bcb493248fe1079a0383.mesh", "res://.import/knife.obj-a5d111187203bcb493248fe1079a0383.mesh" ]
 
 [params]
 

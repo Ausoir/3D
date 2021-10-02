@@ -31,9 +31,7 @@ func _ready():
 	unit.controller = self
 	unit.hit_glance = true
 	G.factions[1].add(self)
-	var mat = load(\"res://assets/materials/mat_dirt.tres\")
-	unit.set_skin(3, mat)
-	unit.item_name = \"player\"
+	unit.item_name = \"inquisitor\"
 
 
 func set_faction(faction):
@@ -82,9 +80,7 @@ func _physics_process(_delta):
 			unit.velocity.y = 20
 			G.cmds([[\"v\",\"host\"],[\"state\",\"haste\",24],[\"v\",\"host\"],[\"state\",\"slowfall\",2]],unit)
 		elif Input.is_action_just_pressed(\"interact\"):
-			if unit.weapon and unit.weapon.onswing:
-				pilot.set_tasks(unit.weapon.onswing)
-			else:
+			if !pilot.swing(unit.weapon):
 				pilot.set_task([\"interact\", 0])
 		elif Input.is_action_just_pressed(\"item\"):
 			var pathing = Pathing.new(G.world)
@@ -96,22 +92,22 @@ func _physics_process(_delta):
 			else:
 				pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
 
-		var camera_basis = camera.global_transform.basis
-		var camera_z = camera_basis.z
-		var camera_x = camera_basis.x
+	var camera_basis = camera.global_transform.basis
+	var camera_z = camera_basis.z
+	var camera_x = camera_basis.x
 
-		camera_z.y = 0
-		camera_x.y = 0
-		unit.view_z = camera_z.normalized()
-		unit.view_x = camera_x.normalized()
+	camera_z.y = 0
+	camera_x.y = 0
+	unit.view_z = camera_z.normalized()
+	unit.view_x = camera_x.normalized()
 
-		var unit_pos = unit.transform.origin
-		var cam_pos = Vector2(unit_pos.x, unit_pos.z)
-		camera.transform.origin.x = cam_pos.x
-		camera.transform.origin.y = unit_pos.y+2.5# - camera.rotation.x*2 + 2
-		camera.transform.origin.z = cam_pos.y
-		
-		unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5 + .5
+	var unit_pos = unit.transform.origin
+	var cam_pos = Vector2(unit_pos.x, unit_pos.z)
+	camera.transform.origin.x = cam_pos.x
+	camera.transform.origin.y = unit_pos.y+2.5# - camera.rotation.x*2 + 2
+	camera.transform.origin.z = cam_pos.y
+	
+	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5 + .5
 
 
 func show_interactable_tip():
@@ -119,6 +115,8 @@ func show_interactable_tip():
 	if item:
 		if item.item_type == \"item\":
 			G.ui.set_tooltip(\"Pick up \" + item.item_name)
+		elif item.item_type == \"object\":
+			G.ui.set_tooltip(\"Interact with \" + item.item_name)
 		elif item.item_type == \"building\":
 			G.ui.set_tooltip(\"Use \" + item.item_name)
 	else:

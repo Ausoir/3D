@@ -13,24 +13,24 @@ func display(damage):
 	node_quad.emitting = true
 "
 
-[sub_resource type="DynamicFont" id=6]
+[sub_resource type="DynamicFont" id=2]
 size = 28
 outline_size = 1
 outline_color = Color( 0, 0, 0, 1 )
 font_data = ExtResource( 1 )
 
-[sub_resource type="ParticlesMaterial" id=2]
+[sub_resource type="ParticlesMaterial" id=3]
 direction = Vector3( 0, 1, 0 )
 spread = 90.0
 initial_velocity = 4.0
 initial_velocity_random = 1.0
-angular_velocity = 360.0
+angular_velocity = 90.0
 angular_velocity_random = 1.0
 
-[sub_resource type="ViewportTexture" id=3]
+[sub_resource type="ViewportTexture" id=4]
 viewport_path = NodePath("Viewport")
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=5]
 resource_local_to_scene = true
 flags_transparent = true
 flags_unshaded = true
@@ -38,11 +38,11 @@ params_billboard_mode = 3
 particles_anim_h_frames = 1
 particles_anim_v_frames = 1
 particles_anim_loop = false
-albedo_texture = SubResource( 3 )
+albedo_texture = SubResource( 4 )
 
-[sub_resource type="QuadMesh" id=5]
+[sub_resource type="QuadMesh" id=6]
 resource_local_to_scene = true
-material = SubResource( 4 )
+material = SubResource( 5 )
 size = Vector2( 3, 0.8 )
 
 [node name="Health" type="Spatial"]
@@ -60,7 +60,7 @@ render_target_update_mode = 3
 [node name="Label" type="Label" parent="Viewport"]
 margin_right = 140.0
 margin_bottom = 36.0
-custom_fonts/font = SubResource( 6 )
+custom_fonts/font = SubResource( 2 )
 custom_colors/font_color = Color( 1, 0, 0, 1 )
 text = "14"
 align = 1
@@ -74,5 +74,5 @@ __meta__ = {
 emitting = false
 amount = 1
 one_shot = true
-process_material = SubResource( 2 )
-draw_pass_1 = SubResource( 5 )
+process_material = SubResource( 3 )
+draw_pass_1 = SubResource( 6 )

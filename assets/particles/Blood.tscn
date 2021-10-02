@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://objects/Particle.gd" type="Script" id=1]
 [ext_resource path="res://assets/textures/blood.png" type="Texture" id=2]
+[ext_resource path="res://assets/audio/hit_flesh.wav" type="AudioStream" id=3]
 
 [sub_resource type="ParticlesMaterial" id=1]
 emission_shape = 1
@@ -42,3 +43,7 @@ explosiveness = 0.9
 process_material = SubResource( 1 )
 draw_pass_1 = SubResource( 3 )
 script = ExtResource( 1 )
+
+[node name="Sound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 3 )
+unit_db = 20.0

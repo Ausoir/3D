@@ -1,6 +1,10 @@
 extends "res://objects/Building.gd"
 
 
+func _ready():
+	health = Vector2(9999,9999)
+
+
 func update_tiles():
 	.update_tiles()
 	var face = global_transform.basis.z

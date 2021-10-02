@@ -6,6 +6,7 @@ const particles = {
 	"smoke": preload("res://assets/particles/Smoke.tscn"),
 	"splinter": preload("res://assets/particles/Splinter.tscn"),
 	"repair": preload("res://assets/particles/Repair.tscn"),
+	"spark": preload("res://assets/particles/Spark.tscn"),
 }
 const class_item = preload("res://objects/Item.gd")
 const command = preload("res://classes/Command.gd")
@@ -78,10 +79,21 @@ func rid(arg, remove=true):
 
 func drop(arg, exc):
 	var pos = arg.transform.origin
-	var r = space.intersect_ray(pos + Vector3(0, 1, 0), pos + Vector3(0, -40, 0), exc, 0b00000000000000000011)
+	var r = space.intersect_ray(pos + Vector3(0, 1, 0), pos + Vector3(0, -40, 0), exc, 0b00000000000000000001)
 	if r and r.position:
 		arg.transform.origin = r.position
 	return arg
+
+
+func roll(arg):
+	var r = 0
+	if "d" in arg:
+		var dices = arg.split("d")
+		for _i in range(int(dices[0])):
+			r += G.rng.randi_range(1, int(dices[1]))
+	else:
+		r = int(arg)
+	return r
 
 
 func dir_to_offset(orientation, rot):

@@ -3,12 +3,13 @@ extends Spatial
 onready var status = G.factory.Status.new()
 var item_name
 var item_type
-var health = Vector2(1, 1)
+var health = Vector2(10, 10)
 var faction = 0
 var direction = 0
 var holder
 var req = [0, 0, 0, 0]
 var onmake
+var ondie
 var onuse
 var onswing
 var onwork
@@ -36,9 +37,15 @@ func on_make():
 		G.cmds(onmake, self)
 
 
-func on_hit(pos, _hitter, damage=1):
-	G.make_particle("splinter", pos, 1)
-	damage(damage)
+func on_hit(pos, _hitter, damage=1, tags=[]):
+	if "demolish" in tags:
+		if "defense" in properties:
+			damage -= G.roll(properties.defense)
+		if damage > 0:
+			G.make_particle("splinter", pos, 1)
+			damage(damage)
+		else:
+			G.make_particle("spark", pos, 1)
 
 
 func trigger(_arg):
@@ -48,12 +55,14 @@ func trigger(_arg):
 func damage(dmg):
 	health.x -= dmg
 	if health.x <= 0:
-		if holder:
-			holder.set_weapon(null)
 		die()
 
 
 func die():
+	if ondie:
+		G.cmds(ondie, self)
+	if holder:
+		holder.set_weapon(null)
 	G.factions[faction].remove(self)
 	status.die()
 	queue_free()

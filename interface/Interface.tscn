@@ -1,8 +1,9 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=1]
 [ext_resource path="res://assets/Baumans-Regular.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=3]
+[ext_resource path="res://interface/health.tscn" type="PackedScene" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends CanvasLayer
@@ -33,8 +34,8 @@ func on_background_click(event):
 
 func update_resources():
 	var team = G.factions[G.you.pilot.faction]
-	$Resources/ManaAmount.set_text(str(team.resource[\"mana\"]))
-	$Resources/FoodAmount.set_text(str(team.resource[\"food\"]))
+	$Menu/Resources/ManaAmount.set_text(str(team.resource[\"mana\"]))
+	$Menu/Resources/FoodAmount.set_text(str(team.resource[\"food\"]))
 
 
 func display(arg, phost):
@@ -47,6 +48,8 @@ func display(arg, phost):
 	tint.set_size(get_viewport().size)
 	menu.show()
 	$Menu/Tabs.rect_position = get_viewport().size / 2 - $Menu/Tabs.rect_size / 2
+	$Menu/Health.rect_position.x = get_viewport().size.x / 2 - $Menu/Health.progress_bar.rect_size.x / 2
+	$Menu/Health.display(G.younit.health.x, G.younit.health.y, G.younit.item_name, G.younit.level)
 	b_pos = Vector2(200, 120)
 	var items = G.factory.craftables[arg]
 	for item in items:
@@ -168,13 +171,17 @@ func _physics_process(_delta):
 blend_mode = 3
 light_mode = 1
 
-[sub_resource type="StyleBoxFlat" id=4]
-bg_color = Color( 0, 0, 0, 0.392157 )
+[sub_resource type="DynamicFont" id=4]
+size = 24
+font_data = ExtResource( 2 )
 
 [sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0, 0, 0, 0.392157 )
+
+[sub_resource type="StyleBoxFlat" id=6]
 bg_color = Color( 0.352941, 0.352941, 0.352941, 0.470588 )
 
-[sub_resource type="DynamicFont" id=6]
+[sub_resource type="DynamicFont" id=7]
 size = 24
 outline_size = 1
 outline_color = Color( 0.282353, 0.282353, 0.282353, 1 )
@@ -207,16 +214,37 @@ __meta__ = {
 [node name="Tabs" type="TabContainer" parent="Menu"]
 margin_right = 488.0
 margin_bottom = 600.0
+custom_fonts/font = SubResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Character" type="ScrollContainer" parent="Menu/Tabs"]
+use_parent_material = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 47.0
+margin_right = -4.0
+margin_bottom = -4.0
+mouse_filter = 1
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Character"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
+alignment = 1
 
 [node name="Construct" type="ScrollContainer" parent="Menu/Tabs"]
 use_parent_material = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
-margin_top = 32.0
+margin_top = 47.0
 margin_right = -4.0
 margin_bottom = -4.0
 mouse_filter = 1
@@ -231,27 +259,29 @@ margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
 alignment = 1
 
-[node name="Resources" type="Panel" parent="."]
+[node name="Health" parent="Menu" instance=ExtResource( 4 )]
+
+[node name="Resources" type="Panel" parent="Menu"]
 margin_right = 280.0
 margin_bottom = 40.0
-custom_styles/panel = SubResource( 4 )
+custom_styles/panel = SubResource( 5 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ManaAmount" type="Label" parent="Resources"]
+[node name="ManaAmount" type="Label" parent="Menu/Resources"]
 use_parent_material = true
 margin_left = 48.0
 margin_top = 8.0
 margin_right = 96.0
-margin_bottom = 24.0
+margin_bottom = 37.0
 rect_scale = Vector2( 2, 2 )
 text = "0"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ManaIcon" type="Sprite" parent="Resources/ManaAmount"]
+[node name="ManaIcon" type="Sprite" parent="Menu/Resources/ManaAmount"]
 use_parent_material = true
 position = Vector2( -20, -2 )
 scale = Vector2( 0.5, 0.5 )
@@ -260,7 +290,7 @@ centered = false
 region_enabled = true
 region_rect = Rect2( 0, 0, 32, 32 )
 
-[node name="FoodAmount" type="Label" parent="Resources"]
+[node name="FoodAmount" type="Label" parent="Menu/Resources"]
 use_parent_material = true
 margin_left = 192.0
 margin_top = 8.0
@@ -272,7 +302,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FoodIcon" type="Sprite" parent="Resources/FoodAmount"]
+[node name="FoodIcon" type="Sprite" parent="Menu/Resources/FoodAmount"]
 use_parent_material = true
 position = Vector2( -20, -2 )
 scale = Vector2( 0.5, 0.5 )
@@ -288,8 +318,8 @@ margin_top = 282.0
 margin_right = 518.0
 margin_bottom = 317.0
 mouse_filter = 1
-custom_styles/disabled = SubResource( 5 )
-custom_fonts/font = SubResource( 6 )
+custom_styles/disabled = SubResource( 6 )
+custom_fonts/font = SubResource( 7 )
 disabled = true
 button_mask = 0
 __meta__ = {

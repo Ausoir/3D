@@ -66,34 +66,39 @@ func on_task_set(newtask):
 	on_task_update()
 
 func on_task_update():
-	if task[0] == \"idle\":
-		unit.set_state(\"move\")
-	elif task[0] == \"wait\":
-		unit.set_state(task[2])
-	elif task[0] == \"work\":
-		unit.set_state(\"work\")
-	elif task[0] == \"drop\":
-		unit.set_state(\"grab\")
-	elif task[0] == \"interact\":
-		unit.set_state(\"grab\")
-	elif task[0] == \"grab\":
-		unit.set_state(\"grab\")
-	elif task[0] == \"move\":
-		unit.set_state(\"move\")
-		var dist = face(task[2])
-		var proximity = 1
-		if len(task) > 3:
-			proximity = task[3]
-		if dist.length() <= proximity:
-			task_timer = 0
-		else:
+	if unit.state_lock:
+		if task[0] == \"attack\" or task[0] == \"move\":
+			face(task[2])
 			unit.motion_target = Vector2(0, 1)
-	elif task[0] == \"attack\":
-		unit.set_state(\"attack\")
-		face(task[2])
-		unit.motion_target = Vector2(0, 1)
-	elif task[0] == \"swing\":
-		unit.set_state(\"attack\")
+	else:
+		if task[0] == \"idle\":
+			unit.set_state(\"move\")
+		elif task[0] == \"wait\":
+			unit.set_state(task[2])
+		elif task[0] == \"work\":
+			unit.set_state(\"work\")
+		elif task[0] == \"drop\":
+			unit.set_state(\"grab\")
+		elif task[0] == \"interact\":
+			unit.set_state(\"grab\")
+		elif task[0] == \"grab\":
+			unit.set_state(\"grab\")
+		elif task[0] == \"move\":
+			unit.set_state(\"move\")
+			var dist = face(task[2])
+			var proximity = 1
+			if len(task) > 3:
+				proximity = task[3]
+			if dist.length() <= proximity:
+				task_timer = 0
+			else:
+				unit.motion_target = Vector2(0, 1)
+		elif task[0] == \"attack\":
+			unit.set_state(\"attack\")
+			face(task[2])
+			unit.motion_target = Vector2(0, 1)
+		elif task[0] == \"swing\":
+			unit.set_state(\"attack\")
 
 func on_task_finish():
 	if task[0] == \"drop\":
@@ -157,6 +162,13 @@ func interact(object):
 		elif object.onuse:
 			tgt = object
 			set_tasks(object.onuse)
+		return true
+
+
+func swing(object):
+	if object != null and object.onswing:
+		tgt = object
+		set_tasks(object.onswing)
 		return true
 "
 

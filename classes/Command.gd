@@ -12,6 +12,10 @@ func run(args):
 	elif args[0] == "v":
 		if args[1] == "host":
 			return host
+		elif args[1] == "tgt":
+			var t = host
+			host = tgt
+			return t
 		elif args[1] == "parent":
 			return host.get_parent()
 		elif args[1] == "usepos":
@@ -34,8 +38,14 @@ func run(args):
 			return host.get_spawnpoint(args[2])
 		elif args[1] == "snap":
 			return G.world.snap_to_tile(tgt)
+	elif args[0] == "r":
+		if args[1] == "int":
+			return G.rng.randi_range(args[2], args[3])
+		elif args[1] == "cmd":
+			var chosen = args[2][G.rng.randi_range(0, len(args[2])-1)]
+			return G.cmds([["t",tgt]]+chosen, host)
 	elif args[0] == "run":
-		G.cmds(args[1], tgt)
+		return G.cmds(args[1], tgt)
 	elif args[0] == "!if":
 		if tgt == args[1]:
 			stop = true
@@ -52,8 +62,13 @@ func run(args):
 			host.get_team().add_resource(-args[1], -args[2])
 	elif args[0] == "trigger":
 		tgt.trigger(args[1])
-	elif args[0] == "equip":
+	elif args[0] == "wield":
 		host.set_weapon(tgt)
+	elif args[0] == "equip":
+		if "part" in tgt.properties:
+			host.set_armor(tgt)
+		else:
+			host.set_weapon(tgt)
 	elif args[0] == "unstate":
 		tgt.status.remove_state(args[1])
 	elif args[0] == "state":
@@ -93,8 +108,12 @@ func run(args):
 		newitem.transform.origin = tgt
 		if len(args) > 2:
 			G.factions[args[2]].add(newitem)
-		G.world.units.add_child(newitem)
 		return newitem
+	elif args[0] == "die":
+		if tgt:
+			tgt.die()
+		else:
+			return null
 	elif args[0] == "damage":
 		if tgt:
 			tgt.damage(args[1])

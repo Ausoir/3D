@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/greatsword.obj-9437d1f3aa855575f3a814fc15e55168.mesh"
+
+[deps]
+
+files=[ "res://.import/greatsword.obj-9437d1f3aa855575f3a814fc15e55168.mesh" ]
+
+source_file="res://assets/models/greatsword.obj"
+dest_files=[ "res://.import/greatsword.obj-9437d1f3aa855575f3a814fc15e55168.mesh", "res://.import/greatsword.obj-9437d1f3aa855575f3a814fc15e55168.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

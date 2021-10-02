@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/longsword_unique.obj-2a6f3d5fcb89da128632ac2496340b7c.mesh"
+
+[deps]
+
+files=[ "res://.import/longsword_unique.obj-2a6f3d5fcb89da128632ac2496340b7c.mesh" ]
+
+source_file="res://assets/models/longsword_unique.obj"
+dest_files=[ "res://.import/longsword_unique.obj-2a6f3d5fcb89da128632ac2496340b7c.mesh", "res://.import/longsword_unique.obj-2a6f3d5fcb89da128632ac2496340b7c.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
