@@ -60,6 +60,8 @@ func run(args):
 			host.get_team().add_resource(-args[1], -args[2], true)
 		else:
 			host.get_team().add_resource(-args[1], -args[2])
+	elif args[0] == "order":
+		tgt.set_tasks(args[1])
 	elif args[0] == "trigger":
 		tgt.trigger(args[1])
 	elif args[0] == "wield":
@@ -82,6 +84,9 @@ func run(args):
 			host.onuse = args[2]
 		elif args[1] == "onswing":
 			host.onswing = args[2]
+	elif args[0] == "alert":
+		for unit in G.world.get_units_near(args[1], args[2]):
+			unit.hear(args[1])
 	elif args[0] == "setwork":
 		host.set_work(args[1])
 		host.set_progress_bar(args[2])

@@ -8,7 +8,7 @@
 [ext_resource path="res://assets/materials/mat_hardwood.tres" type="Material" id=6]
 
 [sub_resource type="GDScript" id=1]
-script/source = "extends \"res://objects/buildings/Connectible.gd\"
+script/source = "extends \"res://objects/Connectible.gd\"
 
 
 func update_tiles():
@@ -23,23 +23,13 @@ func update_tiles():
 		direction = 22
 	tile_type = 980
 	G.world.set_tile_at(translation, tile_type, direction)
-	G.world.set_tile_at(translation + Vector3(0, 6, 0), 981, direction)
+	#G.world.set_tile_at(translation + Vector3(0, 6, 0), 981, direction)
 
 
 func open_walls(_recurse=false):
 	connection = 0
-	var pos = G.world.tilemap.world_to_map(transform.origin)
-	if get_direction(pos, 0) >= 980:
-		if has_node(\"Door\") and is_instance_valid($Door):
-			$Door.queue_free()
-			$StaticBody/Door.queue_free()
-	if G.world.tilemap.get_cell_item(pos.x,pos.y-1,pos.z) >= 980:
-		if has_node(\"Floor\") and is_instance_valid($Floor):
-			$Floor.queue_free()
-			$StaticBody/Floor.queue_free()
 	tile_type = 980
 	G.world.set_tile_at(translation, tile_type, direction)
-	G.world.set_tile_at(translation + Vector3(0, 6, 0), 981, direction)
 "
 
 [sub_resource type="ConvexPolygonShape" id=2]

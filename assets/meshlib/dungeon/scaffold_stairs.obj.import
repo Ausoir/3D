@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scaffold_stairs.obj-c0f19fbcf6d0477c7dd9ae42fde12149.mesh"
+
+[deps]
+
+files=[ "res://.import/scaffold_stairs.obj-c0f19fbcf6d0477c7dd9ae42fde12149.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/scaffold_stairs.obj"
+dest_files=[ "res://.import/scaffold_stairs.obj-c0f19fbcf6d0477c7dd9ae42fde12149.mesh", "res://.import/scaffold_stairs.obj-c0f19fbcf6d0477c7dd9ae42fde12149.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

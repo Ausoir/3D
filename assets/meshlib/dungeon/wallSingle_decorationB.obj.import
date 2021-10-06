@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallSingle_decorationB.obj-48877f9a653893e701ec52a50ea85d1d.mesh"
+
+[deps]
+
+files=[ "res://.import/wallSingle_decorationB.obj-48877f9a653893e701ec52a50ea85d1d.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/wallSingle_decorationB.obj"
+dest_files=[ "res://.import/wallSingle_decorationB.obj-48877f9a653893e701ec52a50ea85d1d.mesh", "res://.import/wallSingle_decorationB.obj-48877f9a653893e701ec52a50ea85d1d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

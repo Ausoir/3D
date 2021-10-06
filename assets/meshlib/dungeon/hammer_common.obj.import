@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/hammer_common.obj-1a2355c03b230ef115c07e37b9bf7e03.mesh"
+
+[deps]
+
+files=[ "res://.import/hammer_common.obj-1a2355c03b230ef115c07e37b9bf7e03.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/hammer_common.obj"
+dest_files=[ "res://.import/hammer_common.obj-1a2355c03b230ef115c07e37b9bf7e03.mesh", "res://.import/hammer_common.obj-1a2355c03b230ef115c07e37b9bf7e03.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

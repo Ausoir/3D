@@ -5,7 +5,10 @@ var duration = 3
 
 func _ready():
 	if has_node("Sound"):
-		$Sound.play()
+		var sound = $Sound
+		sound.play()
+		var dist = max(12, sound.get_max_distance())
+		G.cmds([["alert", sound.global_transform.origin, dist]], null)
 
 
 func _process(delta):

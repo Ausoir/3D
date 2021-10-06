@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/staff_common.obj-7d1988af785222872d555ab14a8fd211.mesh"
+
+[deps]
+
+files=[ "res://.import/staff_common.obj-7d1988af785222872d555ab14a8fd211.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/staff_common.obj"
+dest_files=[ "res://.import/staff_common.obj-7d1988af785222872d555ab14a8fd211.mesh", "res://.import/staff_common.obj-7d1988af785222872d555ab14a8fd211.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

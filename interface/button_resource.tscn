@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=1]
 [ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=2]
+[ext_resource path="res://assets/font_message.tres" type="DynamicFont" id=3]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Button
@@ -35,54 +36,54 @@ region_rect = Rect2( 64, 64, 32, 32 )
 [node name="Name" type="Label" parent="."]
 use_parent_material = true
 margin_left = 20.0
-margin_top = 16.0
-margin_right = 68.0
-margin_bottom = 32.0
-rect_scale = Vector2( 2, 2 )
+margin_top = 8.0
+margin_right = 77.0
+margin_bottom = 37.0
+custom_fonts/font = ExtResource( 3 )
 text = "Name"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ManaIcon" type="Sprite" parent="."]
+[node name="ManaAmount" type="Label" parent="."]
 use_parent_material = true
-position = Vector2( 20, 64 )
+margin_left = 48.0
+margin_top = 80.0
+margin_right = 82.0
+margin_bottom = 114.0
+custom_fonts/font = ExtResource( 3 )
+text = "00"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ManaIcon" type="Sprite" parent="ManaAmount"]
+use_parent_material = true
+position = Vector2( -36, 0 )
 texture = ExtResource( 1 )
 centered = false
 region_enabled = true
 region_rect = Rect2( 0, 0, 32, 32 )
 
-[node name="ManaAmount" type="Label" parent="."]
+[node name="FoodAmount" type="Label" parent="."]
 use_parent_material = true
-margin_left = 64.0
-margin_top = 68.0
-margin_right = 92.0
-margin_bottom = 84.0
-rect_scale = Vector2( 2, 2 )
-text = "0"
+margin_left = 148.0
+margin_top = 80.0
+margin_right = 182.0
+margin_bottom = 114.0
+custom_fonts/font = ExtResource( 3 )
+text = "00"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FoodIcon" type="Sprite" parent="."]
+[node name="FoodIcon" type="Sprite" parent="FoodAmount"]
 use_parent_material = true
-position = Vector2( 104, 64 )
+position = Vector2( -36, 0 )
 texture = ExtResource( 1 )
 centered = false
 region_enabled = true
 region_rect = Rect2( 32, 0, 32, 32 )
-
-[node name="FoodAmount" type="Label" parent="."]
-use_parent_material = true
-margin_left = 144.0
-margin_top = 68.0
-margin_right = 174.0
-margin_bottom = 84.0
-rect_scale = Vector2( 2, 2 )
-text = "0"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Reqs" type="Label" parent="."]
 use_parent_material = true

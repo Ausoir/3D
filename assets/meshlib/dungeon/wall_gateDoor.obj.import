@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wall_gateDoor.obj-8173164875a7794b33bee3d43acfb31a.mesh"
+
+[deps]
+
+files=[ "res://.import/wall_gateDoor.obj-8173164875a7794b33bee3d43acfb31a.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/wall_gateDoor.obj"
+dest_files=[ "res://.import/wall_gateDoor.obj-8173164875a7794b33bee3d43acfb31a.mesh", "res://.import/wall_gateDoor.obj-8173164875a7794b33bee3d43acfb31a.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

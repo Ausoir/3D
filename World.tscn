@@ -44,7 +44,7 @@ func generate():
 	objectmap.rng = rng
 	var elevation_map
 	var biome_map
-	map_size = Vector2(40, 30)
+	map_size = Vector2(16, 16)
 	var generator = Generator.new(rng, map_size)
 	biome_map = generator.make_perlin(map_size.x, map_size.y)
 	elevation_map = generator.make_perlin(map_size.x, map_size.y)
@@ -113,7 +113,8 @@ func generate():
 							objectmap.make(\"weed\", ox, oy, oz)
 						else:
 							objectmap.make(\"rock\", ox, oy, oz)
-	$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
+	if spawnpoints:
+		$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
 
 
 func generate_poi():
@@ -131,21 +132,21 @@ func generate_poi():
 	var spawns = 1
 	while next != null:
 		if spawns > 0:
-			spawnpoints.append(next * 6 + Vector3(3,0,3))
 			spawns -= 1
+			spawnpoints.append(next * 6 + Vector3(3,0,3))
 		elif crystals > 0:
-			pois[\"crystals\"].append(next)
 			crystals -= 1
+			pois[\"crystals\"].append(next)
+			build(\"crystal\", next)
 		else:
 			pois[\"sites\"].append(next)
+			var building = [\"camp\", \"house\", \"graveyard\", \"tower\"]
+			build(building[rng.randi_range(0, len(building)-1)], next)
 		next = pois[\"blanks\"].pop_front()
-	for v in pois[\"sites\"]:
-		build(v)
 
 
-func build(pos):
+func build(building, pos):
 	var mappos = tilemap.map_to_world(pos.x,pos.y,pos.z)
-	var building = [\"camp\", \"house\", \"graveyard\"][rng.randi_range(0, 2)]
 	G.cmds([[\"build\",building,mappos,rng.randi_range(0, 3)]], null)
 
 
@@ -204,7 +205,7 @@ func snap_to_tile(vec):
 func get_units_near(vec, radius=2):
 	var r = []
 	for i in units.get_children():
-		if (i.transform.origin - vec).length() <= radius:
+		if (i.global_transform.origin - vec).length() <= radius:
 			r.append(i)
 	return r
 
@@ -737,7 +738,7 @@ __meta__ = {
 }
 
 [node name="Water" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0427704, 4.00013, -0.0103912 )
 mesh = SubResource( 4 )
 material/0 = ExtResource( 5 )
 script = SubResource( 5 )

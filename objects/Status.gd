@@ -36,7 +36,7 @@ func update(delta):
 			frame -= 1
 			second = true
 		for i in range(len(states)-1, -1, -1):
-			if states[i].update(delta, second):
+			if states[i].update(second):
 				states[i].die()
 				states.remove(i)
 

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scaffold_small_medium.obj-7f6ff531ade2e39e696050f68a20dc0f.mesh"
+
+[deps]
+
+files=[ "res://.import/scaffold_small_medium.obj-7f6ff531ade2e39e696050f68a20dc0f.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/scaffold_small_medium.obj"
+dest_files=[ "res://.import/scaffold_small_medium.obj-7f6ff531ade2e39e696050f68a20dc0f.mesh", "res://.import/scaffold_small_medium.obj-7f6ff531ade2e39e696050f68a20dc0f.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

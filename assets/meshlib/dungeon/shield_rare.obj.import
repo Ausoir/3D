@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/shield_rare.obj-0b38aca95fa50b8174634bf4d5b48eaa.mesh"
+
+[deps]
+
+files=[ "res://.import/shield_rare.obj-0b38aca95fa50b8174634bf4d5b48eaa.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/shield_rare.obj"
+dest_files=[ "res://.import/shield_rare.obj-0b38aca95fa50b8174634bf4d5b48eaa.mesh", "res://.import/shield_rare.obj-0b38aca95fa50b8174634bf4d5b48eaa.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

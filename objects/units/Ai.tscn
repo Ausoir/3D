@@ -37,7 +37,12 @@ func update_target(has_target, thought=false):
 		return
 	var unit_pos = unit.get_interact_position()
 	var target_pos = target.get_interact_position()
-	var collision = G.space.intersect_ray(unit_pos, target_pos, [unit, target], 32)
+	if not reach_to(unit_pos, target_pos):
+		path_to(len(pilot.tasks) == 0 or thought, unit_pos, target_pos)
+
+
+func reach_to(unit_pos, target_pos):
+	var collision = G.space.intersect_ray(unit_pos, target_pos, [], 0b00000000000000100101)
 	if not collision and abs(unit_pos.y - target_pos.y) < 2:
 		var dir = unit_pos.direction_to(target_pos)
 		dir.y = 0
@@ -52,14 +57,17 @@ func update_target(has_target, thought=false):
 					if land_collision and abs(unit.get_position().y - land_collision.position.y) < .2:
 						state = \"hunt\"
 						pilot.set_task([\"move\", 9999, target_pos, 0])
-						return
+						return true
 		pilot.set_task()
+
+
+func path_to(repath, from, to):
 	var path
-	if len(pilot.tasks) == 0 or thought:
+	if repath:
 		pathing.result = []
-		path = pathing.update(unit_pos, target_pos)
+		path = pathing.update(from, to)
 	else:
-		path = pathing.update_nodes(unit_pos)
+		path = pathing.update_nodes(from)
 	if path:
 		state = \"path\"
 		pilot.set_task([\"idle\", 0])
@@ -97,6 +105,13 @@ func perceive():
 				var collision = G.space.intersect_ray(unitpos, objpos, [unit, obj.unit], 32)
 				if not collision:
 					target = obj.unit
+
+
+func hear(vec):
+	if !target or !is_instance_valid(target):
+		var unit_pos = unit.get_interact_position()
+		if not reach_to(unit_pos, vec):
+			path_to(true, unit_pos, vec)
 
 
 func on_hit(_pos, hitter, _damage):

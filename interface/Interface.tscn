@@ -8,14 +8,16 @@
 [sub_resource type="GDScript" id=1]
 script/source = "extends CanvasLayer
 
-
+const Menubutton = preload(\"res://interface/button_resource.tscn\")
+const Itembutton = preload(\"res://interface/button_item.tscn\")
 onready var menu = $Menu
 onready var tint = $Menu/Tint
 onready var tooltip = $Interaction
+onready var tab_equipment = $Menu/Tabs/Equipment/Buttons
+onready var tab_construct = $Menu/Tabs/Construct/Buttons
 var on = false
-var b_pos
-var menubutton = preload(\"res://interface/button_resource.tscn\")
 var host
+var argument
 
 
 func _ready():
@@ -41,21 +43,17 @@ func update_resources():
 func display(arg, phost):
 	if on:
 		clear()
-	host = phost
-	G.you.capture_mouse(0)
 	on = true
+	host = phost
+	argument = arg
+	G.you.capture_mouse(0)
 	tint.show()
 	tint.set_size(get_viewport().size)
 	menu.show()
 	$Menu/Tabs.rect_position = get_viewport().size / 2 - $Menu/Tabs.rect_size / 2
 	$Menu/Health.rect_position.x = get_viewport().size.x / 2 - $Menu/Health.progress_bar.rect_size.x / 2
 	$Menu/Health.display(G.younit.health.x, G.younit.health.y, G.younit.item_name, G.younit.level)
-	b_pos = Vector2(200, 120)
-	var items = G.factory.craftables[arg]
-	for item in items:
-		add_button(item[0], item[1], item[2])
-		if b_pos[1] > 540:
-			b_pos = Vector2(700, 120)
+	on_tab_select($Menu/Tabs.current_tab)
 
 
 func clear():
@@ -63,15 +61,12 @@ func clear():
 	on = false
 	tint.hide()
 	menu.hide()
-	for child in $Menu/Tabs/Construct/Buttons.get_children():
-		child.queue_free()
 
 
 func add_button(name, reqs, args):
-	var button = menubutton.instance()
+	var button = Menubutton.instance()
 	button.get_node(\"Name\").set_text(name)
 	button.set_reqs(reqs[0], reqs[1])
-	#button.set_position(b_pos)
 	button.set_size(Vector2(380, 80))
 	button.connect(\"pressed\", self, \"button_pressed\", [args])
 	button.set_use_parent_material(true)
@@ -90,8 +85,7 @@ func add_button(name, reqs, args):
 	if !button.disabled:
 		desc.add_color_override(\"font_color\", Color(1,1,1))
 		desc.set_text(G.factory.get_description(name))
-	$Menu/Tabs/Construct/Buttons.add_child(button)
-	#b_pos.y += 140
+	tab_construct.add_child(button)
 
 
 func button_pressed(args):
@@ -112,16 +106,54 @@ func display_gather(mana, food):
 
 
 func set_tooltip(msg):
-	if msg != \"\":
+	if msg == null:
+		tooltip.hide()
+	else:
 		tooltip.set_text(msg)
 		tooltip.show()
 		tooltip.rect_position = get_viewport().size / 2 - tooltip.rect_size / 2 + Vector2(0, 160)
-	else:
-		tooltip.hide()
 
 
 func message(msg):
 	$Messages.add(str(msg))
+
+
+func on_tab_select(tab):
+	for child in $Menu/Tabs/Equipment/Buttons.get_children():
+		child.queue_free()
+	for child in $Menu/Tabs/Construct/Buttons.get_children():
+		child.queue_free()
+	if tab == 0:
+		var items = G.factory.craftables[argument]
+		for item in items:
+			add_button(item[0], item[1], item[2])
+	elif tab == 1:
+		if host.weapon:
+			fill_equipment(\"HELD\", host.weapon)
+		for i in host.armors:
+			fill_equipment(i.to_upper(), host.armors[i])
+
+
+func fill_equipment(category, item):
+	var button = Itembutton.instance()
+	button.connect(\"pressed\", self, \"button_pressed\", [[[\"v\",\"parent\"],[\"order\",[[\"drop\", 6]]]]])
+	button.get_node(\"Container/Category\").set_text(category)
+	button.get_node(\"Container/Name\").set_text(item.item_name.capitalize())
+	for property in item.properties:
+		if property in [\"defense\", \"health\", \"damage\", \"speed\"]:
+			var label = Label.new()
+			label.set_text(property.capitalize() + \"   \" + str(item.properties[property]))
+			button.get_node(\"Container\").add_child(label)
+		elif property == \"tags\":
+			for tag in item.properties.tags:
+				var desc = G.factory.get_description(tag)
+				if !desc.empty():
+					var label = Label.new()
+					label.set_text(desc)
+					button.get_node(\"Container\").add_child(label)
+	tab_equipment.add_child(button)
+	button.get_node(\"Container/Category\").rect_min_size.x = tab_equipment.rect_size.x - 14
+	button.rect_min_size.y = button.get_node(\"Container\").rect_size.y + 14
 "
 
 [sub_resource type="GDScript" id=2]
@@ -137,7 +169,6 @@ func add(msg):
 	var label = Label.new()
 	label.add_font_override(\"font\", font)
 	label.set_text(msg)
-	label.set_scale(Vector2(2, 2))
 	for child in get_children():
 		var pos = child.get_position()
 		child.set_position(Vector2(pos.x, pos.y - 40))
@@ -219,26 +250,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Character" type="ScrollContainer" parent="Menu/Tabs"]
-use_parent_material = true
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 47.0
-margin_right = -4.0
-margin_bottom = -4.0
-mouse_filter = 1
-scroll_horizontal_enabled = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Character"]
-margin_right = 480.0
-margin_bottom = 600.0
-rect_min_size = Vector2( 480, 600 )
-alignment = 1
-
 [node name="Construct" type="ScrollContainer" parent="Menu/Tabs"]
 use_parent_material = true
 anchor_right = 1.0
@@ -254,6 +265,27 @@ __meta__ = {
 }
 
 [node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Construct"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
+alignment = 1
+
+[node name="Equipment" type="ScrollContainer" parent="Menu/Tabs"]
+visible = false
+use_parent_material = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 47.0
+margin_right = -4.0
+margin_bottom = -4.0
+mouse_filter = 1
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Equipment"]
 margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
@@ -338,3 +370,5 @@ align = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[connection signal="tab_selected" from="Menu/Tabs" to="." method="on_tab_select"]

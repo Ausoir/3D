@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/coinsSmall.obj-9634dc6528d0fd9906e7e39fe4c55dba.mesh"
+
+[deps]
+
+files=[ "res://.import/coinsSmall.obj-9634dc6528d0fd9906e7e39fe4c55dba.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/coinsSmall.obj"
+dest_files=[ "res://.import/coinsSmall.obj-9634dc6528d0fd9906e7e39fe4c55dba.mesh", "res://.import/coinsSmall.obj-9634dc6528d0fd9906e7e39fe4c55dba.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

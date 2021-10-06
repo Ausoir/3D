@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/cratePlatform_small.obj-73a226e6bbccf75093604791dc6f8c13.mesh"
+
+[deps]
+
+files=[ "res://.import/cratePlatform_small.obj-73a226e6bbccf75093604791dc6f8c13.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/cratePlatform_small.obj"
+dest_files=[ "res://.import/cratePlatform_small.obj-73a226e6bbccf75093604791dc6f8c13.mesh", "res://.import/cratePlatform_small.obj-73a226e6bbccf75093604791dc6f8c13.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

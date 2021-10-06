@@ -23,6 +23,7 @@ onready var unit = $Pilot/Unit
 var mouse_motion = Vector2()
 var mouse_captured = true
 var item_type = \"unit\"
+var target
 
 
 func _ready():
@@ -32,6 +33,7 @@ func _ready():
 	unit.hit_glance = true
 	G.factions[1].add(self)
 	unit.item_name = \"inquisitor\"
+	pilot.set_ability(\"debug\")
 
 
 func set_faction(faction):
@@ -55,47 +57,20 @@ func _input(event):
 			camera.orthonormalize()
 			camera.rotation.x += rot.y
 			camera.rotation.x = clamp(camera.rotation.x, CAMERA_X_ROT_MIN, CAMERA_X_ROT_MAX)
+		show_interactable_tip()
+			
 	if Input.is_action_just_pressed(\"restart\"):
 		print(\"Player._input:restart: \", get_tree().reload_current_scene())
 	elif Input.is_action_just_pressed(\"ui_fullscreen\"):
 		OS.window_fullscreen = !OS.window_fullscreen
 	elif Input.is_action_just_pressed(\"ui_mouse\"):
 		capture_mouse()
-	elif event is InputEventKey:
-		show_interactable_tip()
 
 
 func _physics_process(_delta):
-	unit.motion_target = Vector2(
-			Input.get_action_strength(\"move_right\") - Input.get_action_strength(\"move_left\"),
-			Input.get_action_strength(\"move_back\") - Input.get_action_strength(\"move_front\")
-		)
-	if unit.motion_target != Vector2.ZERO and unit.state != \"attack\":
-		pilot.set_task()
-
-	if mouse_captured:
-		if Input.is_action_just_pressed(\"special\"):
-			unit.set_state(\"jump\")
-			unit.move_and_slide(unit.transform.basis.z*20, Vector3.UP)
-			unit.velocity.y = 20
-			G.cmds([[\"v\",\"host\"],[\"state\",\"haste\",24],[\"v\",\"host\"],[\"state\",\"slowfall\",2]],unit)
-		elif Input.is_action_just_pressed(\"interact\"):
-			if !pilot.swing(unit.weapon):
-				pilot.set_task([\"interact\", 0])
-		elif Input.is_action_just_pressed(\"item\"):
-			var pathing = Pathing.new(G.world)
-			var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
-			G.message(str(pathing.get_routes(pos))+\" : \"+str(pos))
-			G.message(\"Dir:\"+str(G.world.tilemap.get_cell_item_orientation(pos.x, pos.y, pos.z))+\" Item:\"+str(G.world.tilemap.get_cell_item(pos.x, pos.y, pos.z)))
-			if unit.weapon:
-				pilot.set_task([\"drop\", 6])
-			else:
-				pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
-
 	var camera_basis = camera.global_transform.basis
 	var camera_z = camera_basis.z
 	var camera_x = camera_basis.x
-
 	camera_z.y = 0
 	camera_x.y = 0
 	unit.view_z = camera_z.normalized()
@@ -104,23 +79,44 @@ func _physics_process(_delta):
 	var unit_pos = unit.transform.origin
 	var cam_pos = Vector2(unit_pos.x, unit_pos.z)
 	camera.transform.origin.x = cam_pos.x
-	camera.transform.origin.y = unit_pos.y+2.5# - camera.rotation.x*2 + 2
+	camera.transform.origin.y = unit_pos.y+2.5
 	camera.transform.origin.z = cam_pos.y
-	
-	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5 + .5
+	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5 + .3
+
+	var move_target = Vector2(
+			Input.get_action_strength(\"move_right\") - Input.get_action_strength(\"move_left\"),
+			Input.get_action_strength(\"move_back\") - Input.get_action_strength(\"move_front\")
+		)
+	if move_target != Vector2.ZERO:
+		pilot.set_task([\"moveto\", .001, move_target.x, move_target.y])
+
+	if mouse_captured:
+		if Input.is_action_pressed(\"special\"):
+			pilot.set_task([\"special\", 1])
+		elif Input.is_action_just_pressed(\"interact\"):
+			if G.ui.tooltip.visible:
+				pilot.set_task([\"interact\", 0])
+			else:
+				pilot.swing(unit.weapon)
+		elif Input.is_action_just_pressed(\"item\"):
+			var pathing = Pathing.new(G.world)
+			var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
+			#G.message(str(pathing.get_routes(pos))+\" : \"+str(pos))
+			G.message(\"Dir:\"+str(G.world.tilemap.get_cell_item_orientation(pos.x, pos.y, pos.z))+\" Item:\"+str(G.world.tilemap.get_cell_item(pos.x, pos.y, pos.z)))
+			pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
 
 
 func show_interactable_tip():
-	var item = pilot.get_interactable()
-	if item:
-		if item.item_type == \"item\":
-			G.ui.set_tooltip(\"Pick up \" + item.item_name)
-		elif item.item_type == \"object\":
-			G.ui.set_tooltip(\"Interact with \" + item.item_name)
-		elif item.item_type == \"building\":
-			G.ui.set_tooltip(\"Use \" + item.item_name)
-	else:
-		G.ui.set_tooltip(\"\")
+	G.ui.set_tooltip(null)
+	if camera.rotation.x > 0:
+		var item = pilot.get_interactable()
+		if item:
+			if item.item_type == \"item\":
+				G.ui.set_tooltip(\"Pick up [\" + item.item_name.capitalize() + \"]\")
+			elif item.item_type == \"object\":
+				G.ui.set_tooltip(\"Interact with [\" + item.item_name.capitalize() + \"]\")
+			elif item.item_type == \"building\":
+				G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
 
 
 func on_hit(_pos, _hitter, _damage):
@@ -128,6 +124,10 @@ func on_hit(_pos, _hitter, _damage):
 
 
 func die():
+	pass
+
+
+func hear(vec):
 	pass
 "
 

@@ -1,0 +1,315 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://objects/units/Player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://assets/meshlib_dungeon.tres" type="MeshLibrary" id=2]
+[ext_resource path="res://assets/particles/Fire.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/meshlib/dungeon/torchWall.obj" type="ArrayMesh" id=4]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Spatial
+
+const Generator = preload(\"res://classes/DungeonGenerator.gd\")
+onready var tilemap = $GridMap
+onready var objectmap = $GridMap
+onready var objects = $Objects
+onready var others = $Others
+onready var units = $Units
+
+var rng = RandomNumberGenerator.new()
+var map_size = Vector2(0, 0)
+var pois = {\"blanks\":[],
+			\"crystals\":[],
+			\"sites\":[],
+			\"camps\":[]}
+var spawnpoints = []
+
+var aggro_turn = 0
+
+
+func _ready():
+	G.initialize(self)
+	generate()
+
+
+func generate():
+	rng.randomize()
+	#rng.set_seed(21311)
+	tilemap.rng = rng
+	objectmap.rng = rng
+	var biome_map
+	map_size = Vector2(20, 20)
+	var generator = Generator.new(rng, map_size)
+	biome_map = generator.make_dungeon(7)
+	biome_map = generator.make_border(biome_map)
+
+	for x in range(map_size.x):
+		for z in range(map_size.y):
+			var biome = biome_map[x][z]
+			tilemap.set_cell_item(x, -1, z, tilemap.tile)
+			if biome != 0:
+				tilemap.set_cell_item(x, 0, z, tilemap.tile2)
+	tilemap.autotile_map(map_size.x, 0, map_size.y)
+	for x in range(map_size.x):
+		for z in range(map_size.y):
+			var biome = biome_map[x][z]
+			if biome == 2:
+				var dir = tilemap.get_cell_item_orientation(x, 0, z)
+				tilemap.set_cell_item(x, 0, z, tilemap.door, dir)
+	var room = generator.rooms[rng.randi_range(0, len(generator.rooms)-1)]
+	for x in range(room[0].y, room[1].y+1):
+		for y in range(room[0].x, room[1].x+1):
+			tilemap.set_cell_item(x, -1, y, tilemap.tile2)
+
+	if spawnpoints:
+		$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
+
+
+func get_object_at(_vec):
+	return null
+
+func set_object_at(_vec, _arg):
+	pass
+
+func get_object_near(_vec):
+	return null
+
+
+func clean_tile(vec):
+	var pos = tilemap.world_to_map(vec) * 2
+	objectmap.set_cell_item(pos.x, pos.y, pos.z, -1)
+	objectmap.set_cell_item(pos.x+1, pos.y, pos.z, -1)
+	objectmap.set_cell_item(pos.x, pos.y, pos.z+1, -1)
+	objectmap.set_cell_item(pos.x+1, pos.y, pos.z+1, -1)
+
+func is_tile_vacant(vec):
+	var pos = tilemap.world_to_map(vec)
+	var pos2 = pos * 2
+	var r = tilemap.get_cell_item(pos.x, pos.y, pos.z) == -1
+	r = r and objectmap.get_object_at(pos2) == null
+	r = r and objectmap.get_object_at(pos2 + Vector3(1, 0, 0)) == null
+	r = r and objectmap.get_object_at(pos2 + Vector3(0, 0, 1)) == null
+	r = r and objectmap.get_object_at(pos2 + Vector3(1, 0, 1)) == null
+	var down = tilemap.get_cell_item(pos.x, pos.y-1, pos.z)
+	r = r and (down == tilemap.beach or down >= 981 or down in tilemap.dirts)
+	return r
+
+
+func get_tile_at(vec):
+	var pos = tilemap.world_to_map(vec)# + Vector3(0, 1, 0))
+	return tilemap.get_cell_item(pos.x, pos.y, pos.z)
+
+
+func set_tile_at(vec, tile, orientation=0):
+	var pos = tilemap.world_to_map(vec)# + Vector3(0, 1, 0))
+	return tilemap.set_cell_item(pos.x, pos.y, pos.z, tile, orientation)
+
+
+func snap_to_tile(vec):
+	var r = tilemap.world_to_map(vec)
+	return tilemap.map_to_world(r.x, r.y, r.z)
+
+
+func get_units_near(vec, radius=2):
+	var r = []
+	for i in units.get_children():
+		if (i.global_transform.origin - vec).length() <= radius:
+			r.append(i)
+	return r
+
+
+func get_items_at(vec, radius=2):
+	var r = []
+	for i in objects.get_children():
+		if (i.transform.origin - vec).length() <= radius:
+			r.append(i)
+	return r
+
+func get_item_type_at(type, vec, radius=2):
+	var items = G.world.get_items_at(vec, radius)
+	if !items.empty():
+		for i in items:
+			if type == i.item_type:
+				return i
+
+
+func get_site(vec):
+	var pos = objectmap.map_to_world(vec.x, vec.y, vec.z)
+	if get_object_at(pos) == null:
+		pos = pos
+	elif get_object_at(pos + Vector3.LEFT) == null:
+		pos = pos + Vector3.LEFT
+	elif get_object_at(pos + Vector3.RIGHT) == null:
+		pos = pos + Vector3.RIGHT
+	elif get_object_at(pos + Vector3.FORWARD) == null:
+		pos = pos + Vector3.FORWARD
+	else:
+		return
+	return objectmap.world_to_map(pos)
+
+
+func get_pos(vec):
+	return tilemap.map_to_world(vec.x, vec.y+.5, vec.z)
+"
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends GridMap
+
+const orientations = [0, 10, 16, 22]#Z-,Z+,X-,X+
+
+const autotile_dict = [
+	[[1, 3, 5, -7], [1, -3, 5, 7], [1, 3, -5, 7], [-1, 3, 5, 7]],
+	[[1, -3, 5, 7], [1, 3, 5, -7], [-1, 3, 5, 7], [1, 3, -5, 7]],
+	[[1, -3, 5, -7], [1, -3, 5, -7], [-1, 3, -5, 7], [-1, 3, -5, 7]],
+	[[-1, 3, 5, -7], [1, -3, -5, 7], [1, 3, -5, -7], [-1, -3, 5, 7]],
+	[[-1, -3, 5, -7], [1, -3, -5, -7], [-1, 3, -5, -7], [-1, -3, -5, 7]],
+	[[1, 3, 5, 7]],
+	[[-1, -3, -5, -7]],
+]
+var tileset = preload(\"res://assets/meshlib_dungeon.tres\")
+var tile = tileset.find_item_by_name(\"tile1\")
+var tile2 = tileset.find_item_by_name(\"tile2\")
+var door = tileset.find_item_by_name(\"door\")
+var wall = tileset.find_item_by_name(\"wall1\")
+var walls = [
+	tileset.find_item_by_name(\"wallsplit\"),
+	wall,
+	wall,
+	tileset.find_item_by_name(\"wallcorner\"),
+	tileset.find_item_by_name(\"wallend1\"),
+	tileset.find_item_by_name(\"wallcross\"),
+	-1
+]
+
+var rng
+
+func autotile_map(sx, y, sz):
+	var item
+	var autotiles = []
+	var autotile
+	for x in range(-sx, sx):
+		for z in range(-sz, sz):
+			item = get_cell_item(x, y, z)
+			if item == tile2:
+				autotile = set_autotile(tile2, x, y, z, autotile_dict)
+				if autotile:
+					autotiles.append(autotile)
+	for cell in autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], walls[cell[3]], orientations[cell[4]])
+
+func set_autotile(compare, x, y, z, dict):
+	var adj = [-1, -2, -3, -4, -5, -6, -7, -8]
+	if get_cell_item(x+1, y, z) == compare:
+		adj[0] *= -1
+	if get_cell_item(x+1, y, z+1) == compare:
+		adj[1] *= -1
+	if get_cell_item(x, y, z+1) == compare:
+		adj[2] *= -1
+	if get_cell_item(x-1, y, z+1) == compare:
+		adj[3] *= -1
+	if get_cell_item(x-1, y, z) == compare:
+		adj[4] *= -1
+	if get_cell_item(x-1, y, z-1) == compare:
+		adj[5] *= -1
+	if get_cell_item(x, y, z-1) == compare:
+		adj[6] *= -1
+	if get_cell_item(x+1, y, z-1) == compare:
+		adj[7] *= -1
+	var count = 0
+	var orientation
+	for v in dict:
+		orientation = 0
+		for sidereqs in v:
+			if is_matching(adj, sidereqs):
+				return [x, y, z, count, orientation]
+			orientation += 1
+		count += 1
+
+func is_matching(adj, req):
+	for side in req:
+		if adj[abs(side)-1] != side:
+			return false
+	return true
+"
+
+[sub_resource type="GDScript" id=3]
+script/source = "extends \"res://objects/Particle.gd\"
+
+
+# Declare member variables here. Examples:
+# var a = 2
+# var b = \"text\"
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	duration = 9999
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta):
+#	pass
+"
+
+[sub_resource type="Environment" id=4]
+background_mode = 1
+background_energy = 0.0
+ambient_light_energy = 0.0
+auto_exposure_scale = 0.1
+auto_exposure_min_luma = 0.1
+glow_enabled = true
+
+[node name="Dungeon" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="GridMap" type="GridMap" parent="."]
+mesh_library = ExtResource( 2 )
+use_in_baked_light = true
+cell_size = Vector3( 4, 4, 4 )
+collision_layer = 35
+collision_mask = 35
+data = {
+"cells": PoolIntArray( 1, 65530, 1441794, 2, 65530, 655366, 3, 65530, 5, 4, 65530, 5, 6, 65530, 3, 65542, 65530, 3, 131078, 65530, 0, -65535, 65530, 1048576, -65534, 65530, 1048576, -65533, 65530, 1048576, -65532, 65530, 1048576, -65531, 65530, 1048576, -65530, 65530, 1048576, 1, 65531, 1048578, 3, 65531, 1048578, 4, 65531, 1441794, 6, 65531, 1441794, 65542, 65531, 1441794, 131078, 65531, 0, -65535, 65531, 655360, -65534, 65531, 655360, -65533, 65531, 655360, -65532, 65531, 655360, -65531, 65531, 1048576, -65530, 65531, 1048576, 1, 65532, 1048578, 3, 65532, 1441802, 4, 65532, 1441798, 6, 65532, 1441794, 65542, 65532, 1441794, 131078, 65532, 0, 131079, 65532, 0, -65535, 65532, 655360, -65534, 65532, 655360, -65533, 65532, 655360, -65532, 65532, 655360, -65531, 65532, 1048576, -65530, 65532, 1048576, 1, 65533, 1048578, 3, 65533, 1441802, 5, 65533, 1048584, 6, 65533, 1441794, 65542, 65533, 1441794, 131078, 65533, 0, -65535, 65533, 655360, -65534, 65533, 655360, -65533, 65533, 655360, -65532, 65533, 655360, -65531, 65533, 1048576, -65530, 65533, 1048576, 5, 65534, 1048578, 6, 65534, 1441794, 65541, 65534, 1048582, 65542, 65534, 1441794, 131078, 65534, 0, -65535, 65534, 655360, -65534, 65534, 655360, -65533, 65534, 655360, -65532, 65534, 655360, -65531, 65534, 1048576, -65530, 65534, 1048576, 4, 65535, 655362, 5, 65535, 655364, 6, 65535, 2, 7, 65535, 2, 65540, 65535, 655362, 65541, 65535, 655364, 65542, 65535, 1441795, 131078, 65535, 0, -65535, 65535, 655360, -65534, 65535, 655360, -65533, 65535, 655360, -65532, 65535, 655360, -65531, 65535, 1048576, -65530, 65535, 1048576 )
+}
+script = SubResource( 2 )
+__meta__ = {
+"_editor_clip_": 0,
+"_editor_floor_": Vector3( 0, 0, 0 )
+}
+
+[node name="Objects" type="Spatial" parent="."]
+
+[node name="Units" type="Spatial" parent="."]
+
+[node name="Player" parent="Units" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 6, -5 )
+
+[node name="Others" type="Spatial" parent="."]
+
+[node name="MeshInstance" type="MeshInstance" parent="Others"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6, 1 )
+mesh = ExtResource( 4 )
+material/0 = null
+material/1 = null
+material/2 = null
+material/3 = null
+
+[node name="Particle" parent="Others/MeshInstance" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.760675, 0.535372 )
+script = SubResource( 3 )
+
+[node name="OmniLight" type="OmniLight" parent="Others/MeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3 )
+light_color = Color( 1, 0.74902, 0, 1 )
+light_energy = 5.0
+light_bake_mode = 2
+shadow_enabled = true
+omni_range = 9.7
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 4 )
+
+[node name="OmniLight" type="OmniLight" parent="WorldEnvironment"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 14, 15 )
+light_energy = 2.0
+light_bake_mode = 2
+omni_range = 150.0

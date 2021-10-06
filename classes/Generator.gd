@@ -104,7 +104,7 @@ func radialize(base):
 		for j in range(width):
 			var val_y = pow(float(i - center_y) / center_y, 2)
 			var val_x = pow(float(j - center_x) / center_x, 2)
-			var val = min(1, (1-sqrt(val_x+val_y)) * 4)
+			var val = min(1, (1-sqrt(val_x+val_y)) * 12)
 			base[i][j] = val * base[i][j]
 	return base
 

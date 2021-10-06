@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/sword_rare.obj-11181f0c2b5a1a45aa54983fb5bb475a.mesh"
+
+[deps]
+
+files=[ "res://.import/sword_rare.obj-11181f0c2b5a1a45aa54983fb5bb475a.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/sword_rare.obj"
+dest_files=[ "res://.import/sword_rare.obj-11181f0c2b5a1a45aa54983fb5bb475a.mesh", "res://.import/sword_rare.obj-11181f0c2b5a1a45aa54983fb5bb475a.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

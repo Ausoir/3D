@@ -8,7 +8,37 @@ script = ExtResource( 13 )
 [node name="Spawn" type="Spatial" parent="."]
 
 [node name="Position3D" type="Position3D" parent="Spawn"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -8 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1, -8.5 )
+
+[node name="Position3D2" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1, -4.5 )
+
+[node name="Position3D3" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1, -8.5 )
+
+[node name="Position3D4" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1, -8.5 )
+
+[node name="Position3D5" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1, -5.5 )
+
+[node name="Position3D6" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 1, -2.5 )
+
+[node name="Position3D7" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -9.5, 1, 9.5 )
+
+[node name="Position3D8" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6.5, 1, 9.5 )
+
+[node name="Position3D9" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1, 9.5 )
+
+[node name="Position3D10" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1, 9.5 )
+
+[node name="Position3D11" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, -3, 10.5 )
 
 [node name="Tile" type="Spatial" parent="."]
 
@@ -41,27 +71,3 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6, -3, 6 )
 
 [node name="1-9" type="Position3D" parent="Tile"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, -3, 6 )
-
-[node name="0-10" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -6 )
-
-[node name="0-11" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, -6 )
-
-[node name="0-12" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 0 )
-
-[node name="0-13" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, -6 )
-
-[node name="0-14" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, 0 )
-
-[node name="0-15" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6 )
-
-[node name="0-16" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, 6 )
-
-[node name="0-17" type="Position3D" parent="Tile"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, 6 )

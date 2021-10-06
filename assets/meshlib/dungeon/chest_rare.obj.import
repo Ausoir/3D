@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/chest_rare.obj-d606c4b3d122e29e4bd53f15c85bdef0.mesh"
+
+[deps]
+
+files=[ "res://.import/chest_rare.obj-d606c4b3d122e29e4bd53f15c85bdef0.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/chest_rare.obj"
+dest_files=[ "res://.import/chest_rare.obj-d606c4b3d122e29e4bd53f15c85bdef0.mesh", "res://.import/chest_rare.obj-d606c4b3d122e29e4bd53f15c85bdef0.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

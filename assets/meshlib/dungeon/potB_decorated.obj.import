@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/potB_decorated.obj-0242ccc6ff7a4582aae927e31569f40f.mesh"
+
+[deps]
+
+files=[ "res://.import/potB_decorated.obj-0242ccc6ff7a4582aae927e31569f40f.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/potB_decorated.obj"
+dest_files=[ "res://.import/potB_decorated.obj-0242ccc6ff7a4582aae927e31569f40f.mesh", "res://.import/potB_decorated.obj-0242ccc6ff7a4582aae927e31569f40f.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

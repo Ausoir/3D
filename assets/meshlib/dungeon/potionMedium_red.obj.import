@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/potionMedium_red.obj-414da2af12d7693c0128cd01a33adda2.mesh"
+
+[deps]
+
+files=[ "res://.import/potionMedium_red.obj-414da2af12d7693c0128cd01a33adda2.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/potionMedium_red.obj"
+dest_files=[ "res://.import/potionMedium_red.obj-414da2af12d7693c0128cd01a33adda2.mesh", "res://.import/potionMedium_red.obj-414da2af12d7693c0128cd01a33adda2.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

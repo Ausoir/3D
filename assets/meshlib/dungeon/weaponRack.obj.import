@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/weaponRack.obj-bc781c3a16e95f4993f05bbde193292d.mesh"
+
+[deps]
+
+files=[ "res://.import/weaponRack.obj-bc781c3a16e95f4993f05bbde193292d.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/weaponRack.obj"
+dest_files=[ "res://.import/weaponRack.obj-bc781c3a16e95f4993f05bbde193292d.mesh", "res://.import/weaponRack.obj-bc781c3a16e95f4993f05bbde193292d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

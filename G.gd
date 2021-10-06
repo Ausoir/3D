@@ -8,11 +8,11 @@ const particles = {
 	"repair": preload("res://assets/particles/Repair.tscn"),
 	"spark": preload("res://assets/particles/Spark.tscn"),
 }
-const class_item = preload("res://objects/Item.gd")
-const command = preload("res://classes/Command.gd")
+const Command = preload("res://classes/Command.gd")
+const Faction = preload("res://classes/Faction.gd")
+var Skills = preload("res://objects/units/Ability.gd").new()
 var ui
 var factory
-var FACTION = preload("res://classes/Faction.gd")
 var enemy
 var you
 var younit
@@ -20,9 +20,9 @@ var world
 var space
 var tick_events = []
 var factions = [
-	FACTION.new(0),
-	FACTION.new(1),
-	FACTION.new(2),
+	Faction.new(0),
+	Faction.new(1),
+	Faction.new(2),
 ]
 var frame = 0
 
@@ -118,11 +118,12 @@ func dir_to_offset(orientation, rot):
 
 
 func message(msg):
-	ui.message(msg)
+	if ui:
+		ui.message(msg)
 
 
 func cmds(args, host):
-	var c = command.new(host)
+	var c = Command.new(host)
 	for arg in args:
 		c.tgt = c.run(arg)
 		if c.stop:
@@ -130,5 +131,5 @@ func cmds(args, host):
 	return c.tgt
 
 func cmd(arg, host):
-	var c = command.new(host)
+	var c = Command.new(host)
 	return c.run(arg)

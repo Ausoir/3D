@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scaffold_small_low_railing.obj-fa353b23b411885573afd24fcfb39178.mesh"
+
+[deps]
+
+files=[ "res://.import/scaffold_small_low_railing.obj-fa353b23b411885573afd24fcfb39178.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/scaffold_small_low_railing.obj"
+dest_files=[ "res://.import/scaffold_small_low_railing.obj-fa353b23b411885573afd24fcfb39178.mesh", "res://.import/scaffold_small_low_railing.obj-fa353b23b411885573afd24fcfb39178.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

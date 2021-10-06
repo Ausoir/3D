@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/lootSackA.obj-bb4e1a51220e674bb7ad8f83f9be1808.mesh"
+
+[deps]
+
+files=[ "res://.import/lootSackA.obj-bb4e1a51220e674bb7ad8f83f9be1808.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/lootSackA.obj"
+dest_files=[ "res://.import/lootSackA.obj-bb4e1a51220e674bb7ad8f83f9be1808.mesh", "res://.import/lootSackA.obj-bb4e1a51220e674bb7ad8f83f9be1808.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

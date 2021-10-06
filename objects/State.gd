@@ -15,16 +15,16 @@ func _init(phost, ptype, plifetime):
 
 
 func die():
-	if particle:
+	if particle and is_instance_valid(particle):
 		particle.queue_free()
 
 
-func update(delta, second):
+func update(second):
 	if name == "haste":
-		host.motion_target *= 100*delta
+		host.move_speed.x = host.move_speed.y * 1.5
 	elif name == "slowfall":
 		if host.velocity.y < 0:
-			host.velocity.y *= .5
+			host.velocity.y *= .7
 
 	if second:
 		if particle:

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/stairs_wide.obj-f9b7e393db2e7e2504a44b45f0d40994.mesh"
+
+[deps]
+
+files=[ "res://.import/stairs_wide.obj-f9b7e393db2e7e2504a44b45f0d40994.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/stairs_wide.obj"
+dest_files=[ "res://.import/stairs_wide.obj-f9b7e393db2e7e2504a44b45f0d40994.mesh", "res://.import/stairs_wide.obj-f9b7e393db2e7e2504a44b45f0d40994.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

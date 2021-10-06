@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wallIntersection.obj-5819735898bd06a0c0a2d4e6d79aa839.mesh"
+
+[deps]
+
+files=[ "res://.import/wallIntersection.obj-5819735898bd06a0c0a2d4e6d79aa839.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/wallIntersection.obj"
+dest_files=[ "res://.import/wallIntersection.obj-5819735898bd06a0c0a2d4e6d79aa839.mesh", "res://.import/wallIntersection.obj-5819735898bd06a0c0a2d4e6d79aa839.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

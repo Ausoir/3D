@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scaffold_small_medium_cornerLeft.obj-b37ea1a3fd00e2dd635e0018cdfa1b97.mesh"
+
+[deps]
+
+files=[ "res://.import/scaffold_small_medium_cornerLeft.obj-b37ea1a3fd00e2dd635e0018cdfa1b97.mesh" ]
+
+source_file="res://assets/meshlib/dungeon/scaffold_small_medium_cornerLeft.obj"
+dest_files=[ "res://.import/scaffold_small_medium_cornerLeft.obj-b37ea1a3fd00e2dd635e0018cdfa1b97.mesh", "res://.import/scaffold_small_medium_cornerLeft.obj-b37ea1a3fd00e2dd635e0018cdfa1b97.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
