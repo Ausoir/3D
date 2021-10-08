@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/halberd.obj-096ff9004726deab789d81694363159d.mesh"
+
+[deps]
+
+files=[ "res://.import/halberd.obj-096ff9004726deab789d81694363159d.mesh" ]
+
+source_file="res://assets/models/halberd.obj"
+dest_files=[ "res://.import/halberd.obj-096ff9004726deab789d81694363159d.mesh", "res://.import/halberd.obj-096ff9004726deab789d81694363159d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

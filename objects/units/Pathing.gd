@@ -196,7 +196,7 @@ func routes_check_send(sender, pos):
 		var sender_orientation = world.tilemap.get_cell_item_orientation(pos[0], pos[1], pos[2])
 		var sender_open_type = sender % 10
 		r.append_array(get_direction_routes(sender_orientation, sender_open_type))
-	elif sender == world.tilemap.dirtslope or sender == 980:
+	elif world.tilemap.is_climbable(sender):
 		var sender_orientation = world.tilemap.get_cell_item_orientation(pos[0], pos[1], pos[2])
 		if sender_orientation == 0:#Z-
 			r.append_array([[0,1,-1],[0,0,1]])
@@ -206,7 +206,7 @@ func routes_check_send(sender, pos):
 			r.append_array([[-1,1,0],[1,0,0]])
 		elif sender_orientation == 22:#X+
 			r.append_array([[1,1,0],[-1,0,0]])
-	elif sender == world.tilemap.dirttunnel:
+	elif world.tilemap.is_tunnel(sender):
 		var sender_orientation = world.tilemap.get_cell_item_orientation(pos[0], pos[1], pos[2])
 		if sender_orientation == 0 or sender_orientation == 10:#Z-
 			r = [[0,0,-1],[0,0,1]]
@@ -228,33 +228,26 @@ func routes_check_receive(pos, direction):
 		for route in routes:
 			if receive_direction[0] == route[0] and receive_direction[2] == route[2]:
 				return newpos
-	elif receiver == world.tilemap.dirtslope or receiver == 980:
+	elif world.tilemap.is_climbable(receiver):
 		var tile_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
 		if (tile_orientation == 0 and direction==[0,0,-1]) or\
 			(tile_orientation == 10 and direction==[0,0,1]) or\
 			(tile_orientation == 16 and direction==[-1,0,0]) or\
 			(tile_orientation == 22 and direction==[1,0,0]):
 			return newpos
-	elif receiver == 981:
-		var tile_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
-		if (tile_orientation == 0 and direction[2] == 1) or\
-			(tile_orientation == 10 and direction[2] == -1) or\
-			(tile_orientation == 16 and direction[0] == 1) or\
-			(tile_orientation == 22 and direction[0] == -1):
-			return [newpos[0], newpos[1]-1, newpos[2]]
 	else:
-		if receiver == world.tilemap.dirttunnel: #Check if tunnel
+		if world.tilemap.is_tunnel(receiver): #Check if tunnel
 			var tileunder_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
 			if ((tileunder_orientation == 0 or tileunder_orientation == 10) and\
-				(direction == [0,0,-1] or direction==[0,0,1])) or\
+				(direction == [0,0,-1] or direction == [0,0,1])) or\
 				((tileunder_orientation == 16 or tileunder_orientation == 22) and\
-				(direction==[1,0,0] or direction==[-1,0,0])):
+				(direction == [1,0,0] or direction == [-1,0,0])):
 				return newpos
 		else:
 			var tileunder = world.tilemap.get_cell_item(newpos[0], newpos[1]-1, newpos[2])
 			if tileunder == -1:
 				return
-			elif tileunder == world.tilemap.dirtslope or tileunder == 980:
+			elif world.tilemap.is_climbable(tileunder):
 				return [newpos[0], newpos[1]-1, newpos[2]]
-			elif tileunder >= 990 or tileunder == world.tilemap.beach or tileunder in world.tilemap.dirts:
+			elif world.tilemap.is_landable(tileunder):
 				return newpos

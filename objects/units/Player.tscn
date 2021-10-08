@@ -79,9 +79,9 @@ func _physics_process(_delta):
 	var unit_pos = unit.transform.origin
 	var cam_pos = Vector2(unit_pos.x, unit_pos.z)
 	camera.transform.origin.x = cam_pos.x
-	camera.transform.origin.y = unit_pos.y+2.5
+	camera.transform.origin.y = unit_pos.y+1.5
 	camera.transform.origin.z = cam_pos.y
-	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5 + .3
+	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5
 
 	var move_target = Vector2(
 			Input.get_action_strength(\"move_right\") - Input.get_action_strength(\"move_left\"),
@@ -101,7 +101,7 @@ func _physics_process(_delta):
 		elif Input.is_action_just_pressed(\"item\"):
 			var pathing = Pathing.new(G.world)
 			var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
-			#G.message(str(pathing.get_routes(pos))+\" : \"+str(pos))
+			G.message(str(pathing.get_routes(pos))+\" : \"+str(pos))
 			G.message(\"Dir:\"+str(G.world.tilemap.get_cell_item_orientation(pos.x, pos.y, pos.z))+\" Item:\"+str(G.world.tilemap.get_cell_item(pos.x, pos.y, pos.z)))
 			pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
 
@@ -127,7 +127,7 @@ func die():
 	pass
 
 
-func hear(vec):
+func hear(_vec):
 	pass
 "
 
@@ -138,11 +138,10 @@ CAMERA_MOUSE_ROTATION_SPEED = 0.001
 [node name="Pilot" parent="." instance=ExtResource( 1 )]
 
 [node name="CameraBase" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0 )
 
 [node name="SpringArm" type="SpringArm" parent="CameraBase"]
 transform = Transform( -1, 3.69465e-08, -7.92319e-08, 0, 0.906308, 0.422618, 8.74228e-08, 0.422618, -0.906308, 0, 0, 0 )
-spring_length = 3.6
+spring_length = 2.0
 
 [node name="Camera" type="Camera" parent="CameraBase/SpringArm"]
 current = true

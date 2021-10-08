@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/shortkatana.obj-3a8464692027098c3eadcfc4b6dc1ae2.mesh"
+
+[deps]
+
+files=[ "res://.import/shortkatana.obj-3a8464692027098c3eadcfc4b6dc1ae2.mesh" ]
+
+source_file="res://assets/models/shortkatana.obj"
+dest_files=[ "res://.import/shortkatana.obj-3a8464692027098c3eadcfc4b6dc1ae2.mesh", "res://.import/shortkatana.obj-3a8464692027098c3eadcfc4b6dc1ae2.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

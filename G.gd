@@ -1,5 +1,6 @@
 extends Spatial
 
+const BLOCK = 4
 const particles = {
 	"blood": preload("res://assets/particles/Blood.tscn"),
 	"dust": preload("res://assets/particles/Dust.tscn"),
@@ -39,7 +40,6 @@ func initialize(pworld):
 	G.space = pworld.get_world().direct_space_state
 	G.you = pworld.get_node("Units/Player")
 	G.younit = G.you.get_node("Pilot/Unit")
-	G.enemy = pworld.get_node("Enemy")
 	factory._ready()
 	pworld.others.add_child(ui)
 
@@ -94,6 +94,17 @@ func roll(arg):
 	else:
 		r = int(arg)
 	return r
+
+
+func orientation_to_dir(orientation):
+	if orientation == 0:
+		return 2
+	elif orientation == 16:
+		return 1
+	elif orientation == 10:
+		return 0
+	elif orientation == 22:
+		return 3
 
 
 func dir_to_offset(orientation, rot):

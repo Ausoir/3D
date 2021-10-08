@@ -1,8 +1,8 @@
 extends Node
 
 const data = {
-	"debug": ["debug_flight", 0, 2, 0],
-	"whirlwind": ["whirlwind", 1, 1, .8],
+	"debug": ["debug_flight", 1, 2, 0],
+	"charge": ["charge", 2, .1, 999],
 	"flurry": ["flurry", 0, 1, .2],
 }
 
@@ -18,8 +18,8 @@ func debug_flight(unit):
 	unit.velocity.y = 32
 	G.cmds([["v","host"],["state","haste",24],["v","host"],["state","slowfall",2]], unit)
 
-func whirlwind(unit):
-	unit.set_state("whirlwind", true)
+func charge(unit):
+	unit.set_state("charge", true)
 
 func flurry(unit):
 	unit.set_state("flurry", true)

@@ -138,7 +138,7 @@ func get_interactable():
 	var r
 	if items:
 		for item in items:
-			if item.item_name and item.onuse:
+			if item.get(\"item_name\") and item.onuse:
 				if item.item_type == \"item\":
 					return item
 				elif item.item_type == \"object\":

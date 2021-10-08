@@ -1,9 +1,7 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://objects/units/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/meshlib_dungeon.tres" type="MeshLibrary" id=2]
-[ext_resource path="res://assets/particles/Fire.tscn" type="PackedScene" id=3]
-[ext_resource path="res://assets/meshlib/dungeon/torchWall.obj" type="ArrayMesh" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
@@ -17,7 +15,7 @@ onready var units = $Units
 
 var rng = RandomNumberGenerator.new()
 var map_size = Vector2(0, 0)
-var pois = {\"blanks\":[],
+var pois = {\"torch\":[],
 			\"crystals\":[],
 			\"sites\":[],
 			\"camps\":[]}
@@ -37,31 +35,82 @@ func generate():
 	tilemap.rng = rng
 	objectmap.rng = rng
 	var biome_map
-	map_size = Vector2(20, 20)
+	map_size = Vector2(30, 40)
 	var generator = Generator.new(rng, map_size)
-	biome_map = generator.make_dungeon(7)
+	biome_map = generator.make_dungeon(5)
 	biome_map = generator.make_border(biome_map)
 
 	for x in range(map_size.x):
 		for z in range(map_size.y):
-			var biome = biome_map[x][z]
-			tilemap.set_cell_item(x, -1, z, tilemap.tile)
+			var biome = biome_map[z][x]
+			tilemap.set_cell_item(x, -1, z, tilemap.tileA)
 			if biome != 0:
-				tilemap.set_cell_item(x, 0, z, tilemap.tile2)
+				tilemap.set_cell_item(x, 0, z, tilemap.tileB)
+				#tilemap.set_cell_item(x, 1, z, tilemap.tileB)
 	tilemap.autotile_map(map_size.x, 0, map_size.y)
+	#tilemap.autotile_map(map_size.x, 1, map_size.y)
 	for x in range(map_size.x):
 		for z in range(map_size.y):
-			var biome = biome_map[x][z]
+			var biome = biome_map[z][x]
 			if biome == 2:
 				var dir = tilemap.get_cell_item_orientation(x, 0, z)
 				tilemap.set_cell_item(x, 0, z, tilemap.door, dir)
-	var room = generator.rooms[rng.randi_range(0, len(generator.rooms)-1)]
-	for x in range(room[0].y, room[1].y+1):
-		for y in range(room[0].x, room[1].x+1):
-			tilemap.set_cell_item(x, -1, y, tilemap.tile2)
+				var pos = Vector3(x, 0, z)
+				if !poi_near(pois.torch, pos, 7):
+					pois.torch.append(pos)
+	for room in generator.rooms:
+		if room[0] == 1:
+			for x in range(room[1].y, room[2].y+1):
+				for z in range(room[1].x, room[2].x+1):
+					tilemap.set_cell_item(x, -1, z, tilemap.tileB)
+					if tilemap.get_cell_item(x, 0, z) == tilemap.door:
+						var dir = tilemap.get_cell_item_orientation(x, 0, z)
+			spawnpoints.append(tilemap.map_to_world(room[1].x+2,0.2,room[1].y+2))
+			pois.torch.append(Vector3(room[1].x+2, 0, room[1].y+2))
+
+	generate_torches()
 
 	if spawnpoints:
 		$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
+
+
+func generate_torches():
+	var POI_DISTANCE = 6
+	var gx = int(map_size.x / POI_DISTANCE)
+	var gz = int(map_size.y / POI_DISTANCE)
+	for x in range(gx):
+		for z in range(gz):
+			var ox = x * POI_DISTANCE + rng.randi_range(0, POI_DISTANCE-1)
+			var oz = z * POI_DISTANCE + rng.randi_range(0, POI_DISTANCE-1)
+			if tilemap.get_cell_item(ox, 0, oz) == tilemap.wall:
+				var pos = Vector3(ox, 0, oz)
+				if !poi_near(pois.torch, pos, 3):
+					pois.torch.append(pos)
+
+	for i in pois.torch:
+		var dir = tilemap.get_cell_item_orientation(i.x, i.y, i.z)
+		build(\"torch\", i, dir)
+
+
+func poi_near(arr, pos, radius):
+	var diffY = Vector3(1, 2, 1)
+	for v in arr:
+		if (v * diffY).distance_to(pos * diffY) < radius:
+			return true
+	return false
+
+
+func build(building, pos, orientation):
+	var vec = tilemap.map_to_world(pos.x,pos.y,pos.z)
+	var ortho = G.dir_to_offset(orientation, 0)
+	var r = G.cmds([[\"make\",building]], null)
+	var orig_translation = r.translation
+	if ortho == Vector2.ZERO:
+		r.translate(vec + orig_translation)
+	else:
+		r.look_at_from_position(vec, vec+Vector3(ortho.x, 0, ortho.y), Vector3.UP)
+		r.translate(orig_translation)
+	return r
 
 
 func get_object_at(_vec):
@@ -90,7 +139,7 @@ func is_tile_vacant(vec):
 	r = r and objectmap.get_object_at(pos2 + Vector3(0, 0, 1)) == null
 	r = r and objectmap.get_object_at(pos2 + Vector3(1, 0, 1)) == null
 	var down = tilemap.get_cell_item(pos.x, pos.y-1, pos.z)
-	r = r and (down == tilemap.beach or down >= 981 or down in tilemap.dirts)
+	r = r and tilemap.is_landable(down)
 	return r
 
 
@@ -166,8 +215,8 @@ const autotile_dict = [
 	[[-1, -3, -5, -7]],
 ]
 var tileset = preload(\"res://assets/meshlib_dungeon.tres\")
-var tile = tileset.find_item_by_name(\"tile1\")
-var tile2 = tileset.find_item_by_name(\"tile2\")
+var tileA = tileset.find_item_by_name(\"tile1\")
+var tileB = tileset.find_item_by_name(\"tile2\")
 var door = tileset.find_item_by_name(\"door\")
 var wall = tileset.find_item_by_name(\"wall1\")
 var walls = [
@@ -182,6 +231,18 @@ var walls = [
 
 var rng
 
+func is_landable(tile):
+	return tile != -1
+
+func is_climbable(_tile):
+	return false
+
+func is_tunnel(_tile):
+	return false
+
+func get_object_at(_pos):
+	return null
+
 func autotile_map(sx, y, sz):
 	var item
 	var autotiles = []
@@ -189,8 +250,8 @@ func autotile_map(sx, y, sz):
 	for x in range(-sx, sx):
 		for z in range(-sz, sz):
 			item = get_cell_item(x, y, z)
-			if item == tile2:
-				autotile = set_autotile(tile2, x, y, z, autotile_dict)
+			if item == tileB:
+				autotile = set_autotile(tileB, x, y, z, autotile_dict)
 				if autotile:
 					autotiles.append(autotile)
 	for cell in autotiles:
@@ -231,49 +292,33 @@ func is_matching(adj, req):
 	return true
 "
 
-[sub_resource type="GDScript" id=3]
-script/source = "extends \"res://objects/Particle.gd\"
-
-
-# Declare member variables here. Examples:
-# var a = 2
-# var b = \"text\"
-
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	duration = 9999
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-"
-
-[sub_resource type="Environment" id=4]
+[sub_resource type="Environment" id=3]
 background_mode = 1
 background_energy = 0.0
 ambient_light_energy = 0.0
 auto_exposure_scale = 0.1
 auto_exposure_min_luma = 0.1
 glow_enabled = true
+glow_intensity = 1.0
+glow_strength = 0.0
+glow_hdr_luminance_cap = 8.0
+glow_hdr_scale = 1.0
 
 [node name="Dungeon" type="Spatial"]
 script = SubResource( 1 )
 
 [node name="GridMap" type="GridMap" parent="."]
 mesh_library = ExtResource( 2 )
-use_in_baked_light = true
 cell_size = Vector3( 4, 4, 4 )
 collision_layer = 35
 collision_mask = 35
 data = {
-"cells": PoolIntArray( 1, 65530, 1441794, 2, 65530, 655366, 3, 65530, 5, 4, 65530, 5, 6, 65530, 3, 65542, 65530, 3, 131078, 65530, 0, -65535, 65530, 1048576, -65534, 65530, 1048576, -65533, 65530, 1048576, -65532, 65530, 1048576, -65531, 65530, 1048576, -65530, 65530, 1048576, 1, 65531, 1048578, 3, 65531, 1048578, 4, 65531, 1441794, 6, 65531, 1441794, 65542, 65531, 1441794, 131078, 65531, 0, -65535, 65531, 655360, -65534, 65531, 655360, -65533, 65531, 655360, -65532, 65531, 655360, -65531, 65531, 1048576, -65530, 65531, 1048576, 1, 65532, 1048578, 3, 65532, 1441802, 4, 65532, 1441798, 6, 65532, 1441794, 65542, 65532, 1441794, 131078, 65532, 0, 131079, 65532, 0, -65535, 65532, 655360, -65534, 65532, 655360, -65533, 65532, 655360, -65532, 65532, 655360, -65531, 65532, 1048576, -65530, 65532, 1048576, 1, 65533, 1048578, 3, 65533, 1441802, 5, 65533, 1048584, 6, 65533, 1441794, 65542, 65533, 1441794, 131078, 65533, 0, -65535, 65533, 655360, -65534, 65533, 655360, -65533, 65533, 655360, -65532, 65533, 655360, -65531, 65533, 1048576, -65530, 65533, 1048576, 5, 65534, 1048578, 6, 65534, 1441794, 65541, 65534, 1048582, 65542, 65534, 1441794, 131078, 65534, 0, -65535, 65534, 655360, -65534, 65534, 655360, -65533, 65534, 655360, -65532, 65534, 655360, -65531, 65534, 1048576, -65530, 65534, 1048576, 4, 65535, 655362, 5, 65535, 655364, 6, 65535, 2, 7, 65535, 2, 65540, 65535, 655362, 65541, 65535, 655364, 65542, 65535, 1441795, 131078, 65535, 0, -65535, 65535, 655360, -65534, 65535, 655360, -65533, 65535, 655360, -65532, 65535, 655360, -65531, 65535, 1048576, -65530, 65535, 1048576 )
+"cells": PoolIntArray(  )
 }
 script = SubResource( 2 )
 __meta__ = {
 "_editor_clip_": 0,
-"_editor_floor_": Vector3( 0, 0, 0 )
+"_editor_floor_": Vector3( 0, 1, 0 )
 }
 
 [node name="Objects" type="Spatial" parent="."]
@@ -281,32 +326,11 @@ __meta__ = {
 [node name="Units" type="Spatial" parent="."]
 
 [node name="Player" parent="Units" instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 6, -5 )
 
 [node name="Others" type="Spatial" parent="."]
 
-[node name="MeshInstance" type="MeshInstance" parent="Others"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 6, 1 )
-mesh = ExtResource( 4 )
-material/0 = null
-material/1 = null
-material/2 = null
-material/3 = null
-
-[node name="Particle" parent="Others/MeshInstance" instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.760675, 0.535372 )
-script = SubResource( 3 )
-
-[node name="OmniLight" type="OmniLight" parent="Others/MeshInstance"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3 )
-light_color = Color( 1, 0.74902, 0, 1 )
-light_energy = 5.0
-light_bake_mode = 2
-shadow_enabled = true
-omni_range = 9.7
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 4 )
+environment = SubResource( 3 )
 
 [node name="OmniLight" type="OmniLight" parent="WorldEnvironment"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 14, 15 )

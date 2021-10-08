@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/gladius.obj-cd7e37a3268c204c978958d96d1d6a6c.mesh"
+
+[deps]
+
+files=[ "res://.import/gladius.obj-cd7e37a3268c204c978958d96d1d6a6c.mesh" ]
+
+source_file="res://assets/models/gladius.obj"
+dest_files=[ "res://.import/gladius.obj-cd7e37a3268c204c978958d96d1d6a6c.mesh", "res://.import/gladius.obj-cd7e37a3268c204c978958d96d1d6a6c.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

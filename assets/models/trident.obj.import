@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/trident.obj-21d3375c82a7debecff8f6dedfee47f2.mesh"
+
+[deps]
+
+files=[ "res://.import/trident.obj-21d3375c82a7debecff8f6dedfee47f2.mesh" ]
+
+source_file="res://assets/models/trident.obj"
+dest_files=[ "res://.import/trident.obj-21d3375c82a7debecff8f6dedfee47f2.mesh", "res://.import/trident.obj-21d3375c82a7debecff8f6dedfee47f2.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -62,6 +62,8 @@ func run(args):
 			host.get_team().add_resource(-args[1], -args[2])
 	elif args[0] == "order":
 		tgt.set_tasks(args[1])
+	elif args[0] == "ability":
+		tgt.set_ability(args[1])
 	elif args[0] == "trigger":
 		tgt.trigger(args[1])
 	elif args[0] == "wield":

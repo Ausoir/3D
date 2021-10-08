@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/shortsword_cone.obj-2f99f69d6f256207ce52326d05e48fa8.mesh"
+
+[deps]
+
+files=[ "res://.import/shortsword_cone.obj-2f99f69d6f256207ce52326d05e48fa8.mesh" ]
+
+source_file="res://assets/models/shortsword_cone.obj"
+dest_files=[ "res://.import/shortsword_cone.obj-2f99f69d6f256207ce52326d05e48fa8.mesh", "res://.import/shortsword_cone.obj-2f99f69d6f256207ce52326d05e48fa8.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

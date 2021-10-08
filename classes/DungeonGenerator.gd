@@ -15,7 +15,10 @@ func make_dungeon(times):
 func divide(base, from, to, times, times_hall, horizontal):
 	var size = to - from
 	if (size.x <= 4 and size.y <= 4) or times <= 0:
-		rooms.append([from, to])
+		if times <= 0:
+			rooms.append([3, from, to])
+		else:
+			rooms.append([1, from, to])
 		return times <= 0
 	elif size.x <= 4:
 		horizontal = 1
@@ -27,42 +30,42 @@ func divide(base, from, to, times, times_hall, horizontal):
 	if times_hall > 0:
 		gap = 1
 	if horizontal_roll < horizontal: #horizontal
-		var wall = rng.randi_range(from.y+2, to.y-2)
+		var wall = rng.randi_range(from.y+2+gap, to.y-2-gap)
 		fill(base, Vector2(from.x, wall-gap), Vector2(to.x, wall+gap), 1)
-		divide(base, Vector2(from.x, from.y), Vector2(to.x, wall-gap), times-1, times_hall-1, horizontal_roll+.2)
-		divide(base, Vector2(from.x, wall+gap), Vector2(to.x, to.y), times-1, times_hall-1, horizontal_roll+.2)
-		if times_hall > 0:
-			rooms.append([Vector2(from.x, wall-gap), Vector2(to.x, wall+gap)])
+		divide(base, Vector2(from.x, from.y), Vector2(to.x, wall-gap), times-1, times_hall-1, horizontal_roll)
+		divide(base, Vector2(from.x, wall+gap), Vector2(to.x, to.y), times-1, times_hall-1, horizontal_roll)
+		if gap > 0:
+			rooms.append([2, Vector2(from.x, wall-gap), Vector2(to.x, wall+gap)])
 			fill(base, Vector2(from.x, wall), Vector2(to.x, wall), 0)
 			doorCandidates.append([0, from.x, wall-gap, to.x, wall-gap])
 			doorCandidates.append([0, from.x, wall+gap, to.x, wall+gap])
-			doorCandidates.append([0, from.x, wall-gap, to.x, wall+gap])
 		else:
 			doorCandidates.append([0, from.x, wall, to.x, wall])
 	else: #vertical
-		var wall = rng.randi_range(from.x+2, to.x-2)
+		var wall = rng.randi_range(from.x+2+gap, to.x-2-gap)
 		fill(base, Vector2(wall-gap, from.y), Vector2(wall+gap, to.y), 1)
-		divide(base, Vector2(from.x, from.y), Vector2(wall-gap, to.y), times-1, times_hall-1, horizontal_roll-.2)
-		divide(base, Vector2(wall+gap, from.y), Vector2(to.x, to.y), times-1, times_hall-1, horizontal_roll-.2)
-		if times_hall > 0:
-			rooms.append([Vector2(wall-gap, from.y), Vector2(wall+gap, to.y)])
+		divide(base, Vector2(from.x, from.y), Vector2(wall-gap, to.y), times-1, times_hall-1, horizontal_roll)
+		divide(base, Vector2(wall+gap, from.y), Vector2(to.x, to.y), times-1, times_hall-1, horizontal_roll)
+		if gap > 0:
+			rooms.append([2, Vector2(wall-gap, from.y), Vector2(wall+gap, to.y)])
 			fill(base, Vector2(wall, from.y), Vector2(wall, to.y), 0)
 			doorCandidates.append([1, wall-gap, from.y, wall-gap, to.y])
 			doorCandidates.append([1, wall+gap, from.y, wall+gap, to.y])
-			doorCandidates.append([1, wall-gap, from.y, wall+gap, to.y])
 		else:
 			doorCandidates.append([1, wall, from.y, wall, to.y])
 	for doorCandidate in doorCandidates:
 		var doors = []
 		if doorCandidate[0] == 0:
 			for i in range(doorCandidate[1]+1, doorCandidate[3]):
-				if base[doorCandidate[2]][i] == 1 and base[doorCandidate[2]+1][i] == 0 and base[doorCandidate[2]-1][i] == 0:
+				if base[doorCandidate[2]+1][i] == 0 and base[doorCandidate[2]-1][i] == 0:
 					doors.append(Vector2(i, doorCandidate[2]))
 		else:
 			for i in range(doorCandidate[2]+1, doorCandidate[4]):
-				if base[doorCandidate[2]][i] == 1 and base[i][doorCandidate[1]+1] == 0 and base[i][doorCandidate[1]-1] == 0:
+				if base[i][doorCandidate[1]+1] == 0 and base[i][doorCandidate[1]-1] == 0:
 					doors.append(Vector2(doorCandidate[1], i))
-		if !doors.empty():
+		if doors.empty():
+			print("Door couldn't be placed: ", doorCandidate)
+		else:
 			var t = doors[rng.randi_range(0, len(doors)-1)]
 			base[t.y][t.x] = 2
 

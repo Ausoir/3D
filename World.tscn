@@ -333,6 +333,14 @@ func make(item, x, y, z):
 		var items = models[item]
 		set_cell_item(x, y, z, items[rng.randi_range(0, items.size()-1)], orientations[rng.randi_range(0, 3)])
 
+func is_landable(tile):
+	return tile == beach or tile == dirt or tile >= 981
+
+func is_climbable(tile):
+	return tile == dirtslope or tile == 980
+
+func is_tunnel(tile):
+	return tile == dirttunnel
 
 func autotile_map(sx, sy, sz):
 	var item

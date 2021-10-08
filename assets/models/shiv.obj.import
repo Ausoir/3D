@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/shiv.obj-54a526df6e93eaec6670c37c5cc64871.mesh"
+
+[deps]
+
+files=[ "res://.import/shiv.obj-54a526df6e93eaec6670c37c5cc64871.mesh" ]
+
+source_file="res://assets/models/shiv.obj"
+dest_files=[ "res://.import/shiv.obj-54a526df6e93eaec6670c37c5cc64871.mesh", "res://.import/shiv.obj-54a526df6e93eaec6670c37c5cc64871.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

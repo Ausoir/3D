@@ -32,12 +32,22 @@ const data = {
 		{onswing=[["swing", 9999]]}, {damage="1d6", speed=.3, tags=["demolish", "penetrate", "mine"]}],
 	"knife": ["item", preload("res://assets/models/knife.obj"),
 		{onswing=[["swing", 9999]]}, {damage="1d4", speed=2, tags=["cut"]}],
+	"shiv": ["item", preload("res://assets/models/shiv.obj"),
+		{onswing=[["swing", 9999]]}, {damage="1d4", speed=2, tags=["cut"]}],
 	"hammer": ["item", preload("res://assets/models/hammer.obj"),
 		{onswing=[["wait", 9, "work"],["cmd", 0, [["menu","hammer"]]]]},{}],
 	"spear": ["item", preload("res://assets/models/spear.obj"),
 		{onswing=[["swing", 9999]]}, {damage="1d6"}],
+	"trident": ["item", preload("res://assets/models/trident.obj"),
+		{onswing=[["swing", 9999]]}, {damage="1d6"}],
+	"halberd": ["item", preload("res://assets/models/halberd.obj"),
+		{onswing=[["swing", 9999]]}, {damage="1d6"}],
+	"glaive": ["item", preload("res://assets/models/glaive.obj"),
+		{onswing=[["swing", 9999]]}, {damage="1d6"}],
 	"shortsword": ["item", preload("res://assets/models/shortsword.obj"),
 		{onswing=[["swing", 9999]]}, {damage="2d4", speed=1.2}],
+	"scimitar": ["item", preload("res://assets/models/scimitar.obj"),
+		{onswing=[["swing", 9999]]}, {damage="2d6", speed=1.2, tags=["cut"]}],
 	"saber": ["item", preload("res://assets/models/saber.obj"),
 		{onswing=[["swing", 9999]]}, {damage="2d6", speed=1.2, tags=["cut"]}],
 	"longsword": ["item", preload("res://assets/models/longsword.obj"),
@@ -48,12 +58,18 @@ const data = {
 		{onswing=[["swing", 9999]]}, {damage="1d6", speed=1.2, tags=["penetrate"]}],
 	"katana": ["item", preload("res://assets/models/katana.obj"),
 		{onswing=[["swing", 9999]]}, {damage="1d16", speed=1.2, tags=["cut"]}],
+	"wakizashi": ["item", preload("res://assets/models/shortkatana.obj"),
+		{onswing=[["swing", 9999]]}, {damage="1d16", speed=1.2, tags=["cut"]}],
+	"club": ["item", preload("res://assets/models/club.obj"),
+		{onswing=[["swing", 9999]]}, {damage="2d4", speed=.8, tags=["penetrate"]}],
 	"mace": ["item", preload("res://assets/models/mace.obj"),
 		{onswing=[["swing", 9999]]}, {damage="2d4", speed=.8, tags=["penetrate"]}],
 	"greatmace": ["item", preload("res://assets/models/greatmace.obj"),
 		{onswing=[["swing", 9999]]}, {damage="3d4", speed=.6, tags=["demolish", "penetrate"]}],
-	"greathammer": ["item", preload("res://assets/models/greathammer.obj"),
+	"warhammer": ["item", preload("res://assets/models/warhammer.obj"),
 		{onswing=[["swing", 9999]]}, {damage="3d6", speed=.6, tags=["demolish", "penetrate"]}],
+	"conesword": ["item", preload("res://assets/models/shortsword_cone.obj"),
+		{onswing=[["swing", 9999]]}, {damage="2d6", speed=1.5, tags=["cut"]}],
 	"feather blade": ["item", preload("res://assets/models/shortsword_unique.obj"),
 		{onswing=[["swing", 9999]]}, {damage="2d6", speed=1.5, tags=["cut"]}],
 	"real blade": ["item", preload("res://assets/models/longsword_unique.obj"),
@@ -103,6 +119,8 @@ const data = {
 		{onuse=[["work", WORK_DELAY]],
 		 onwork=[["cost",0,-3,true], ["v","transform"], ["make", "farm"],["claim"], ["v","host"], ["die"]]},{}],
 	"bed": ["building", preload("res://assets/buildings/Bed.tscn"),
+		{onuse=[["cmd", 0, [["menu","hire"]]]]},{}],
+	"torch": ["building", preload("res://assets/buildings/Torch.tscn"),
 		{onuse=[["cmd", 0, [["menu","hire"]]]]},{}],
 	"crystal": ["building", preload("res://assets/buildings/Crystal.tscn"),
 		{onmake=[["v","spawnpoint",0],["r","cmd",[[],[["spawn","warrior"]],[["spawn","soldier"]]]],
@@ -159,20 +177,28 @@ onready var craftables = {
 		]]]]],
 		["Build Bedroom", [1,0], [["v","usepos"],["v","snap"], ["prepare","bed",2],["!if",null],["claim"],["cost",1,0]]],
 		["Build Room", [1,0,["bed"]], [["v","usepos"],["v","snap"], ["prepare","room",2,1],["!if",null],["claim"],["cost",1,0]]],
-		#["Build Farm", [1,0,["bed"]], [["v","usepos"],["v","snap"],["v","add",Vector3(0,-6,0)],["iftile",G.world.get_node("GridTerrain").dirt],["v","usepos"],["v","snap"],["prepare","farm",2,1],["!if",null],["claim"],["cost",1,0]]],
 		["Build Camp", [1,0,["farm"]], [["v","usepos"],["v","snap"], ["prepare","camp",2,0]]],
 		["Build Kitchen", [1,0,["farm"]], [["v","usepos"],["v","snap"], ["prepare","kitchen",2,0]]],
 		["Build Workshop", [1,0,["bed"]], [["v","usepos"],["v","snap"], ["prepare","workshop",2,0]]],
-		["Wield Axe", [1,0], [["v","pos",1], ["make","axe"],["wield"],["cost",1,0]]],
-		["Wield Pickaxe", [1,0], [["v","pos",1], ["make","pickaxe"],["wield"],["cost",1,0]]],
-		["Wield Rapier", [1,0], [["v","pos",1], ["make","rapier"],["wield"],["cost",1,0]]],
-		["Wield Greatsword", [1,0], [["v","pos",1], ["make","greatsword"],["wield"],["cost",1,0]]],
-		["Wield Lamp", [1,0], [["v","pos",1], ["make","lantern"],["wield"],["cost",1,0]]],
-		["Equip Iron Suit", [1,0], [["v","pos",1], ["make","iron armor"],["equip"], ["make","iron gauntlets"],["equip"], ["make","iron boots"],["equip"]]],
-		["Equip Head", [1,0], [["v","pos",1], ["make","headband"],["equip"],["cost",1,0]]],
+		["Wield Katana", [1,0], [["make","katana"],["wield"],["cost",1,0]]],
+		["Wield Wakizashi", [1,0], [["make","wakizashi"],["wield"],["cost",1,0]]],
+		["Wield Saber", [1,0], [["make","saber"],["wield"],["cost",1,0]]],
+		["Wield scimitar", [1,0], [["make","scimitar"],["wield"],["cost",1,0]]],
+		["Wield Warhammer", [1,0], [["make","warhammer"],["wield"],["cost",1,0]]],
+		["Wield Shovel", [1,0], [["make","shovel"],["wield"],["cost",1,0]]],
+		["Wield Pickaxe", [1,0], [["make","pickaxe"],["wield"],["cost",1,0]]],
+		["Wield Trident", [1,0], [["make","trident"],["wield"],["cost",1,0]]],
+		["Wield Halberd", [1,0], [["make","halberd"],["wield"],["cost",1,0]]],
+		["Wield Glaive", [1,0], [["make","glaive"],["wield"],["cost",1,0]]],
+		["Wield Lamp", [1,0], [["make","lantern"],["wield"],["cost",1,0]]],
+		["Equip Iron Suit", [1,0], [["make","iron armor"],["equip"], ["make","iron gauntlets"],["equip"], ["make","iron boots"],["equip"]]],
+		["Equip Head", [1,0], [["make","full helmet"],["equip"],["cost",1,0]]],
+		["Equip Head2", [1,0], [["make","helmet"],["equip"],["cost",1,0]]],
 		["Spawn Friend", [1,0], [["v","pos"], ["spawn","warrior"], ["claim"]]],
 		["Spawn Enemy", [1,0], [["v","pos"], ["spawn","soldier"], ["claim",2]]],
 		["Spawn Chest", [1,0], [["v","pos"], ["make","chest"], ["drop"]]],
+		["Ability Flurry", [1,0], [["v","host"],["v","parent"],["ability","flurry"]]],
+		["Ability Charge", [1,0], [["v","host"],["v","parent"],["ability","charge"]]],
 	],
 	"hammer": [
 		["Build Post", [1,0,["room"]], [["v","pos"],["v","snap"], ["prepare","post",3,1],["!if",null],["claim"],["cost",1,0]]],
@@ -259,16 +285,18 @@ func make(arg):
 	var r
 	if item[1] is PackedScene:
 		r = item[1].instance()
+		if r.get_script() != Item_Script:
+			r.set_script(Item_Script)
 	elif item[0] == "item":
 		r = Type_Item.instance()
+		r.mesh = item[1]
 	else:
 		r = Type_Object.instance()
-	if item[0] == "object":
 		r.mesh = item[1]
+	if item[0] == "object":
 		r.create_trimesh_collision()
 		r.get_child(0).set_collision_layer(0b00000000000000000110)
 	elif item[0] == "item":
-		r.mesh = item[1]
 		r.onuse = [["wait", 6, "grab"],["cmd", 0, [["wield"]]]]
 	r.item_name = arg
 	r.item_type = item[0]
