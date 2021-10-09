@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/crossbow_rare.obj-8e2889c59581c804dae3f38a8cf18114.mesh"
+
+[deps]
+
+files=[ "res://.import/crossbow_rare.obj-8e2889c59581c804dae3f38a8cf18114.mesh" ]
+
+source_file="res://assets/models/crossbow_rare.obj"
+dest_files=[ "res://.import/crossbow_rare.obj-8e2889c59581c804dae3f38a8cf18114.mesh", "res://.import/crossbow_rare.obj-8e2889c59581c804dae3f38a8cf18114.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

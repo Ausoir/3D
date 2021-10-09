@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/spellBook.obj-6552f104a5be0ee24971f2fdac88a1e4.mesh"
+
+[deps]
+
+files=[ "res://.import/spellBook.obj-6552f104a5be0ee24971f2fdac88a1e4.mesh" ]
+
+source_file="res://assets/models/spellBook.obj"
+dest_files=[ "res://.import/spellBook.obj-6552f104a5be0ee24971f2fdac88a1e4.mesh", "res://.import/spellBook.obj-6552f104a5be0ee24971f2fdac88a1e4.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

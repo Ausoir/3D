@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/pots.obj-3826cde4e677c40e1a340a673ea57941.mesh"
+
+[deps]
+
+files=[ "res://.import/pots.obj-3826cde4e677c40e1a340a673ea57941.mesh" ]
+
+source_file="res://assets/models/pots.obj"
+dest_files=[ "res://.import/pots.obj-3826cde4e677c40e1a340a673ea57941.mesh", "res://.import/pots.obj-3826cde4e677c40e1a340a673ea57941.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

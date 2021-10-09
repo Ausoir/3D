@@ -14,9 +14,11 @@ func perform(ability, unit):
 		call(data[ability][0], unit)
 
 func debug_flight(unit):
-	unit.set_state("jump")
-	unit.velocity.y = 32
-	G.cmds([["v","host"],["state","haste",24],["v","host"],["state","slowfall",2]], unit)
+	if unit.state_time > 1:
+		G.cmds([["v","host"],["state","haste",24],["v","host"],["state","slowfall",2]], unit)
+	else:
+		unit.set_state("jump")
+		unit.velocity.y = 28
 
 func charge(unit):
 	unit.set_state("charge", true)

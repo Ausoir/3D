@@ -16,7 +16,8 @@ const unit_data = {
 }
 
 const data = {
-	"lantern": ["item", preload("res://objects/Lamp.tscn"), {},{}],
+	"lantern": ["item", preload("res://assets/models/torch.tscn"),
+		{onswing=[["swing", 9999]]}, {damage="1d6", speed=.8, tags=["cut"]}],
 
 	"branch": ["item", preload("res://assets/models/branch.obj"),
 		{onswing=[["wait", 12, "work"],["cmd", 0, [["menu","branch"]]]]},{}],

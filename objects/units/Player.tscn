@@ -101,6 +101,7 @@ func _physics_process(_delta):
 		elif Input.is_action_just_pressed(\"item\"):
 			var pathing = Pathing.new(G.world)
 			var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
+			G.message(\"Pos:\"+str(pos))
 			G.message(str(pathing.get_routes(pos))+\" : \"+str(pos))
 			G.message(\"Dir:\"+str(G.world.tilemap.get_cell_item_orientation(pos.x, pos.y, pos.z))+\" Item:\"+str(G.world.tilemap.get_cell_item(pos.x, pos.y, pos.z)))
 			pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])

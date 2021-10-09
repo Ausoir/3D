@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/sword_common.obj-53c321421133c7faef4c8ac1a19ba5bf.mesh"
+
+[deps]
+
+files=[ "res://.import/sword_common.obj-53c321421133c7faef4c8ac1a19ba5bf.mesh" ]
+
+source_file="res://assets/models/sword_common.obj"
+dest_files=[ "res://.import/sword_common.obj-53c321421133c7faef4c8ac1a19ba5bf.mesh", "res://.import/sword_common.obj-53c321421133c7faef4c8ac1a19ba5bf.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/lootSackB.obj-268a1c12af7972c41ae13c96ee06f5dc.mesh"
+
+[deps]
+
+files=[ "res://.import/lootSackB.obj-268a1c12af7972c41ae13c96ee06f5dc.mesh" ]
+
+source_file="res://assets/models/lootSackB.obj"
+dest_files=[ "res://.import/lootSackB.obj-268a1c12af7972c41ae13c96ee06f5dc.mesh", "res://.import/lootSackB.obj-268a1c12af7972c41ae13c96ee06f5dc.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -397,6 +397,9 @@ func die():
 	status.die()
 	if weapon:
 		weapon.die()
+	for v in armors.values():
+		v.die()
+		remove_child(v)
 	controller.die()
 "
 
@@ -598,7 +601,7 @@ nodes/swing/node = SubResource( 31 )
 nodes/swing/position = Vector2( -700, -140 )
 nodes/work/node = SubResource( 32 )
 nodes/work/position = Vector2( -140, 200 )
-node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "cast speed", 0, "cast type", "attack speed", 0, "attack", "lunge", 0, "movement", "lunge", 1, "attack speed", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD" ]
+node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "attack speed", 0, "attack", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "cast speed", 0, "cast type", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "lunge", 0, "movement", "lunge", 1, "attack speed" ]
 
 [sub_resource type="CapsuleShape" id=34]
 radius = 0.7

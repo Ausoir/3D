@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/dagger_rare.obj-2a75a4317aa5dc2ed7c1b2c759aa257c.mesh"
+
+[deps]
+
+files=[ "res://.import/dagger_rare.obj-2a75a4317aa5dc2ed7c1b2c759aa257c.mesh" ]
+
+source_file="res://assets/models/dagger_rare.obj"
+dest_files=[ "res://.import/dagger_rare.obj-2a75a4317aa5dc2ed7c1b2c759aa257c.mesh", "res://.import/dagger_rare.obj-2a75a4317aa5dc2ed7c1b2c759aa257c.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/shield_common.obj-6e73a14c8c03ea050572a2339cb8472e.mesh"
+
+[deps]
+
+files=[ "res://.import/shield_common.obj-6e73a14c8c03ea050572a2339cb8472e.mesh" ]
+
+source_file="res://assets/models/shield_common.obj"
+dest_files=[ "res://.import/shield_common.obj-6e73a14c8c03ea050572a2339cb8472e.mesh", "res://.import/shield_common.obj-6e73a14c8c03ea050572a2339cb8472e.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

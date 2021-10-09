@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/quiver_empty.obj-2bf8e65b0679b77c6d138381cf60bb30.mesh"
+
+[deps]
+
+files=[ "res://.import/quiver_empty.obj-2bf8e65b0679b77c6d138381cf60bb30.mesh" ]
+
+source_file="res://assets/models/quiver_empty.obj"
+dest_files=[ "res://.import/quiver_empty.obj-2bf8e65b0679b77c6d138381cf60bb30.mesh", "res://.import/quiver_empty.obj-2bf8e65b0679b77c6d138381cf60bb30.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
