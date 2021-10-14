@@ -1,29 +1,21 @@
 extends "res://objects/Item.gd"
 
-var tile_type = 900
-
 
 func on_make():
 	.on_make()
-	update_tiles()
+	open_walls()
 
+func open_walls():
+	pass
 
-func update_tiles():
-	G.world.set_tile_at(translation, tile_type)
-
-
-func die():
-	clear_tiles()
-	for child in G.world.objects.get_children():
-		if child.get("tile_type") and child != self:
-			if child.translation == translation:
-				child.update_tiles()
-	.die()
-
-
-func clear_tiles():
-	G.world.set_tile_at(translation, -1)
-
+func rid(node_name):
+	var node = get_node(node_name)
+	if node != null and is_instance_valid(node):
+		node.queue_free()
+		if has_node("StaticBody/"+node_name):
+			get_node("StaticBody/"+node_name).queue_free()
+			return true
+	return false
 
 func get_spawnpoint(idx):
 	return $Spawn.get_child(idx).global_transform.origin

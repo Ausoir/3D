@@ -37,15 +37,14 @@ func on_make():
 		G.cmds(onmake, self)
 
 
-func on_hit(pos, _hitter, damage=1, tags=[]):
-	if "demolish" in tags:
-		if "defense" in properties:
-			damage -= G.roll(properties.defense)
-		if damage > 0:
-			G.make_particle("splinter", pos, 1)
-			damage(damage)
-		else:
-			G.make_particle("spark", pos, 1)
+func on_hit(pos, _hitter, damage=1, _tags=[]):
+	if "defense" in properties:
+		damage -= G.roll(properties.defense)
+	if damage > 0:
+		G.make_particle("splinter", pos, 1)
+		damage(damage)
+	else:
+		G.make_particle("spark", pos, 1)
 
 
 func trigger(_arg):

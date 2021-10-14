@@ -4,7 +4,7 @@
 [ext_resource path="res://assets/textures/cobble.png" type="Texture" id=2]
 
 [resource]
-albedo_color = Color( 0.768627, 0.768627, 0.768627, 1 )
+albedo_color = Color( 0.462745, 0.462745, 0.462745, 1 )
 albedo_texture = ExtResource( 2 )
 normal_enabled = true
 normal_scale = 4.0

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scaffold_medium_railing.obj-930dd91309497aff5029cfdefe4c0d5d.mesh"
+
+[deps]
+
+files=[ "res://.import/scaffold_medium_railing.obj-930dd91309497aff5029cfdefe4c0d5d.mesh" ]
+
+source_file="res://assets/models/buildings/scaffold_medium_railing.obj"
+dest_files=[ "res://.import/scaffold_medium_railing.obj-930dd91309497aff5029cfdefe4c0d5d.mesh", "res://.import/scaffold_medium_railing.obj-930dd91309497aff5029cfdefe4c0d5d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

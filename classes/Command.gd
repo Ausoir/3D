@@ -87,7 +87,8 @@ func run(args):
 		elif args[1] == "onswing":
 			host.onswing = args[2]
 	elif args[0] == "alert":
-		for unit in G.world.get_units_near(args[1], args[2]):
+		var nearby_units = G.world.get_units_near(args[1], args[2])
+		for unit in nearby_units:
 			unit.hear(args[1])
 	elif args[0] == "setwork":
 		host.set_work(args[1])
@@ -100,9 +101,9 @@ func run(args):
 	elif args[0] == "make":
 		var newitem = G.factory.make(args[1])
 		if tgt is Transform:
-			newitem.transform = tgt
+			newitem.transform = tgt.translated(newitem.translation)
 		elif tgt is Vector3:
-			newitem.transform.origin = tgt
+			newitem.translate(tgt)
 		if len(args) > 2:
 			G.factions[args[2]].add(newitem)
 		G.world.objects.add_child(newitem)

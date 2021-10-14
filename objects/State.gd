@@ -11,10 +11,16 @@ func _init(phost, ptype, plifetime):
 		particle = G.make_particle("repair", host.global_transform.origin, 9999)
 	elif name == "haste":
 		particle = G.make_particle("repair", host.global_transform.origin, 9999)
+	elif name == "light":
+		particle = G.make_particle("light", host.global_transform.origin, 9999)
+	elif name == "night vision":
+		G.world.get_node("WorldEnvironment").environment.set_ambient_light_energy(1)
 	lifetime = plifetime
 
 
 func die():
+	if name == "night vision":
+		G.world.get_node("WorldEnvironment").environment.set_ambient_light_energy(0)
 	if particle and is_instance_valid(particle):
 		particle.queue_free()
 
@@ -25,10 +31,9 @@ func update(second):
 	elif name == "slowfall":
 		if host.velocity.y < 0:
 			host.velocity.y *= .7
-
+	if particle:
+		particle.transform.origin = host.global_transform.origin
 	if second:
-		if particle:
-			particle.transform.origin = host.global_transform.origin
 		if name == "work":
 			host.work -= 1
 		if lifetime < 999999:

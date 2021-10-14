@@ -1,6 +1,7 @@
 extends Spatial
 
 const BLOCK = 4
+const HALFBLOCK = 2
 const particles = {
 	"blood": preload("res://assets/particles/Blood.tscn"),
 	"dust": preload("res://assets/particles/Dust.tscn"),
@@ -8,6 +9,8 @@ const particles = {
 	"splinter": preload("res://assets/particles/Splinter.tscn"),
 	"repair": preload("res://assets/particles/Repair.tscn"),
 	"spark": preload("res://assets/particles/Spark.tscn"),
+	"light": preload("res://assets/particles/Light.tscn"),
+	"debug": preload("res://assets/particles/Debug.tscn"),
 }
 const Command = preload("res://classes/Command.gd")
 const Faction = preload("res://classes/Faction.gd")
@@ -27,7 +30,7 @@ var factions = [
 ]
 var frame = 0
 
-var rng = RandomNumberGenerator.new()
+var rng = preload("res://classes/Random.gd").new()
 
 
 func _init():
@@ -71,10 +74,11 @@ func make_particle(arg, pos, lifetime):
 
 
 func rid(arg, remove=true):
-	if arg.get_parent() == world.objects:
-		world.objects.remove_child(arg)
-		if remove:
-			arg.queue_free()
+	if world != null and is_instance_valid(world):
+		if arg.get_parent() == world.objects:
+			world.objects.remove_child(arg)
+			if remove:
+				arg.queue_free()
 
 
 func drop(arg, exc):

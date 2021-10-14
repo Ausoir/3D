@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://objects/Particle.gd" type="Script" id=1]
+
+[sub_resource type="Curve" id=5]
+_data = [ Vector2( 0, 0 ), 0.0, 7.14123, 0, 0, Vector2( 0.509434, 0.986364 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), -7.50525, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=6]
+curve = SubResource( 5 )
+
+[sub_resource type="ParticlesMaterial" id=7]
+direction = Vector3( 0, 1, 0 )
+spread = 90.0
+gravity = Vector3( 0, 1, 0 )
+angle_random = 1.0
+scale = 2.0
+scale_random = 1.0
+scale_curve = SubResource( 6 )
+
+[sub_resource type="SpatialMaterial" id=8]
+flags_unshaded = true
+params_diffuse_mode = 4
+params_specular_mode = 4
+
+[sub_resource type="SphereMesh" id=4]
+material = SubResource( 8 )
+radius = 0.3
+height = 0.6
+radial_segments = 32
+rings = 16
+
+[node name="Particle" type="Particles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+amount = 3
+lifetime = 3.0
+fract_delta = false
+process_material = SubResource( 7 )
+draw_pass_1 = SubResource( 4 )
+script = ExtResource( 1 )

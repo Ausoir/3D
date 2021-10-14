@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scaffold_small_medium_long.obj-280342b41b0ab23036345d4b32c231dc.mesh"
+
+[deps]
+
+files=[ "res://.import/scaffold_small_medium_long.obj-280342b41b0ab23036345d4b32c231dc.mesh" ]
+
+source_file="res://assets/models/buildings/scaffold_small_medium_long.obj"
+dest_files=[ "res://.import/scaffold_small_medium_long.obj-280342b41b0ab23036345d4b32c231dc.mesh", "res://.import/scaffold_small_medium_long.obj-280342b41b0ab23036345d4b32c231dc.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

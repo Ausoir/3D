@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/bookcase.obj-62516ff2cb40eb149ad201b5dcb26baa.mesh"
+
+[deps]
+
+files=[ "res://.import/bookcase.obj-62516ff2cb40eb149ad201b5dcb26baa.mesh" ]
+
+source_file="res://assets/models/buildings/bookcase.obj"
+dest_files=[ "res://.import/bookcase.obj-62516ff2cb40eb149ad201b5dcb26baa.mesh", "res://.import/bookcase.obj-62516ff2cb40eb149ad201b5dcb26baa.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

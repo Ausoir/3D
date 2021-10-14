@@ -38,36 +38,25 @@ func update_target(has_target, thought=false):
 	var unit_pos = unit.get_interact_position()
 	var target_pos = target.get_interact_position()
 	if not reach_to(unit_pos, target_pos):
-		path_to(len(pilot.tasks) == 0 or thought, unit_pos, target_pos)
+		path_to(thought, unit_pos, target_pos)
 
 
 func reach_to(unit_pos, target_pos):
-	var collision = G.space.intersect_ray(unit_pos, target_pos, [], 0b00000000000000100101)
-	if not collision and abs(unit_pos.y - target_pos.y) < 2:
-		var dir = unit_pos.direction_to(target_pos)
-		dir.y = 0
-		var front = unit_pos + dir
-		var land_collision = G.space.intersect_ray(front, unit_pos+(dir*3)+Vector3(1.5,-6,0), [unit])
-		if land_collision and abs(unit.get_position().y - land_collision.position.y) < .2:
-			land_collision = G.space.intersect_ray(front, unit_pos+(dir*3)+Vector3(-1.5,-6,0), [unit])
-			if land_collision and abs(unit.get_position().y - land_collision.position.y) < .2:
-				land_collision = G.space.intersect_ray(front, unit_pos+(dir*3)+Vector3(0,-6,-1.5), [unit])
-				if land_collision and abs(unit.get_position().y - land_collision.position.y) < .2:
-					land_collision = G.space.intersect_ray(front, unit_pos+(dir*3)+Vector3(0,-6,1.5), [unit])
-					if land_collision and abs(unit.get_position().y - land_collision.position.y) < .2:
-						state = \"hunt\"
-						pilot.set_task([\"move\", 9999, target_pos, 0])
-						return true
-		pilot.set_task()
+	var collision = G.space.intersect_ray(unit_pos, target_pos, [target, unit], 0b00000000000000100101)
+	if not collision:
+		if abs(unit_pos.y - target_pos.y) < 2:
+			var dir = unit_pos.direction_to(target_pos)
+			dir.y = 0
+			state = \"hunt\"
+			pilot.set_task([\"move\", 9999, target_pos, 0])
+			return true
 
 
 func path_to(repath, from, to):
 	var path
-	if repath:
+	if repath or len(pilot.tasks) == 0:
 		pathing.result = []
 		path = pathing.update(from, to)
-	else:
-		path = pathing.update_nodes(from)
 	if path:
 		state = \"path\"
 		pilot.set_task([\"idle\", 0])
@@ -78,18 +67,11 @@ func path_to(repath, from, to):
 
 func unstuck():
 	state = \"stuck\"
-	var unit_pos = unit.get_interact_position()
 	var target_pos = target.get_interact_position()
-	var collision = G.space.intersect_ray(unit_pos, target_pos, [unit, target], 32)
-	if collision and is_instance_valid(collision.collider) and (collision.collider is StaticBody or collision.collider is KinematicBody):
-		var col_faction = collision.collider.get_parent().get(\"faction\")
-		if collision and col_faction and !pilot.get_team().is_ally(col_faction):
-			pilot.set_task([\"attack\", 9999, collision.position])
-			return
-	var building = G.world.get_item_type_at(\"building\", unit.get_interact_position(), 6)
-	if building:
-		pilot.set_task([\"attack\", 9999, building.global_transform.origin])
+	if G.rng.randi_range(0,1) == 0:
+		pilot.set_task([\"attack\", 9999, target_pos])
 	else:
+		var unit_pos = unit.get_interact_position()
 		var strafe = unit_pos.cross(target_pos) * (40 * rng.randi_range(0, 1) - 20)
 		pilot.set_task([\"move\", rng.randi_range(20, 40), unit_pos + strafe, 0])
 
@@ -143,19 +125,21 @@ func _physics_process(_delta):
 			else:
 				target = null
 		if frame % 20 == 0:
-			if frame % 120 == 0:
+			if state == \"stuck\":
+				if (unit.get_position() - last_pos).length() > 1.7:
+					state = \"idle\"
+				else:
+					pilot.set_task([\"attack\", 9999, target.get_position()])
+			elif frame % 120 == 0:
 				if frame >= 240 or !has_target:
 					frame = 0
 					perceive()
 					update_target(has_target, true)
 				elif has_target:
 					var new_pos = unit.get_position()
-					if (new_pos - last_pos).length() < 2:
+					if (new_pos - last_pos).length() < 1.7:
 						unstuck()
 					last_pos = new_pos
-			elif state == \"stuck\":
-				if (unit.get_position() - last_pos).length() > 2:
-					state = \"idle\"
 			else:
 				update_target(has_target, false)
 "

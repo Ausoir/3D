@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Game"
-run/main_scene="res://Dungeon.tscn"
+run/main_scene="res://world/Dungeon.tscn"
 config/icon="res://icon.png"
 
 [autoload]

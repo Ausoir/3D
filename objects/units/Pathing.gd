@@ -1,6 +1,9 @@
 class_name Pathing
 
 
+const BLOCK = 2
+const HALFBLOCK = BLOCK / 2
+const ORTHO = [Vector3(-BLOCK-HALFBLOCK,0,0),Vector3(BLOCK+HALFBLOCK,0,0),Vector3(0,0,-BLOCK-HALFBLOCK),Vector3(0,0,BLOCK+HALFBLOCK)]
 var target
 var pathing_length = 16
 var pathing_times = 8
@@ -76,23 +79,10 @@ func iterate(node):
 
 
 func reset(hostpos):
-	heuristic_threshold = (hostpos - target).length() * 2 + 4
+	#heuristic_threshold = (hostpos - target).length() * 2 + 4
 	open = [pathnode.new(null, hostpos)]
 	closed = []
 	closest = open[0]
-
-
-func debug_trace():
-	for draw in open:
-		G.make_particle("smoke", to_tile_pos(draw.pos), 3)
-
-
-func to_tile_coord(vec):
-	return world.tilemap.world_to_map(vec)
-
-
-func to_tile_pos(vec):
-	return world.tilemap.map_to_world(vec.x, vec.y, vec.z)
 
 
 func update(hostposv, targetv):	
@@ -112,7 +102,8 @@ func update(hostposv, targetv):
 					break
 			else:
 				break
-		#debug_trace()
+		#for draw in open:
+		#	G.make_particle("smoke", to_tile_pos(draw.pos), 3)
 		if not done and next_reset > pathing_times: #Out of reach
 			done = closest
 		if done:
@@ -126,6 +117,11 @@ func update(hostposv, targetv):
 				result.insert(0, to_tile_pos(done.pos))
 		return result
 
+func to_tile_coord(vec):
+	return ((vec + Vector3(HALFBLOCK,0,HALFBLOCK)) / BLOCK).floor()
+
+func to_tile_pos(vec):
+	return vec * BLOCK + Vector3(HALFBLOCK,0,HALFBLOCK)
 
 func update_nodes(hostposv):
 	var done = closest
@@ -137,20 +133,32 @@ func update_nodes(hostposv):
 				done.parent = null
 				break
 			done = done.parent
-			#G.make_particle("smoke", to_tile_pos(done.pos), 3)
+			#G.make_particle("debug", to_tile_pos(done.pos), 3)
 			result.insert(0, to_tile_pos(done.pos))
 		return result
 
 
 func get_routes(pos):
-	var sender = world.tilemap.get_cell_item(pos.x, pos.y, pos.z)
-	var ways = routes_check_send(sender, pos)
-	var r = []
-	for way in ways:
-		var route = routes_check_receive(pos, way)
-		if route:
-			r.append(route)
-	return r
+	var ways = []
+	var vec = Vector3(pos.x*BLOCK, 2, pos.z*BLOCK)
+	if check_ray(vec, ORTHO[0]):
+		ways.append(pos + Vector3.LEFT)
+	if check_ray(vec, ORTHO[1]):
+		ways.append(pos + Vector3.RIGHT)
+	if check_ray(vec, ORTHO[2]):
+		ways.append(pos + Vector3.FORWARD)
+	if check_ray(vec, ORTHO[3]):
+		ways.append(pos + Vector3.BACK)
+	return ways
+
+func check_ray(vec, add):
+	var added = vec + add
+	var r = G.space.intersect_ray(vec, added, [], 0b00000000000000100001)
+	return r.empty()
+
+func get_routes_debug(vec):
+	var pos = to_tile_coord(vec)
+	return str(get_routes(pos)) + " : " + str(pos)
 
 
 func get_direction_routes(orientation, open_type):
@@ -228,6 +236,8 @@ func routes_check_receive(pos, direction):
 		for route in routes:
 			if receive_direction[0] == route[0] and receive_direction[2] == route[2]:
 				return newpos
+	elif world.tilemap.is_wall(receiver):
+		return
 	elif world.tilemap.is_climbable(receiver):
 		var tile_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
 		if (tile_orientation == 0 and direction==[0,0,-1]) or\
