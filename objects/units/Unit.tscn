@@ -67,6 +67,7 @@ var helm
 var level = 1
 var armors = {}
 var health = Vector2(5, 5)
+var cast = 0
 
 
 func _ready():
@@ -81,6 +82,7 @@ func set_state(arg=\"move\", force=false):
 	if state != arg:
 		if !state_lock or force:
 			if state != \"death\":
+				cast = 0
 				if arg == \"move\":
 					anim_tree[\"parameters/state/current\"] = 0
 				elif arg in hardstate_map:
@@ -183,6 +185,11 @@ func _physics_process(delta):
 	global_transform.basis = orientation.basis
 
 
+func on_cast():
+	cast += 1
+	G.message(cast)
+
+
 func on_anim_finish():
 	state_lock = false
 	get_parent().task_timer = 0
@@ -217,6 +224,7 @@ func set_weapon(item):
 		G.world.objects.add_child(weapon)
 		G.drop(weapon, [self, weapon])
 		weapon = null
+		update_stats()
 		return weapon
 	elif item != null:
 		if weapon:
@@ -235,10 +243,7 @@ func set_weapon(item):
 			hitbox.set_shape(hitshape)
 			hitbox.set_collision_mask(0b00000000000000000111)
 			hitbox.set_exclude([self])
-			if \"speed\" in weapon.properties:
-				anim_tree[\"parameters/attack speed/scale\"] = weapon.properties.speed
-			else:
-				anim_tree[\"parameters/attack speed/scale\"] = 1
+			update_stats()
 
 func set_armor(arg):
 	var data = arg.properties
@@ -248,9 +253,6 @@ func set_armor(arg):
 			remove_child(oldarmor)
 		G.world.objects.add_child(oldarmor)
 		oldarmor.transform.origin = get_position()
-		if \"health\" in oldarmor.properties:
-			health.x -= oldarmor.properties.health
-			health.y -= oldarmor.properties.health
 	if arg.holder == self:
 		set_weapon(null)
 	G.rid(arg, false)
@@ -260,14 +262,31 @@ func set_armor(arg):
 	else:
 		body_mesh.set_surface_material(skin_map[data.part], data.skin)
 	armors[data.part] = arg
-	if \"health\" in data:
-		health.x += data.health
-		health.y += data.health
-	health.x = max(1, health.x)
+	update_stats()
 
-func set_special(ptype, pscale):
+func update_stats():
+	var m_attack_speed = 1
+	var m_cast_speed = 1
+	var m_move_speed = 4
+	var m_health = 5
+	var equipments = armors.values()
+	if weapon != null:
+		equipments += [weapon]
+	for item in equipments:
+		if \"health\" in item.properties:
+			m_health += item.properties.health
+		if \"speed\" in item.properties:
+			m_attack_speed -= item.properties.speed
+		if \"weight\" in item.properties:
+			m_cast_speed -= item.properties.weight
+			m_move_speed -= item.properties.weight
+	anim_tree[\"parameters/cast speed/scale\"] = m_cast_speed
+	anim_tree[\"parameters/attack speed/scale\"] = m_attack_speed
+	move_speed.y = m_move_speed
+	health.y = m_health
+
+func set_special(ptype):
 	anim_tree[\"parameters/cast type/current\"] = ptype
-	anim_tree[\"parameters/cast speed/scale\"] = pscale
 
 func on_hit(pos, hitter, damage, tags):
 	if !(\"penetrate\" in tags):
@@ -568,7 +587,7 @@ nodes/swing/node = SubResource( 31 )
 nodes/swing/position = Vector2( -700, -140 )
 nodes/work/node = SubResource( 32 )
 nodes/work/position = Vector2( -140, 200 )
-node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "lunge", 0, "movement", "lunge", 1, "attack speed", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "attack speed", 0, "attack", "cast speed", 0, "cast type", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation" ]
+node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "attack speed", 0, "attack", "cast speed", 0, "cast type", "lunge", 0, "movement", "lunge", 1, "attack speed" ]
 
 [sub_resource type="RayShape" id=34]
 length = 0.2
@@ -3816,6 +3835,23 @@ tracks/22/loop_wrap = true
 tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 0.833333, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
+tracks/23/type = "method"
+tracks/23/path = NodePath(".")
+tracks/23/interp = 1
+tracks/23/loop_wrap = true
+tracks/23/imported = false
+tracks/23/enabled = true
+tracks/23/keys = {
+"times": PoolRealArray( 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "on_cast"
+}, {
+"args": [  ],
+"method": "on_cast"
+} ]
+}
 
 [sub_resource type="Animation" id=63]
 length = 0.833333
@@ -3980,6 +4016,23 @@ tracks/22/loop_wrap = true
 tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 0.833333, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
+tracks/23/type = "method"
+tracks/23/path = NodePath(".")
+tracks/23/interp = 1
+tracks/23/loop_wrap = true
+tracks/23/imported = false
+tracks/23/enabled = true
+tracks/23/keys = {
+"times": PoolRealArray( 0.4, 0.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"values": [ {
+"args": [  ],
+"method": "on_cast"
+}, {
+"args": [  ],
+"method": "on_cast"
+} ]
+}
 
 [sub_resource type="Animation" id=64]
 length = 2.5

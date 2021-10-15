@@ -154,21 +154,4 @@ func run(args):
 		var pos = args[2]
 		var ortho = [Vector3.LEFT,Vector3.RIGHT,Vector3.FORWARD,Vector3.BACK][args[3]]
 		return G.cmds([["t",pos],["tilespace",false],["t",Transform().translated(pos).looking_at(ortho+pos, Vector3.UP)],["make",args[1]]], null)
-	elif args[0] == "prepare":
-		return G.cmds([["t",tgt],["tilespace",true],["t",tgt],["getobj","object"],["damage",9],["t",tgt],["blueprint", args[1], args[2]]], host)
-	elif args[0] == "blueprint":
-		var blueprint = G.factory.make_blueprint(args[1], args[2])
-		G.world.objects.add_child(blueprint)
-		var face = host.global_transform.basis.z
-		if face.x > .7 and abs(face.z) <= .7:
-			blueprint.look_at(Vector3.LEFT, Vector3.UP)
-		elif abs(face.x) <= .7 and face.z > .7:
-			blueprint.look_at(Vector3.FORWARD, Vector3.UP)
-		elif face.x < -.7 and abs(face.z) <= .7:
-			blueprint.look_at(Vector3.RIGHT, Vector3.UP)
-		elif abs(face.x) <= .7 and face.z < -.7:
-			blueprint.look_at(Vector3.BACK, Vector3.UP)
-		blueprint.orthonormalize()
-		blueprint.transform.origin = tgt
-		return blueprint
 	return tgt

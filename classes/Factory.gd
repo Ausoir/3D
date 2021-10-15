@@ -1,6 +1,5 @@
 const WORK_DELAY = 5
 const Item_Script = preload("res://objects/Item.gd")
-const Blueprint = preload("res://assets/materials/mat_blueprint.tres")
 const Despawn = preload("res://assets/materials/mat_despawn.tres")
 const Progress = preload("res://interface/progress_bar.tscn")
 const Status = preload("res://objects/Status.gd")
@@ -64,11 +63,11 @@ const data = {
 	"club": ["item", preload("res://assets/models/club.obj"),
 		{onswing=[["swing", 9999]]}, {damage="2d4", speed=.8, tags=["blunt"]}],
 	"mace": ["item", preload("res://assets/models/mace.obj"),
-		{onswing=[["swing", 9999]]}, {damage="2d8", speed=.8, tags=["blunt"]}],
+		{onswing=[["swing", 9999]]}, {damage="2d8", speed=.8,weight=1, tags=["blunt"]}],
 	"greatmace": ["item", preload("res://assets/models/greatmace.obj"),
-		{onswing=[["swing", 9999]]}, {damage="2d12", speed=.6, tags=["blunt"]}],
+		{onswing=[["swing", 9999]]}, {damage="2d12", speed=.6,weight=1, tags=["blunt"]}],
 	"warhammer": ["item", preload("res://assets/models/warhammer.obj"),
-		{onswing=[["swing", 9999]]}, {damage="3d6", speed=.6, tags=["blunt"]}],
+		{onswing=[["swing", 9999]]}, {damage="3d6", speed=.6,weight=1, tags=["blunt"]}],
 	"conesword": ["item", preload("res://assets/models/shortsword_cone.obj"),
 		{onswing=[["swing", 9999]]}, {damage="2d6", speed=1.5, tags=["cut"]}],
 	"feather blade": ["item", preload("res://assets/models/shortsword_unique.obj"),
@@ -79,25 +78,25 @@ const data = {
 	"casual wear": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{part="armor",skin=preload("res://assets/materials/mat_cloth.tres")}],
 	"leather armor": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{defense=3,weight=1, part="armor",skin=preload("res://assets/materials/mat_dirt.tres")}],
+		{defense=3,weight=.1, part="armor",skin=preload("res://assets/materials/mat_dirt.tres")}],
 	"iron armor": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{defense=5,weight=3, part="armor",skin=preload("res://assets/materials/mat_metal.tres")}],
+		{defense=5,weight=.3, part="armor",skin=preload("res://assets/materials/mat_metal.tres")}],
 	"leather gloves": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=1, part="arms",skin=preload("res://assets/materials/mat_dirt.tres")}],
 	"iron gauntlets": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{defense=2,weight=1, part="arms",skin=preload("res://assets/materials/mat_metal.tres")}],
+		{defense=2,weight=.1, part="arms",skin=preload("res://assets/materials/mat_metal.tres")}],
 	"shoes": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{part="legs",skin=preload("res://assets/materials/mat_cloth.tres")}],
 	"leather boots": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=1, part="legs",skin=preload("res://assets/materials/mat_dirt.tres")}],
 	"iron boots": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{defense=2,weight=1, part="legs",skin=preload("res://assets/materials/mat_metal.tres")}],
+		{defense=2,weight=.1, part="legs",skin=preload("res://assets/materials/mat_metal.tres")}],
 	"headband": ["item", preload("res://assets/models/headband.obj"), {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{health=20, part="head"}],
 	"helmet": ["item", preload("res://assets/models/helmet.obj"), {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{defense=1,weight=1, part="head"}],
+		{defense=1,weight=.1, part="head"}],
 	"full helmet": ["item", preload("res://assets/models/fullhelm.obj"), {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{defense=2,weight=2, part="head"}],
+		{defense=2,weight=.2, part="head"}],
 	"amulet of protection": ["item", {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=2, part="accessory"}],
 
@@ -144,28 +143,20 @@ onready var craftables = {
 				[["v","host"],["state","work",9999],["setwork",3,"Deconstructing..."],["oncall","onwork",[["v","host"],["die"]]]]
 			]]
 		]]]]],
-		["Build Bedroom", [1,0], [["v","usepos"],["v","snap"], ["prepare","bed",2],["!if",null],["claim"],["cost",1,0]]],
-		["Build Room", [1,0,["bed"]], [["v","usepos"],["v","snap"], ["prepare","room",2,1],["!if",null],["claim"],["cost",1,0]]],
-		["Build Camp", [1,0,["farm"]], [["v","usepos"],["v","snap"], ["prepare","camp",2,0]]],
-		["Build Kitchen", [1,0,["farm"]], [["v","usepos"],["v","snap"], ["prepare","kitchen",2,0]]],
-		["Build Workshop", [1,0,["bed"]], [["v","usepos"],["v","snap"], ["prepare","workshop",2,0]]],
-		["Wield Katana", [1,0], [["make","katana"],["wield"],["cost",1,0]]],
+		["Wield Lamp", [1,0], [["make","lantern"],["wield"],["cost",1,0]]],
 		["Wield Wakizashi", [1,0], [["make","wakizashi"],["wield"],["cost",1,0]]],
 		["Wield Saber", [1,0], [["make","saber"],["wield"],["cost",1,0]]],
 		["Wield scimitar", [1,0], [["make","scimitar"],["wield"],["cost",1,0]]],
 		["Wield Warhammer", [1,0], [["make","warhammer"],["wield"],["cost",1,0]]],
-		["Wield Shovel", [1,0], [["make","shovel"],["wield"],["cost",1,0]]],
 		["Wield Pickaxe", [1,0], [["make","pickaxe"],["wield"],["cost",1,0]]],
-		["Wield Trident", [1,0], [["make","trident"],["wield"],["cost",1,0]]],
 		["Wield Halberd", [1,0], [["make","halberd"],["wield"],["cost",1,0]]],
-		["Wield Glaive", [1,0], [["make","glaive"],["wield"],["cost",1,0]]],
-		["Wield Lamp", [1,0], [["make","lantern"],["wield"],["cost",1,0]]],
 		["Equip Iron Suit", [1,0], [["make","iron armor"],["equip"], ["make","iron gauntlets"],["equip"], ["make","iron boots"],["equip"]]],
 		["Equip Head", [1,0], [["make","full helmet"],["equip"],["cost",1,0]]],
 		["Equip Head2", [1,0], [["make","helmet"],["equip"],["cost",1,0]]],
 		["Spawn Friend", [1,0], [["v","pos"], ["spawn","warrior"], ["claim"]]],
 		["Spawn Enemy", [1,0], [["v","pos"], ["spawn","soldier"], ["claim",2]]],
 		["Spawn Chest", [1,0], [["v","pos"], ["make","chest"], ["drop"]]],
+		["Ability Debug", [1,0], [["v","host"],["v","parent"],["ability","debug"]]],
 		["Ability Flurry", [1,0], [["v","host"],["v","parent"],["ability","flurry"]]],
 		["Ability Charge", [1,0], [["v","host"],["v","parent"],["ability","charge"]]],
 	],
@@ -203,31 +194,6 @@ func make_unit(arg):
 	var rot = G.rng.randf() * PI
 	unit.rotate_y(rot)
 	unit.view_z = unit.view_z.rotated(Vector3.UP, rot)
-	return r
-
-
-func make_blueprint(arg, worktime):
-	var item = data[arg]
-	var r
-	if item[1] is Mesh:
-		r = Type_Object.instance()
-		r.mesh = item[1]
-		r.set_material_override(Blueprint)
-	else:
-		r = item[1].instance()
-		for child in r.get_children():
-			if child is MeshInstance:
-				child.set_material_override(Blueprint)
-			elif child is StaticBody:
-				child.set_collision_layer(0b00000000000000000100)
-				child.set_collision_mask(0)
-	r.set_progress_bar()
-	r.item_type = "object"
-	r.item_name = arg
-	r.set_work(worktime)
-	r.health = Vector2(1, 1)
-	r.onuse = [["work", WORK_DELAY]]
-	r.onwork = [["v","transform"], ["make", arg],["claim"], ["v","host"], ["die"]]
 	return r
 
 

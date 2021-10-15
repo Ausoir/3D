@@ -6,7 +6,7 @@
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
-const DGenerator = preload(\"res://classes/DungeonGenerator.gd\")
+const DGenerator = preload(\"res://world/DungeonGenerator.gd\")
 const dungeon_types = {
 	\"derelict\": [[\"defense\", \"living\", \"lab\", \"storage\"], [\"storage\"]]
 }
@@ -19,6 +19,7 @@ var rng = preload(\"res://classes/Random.gd\").new()
 var map_size = Vector2(0, 0)
 var pois = {\"torch\":[],
 			\"camps\":[]}
+var dungeon_map
 var spawnpoints = []
 
 var aggro_turn = 0
@@ -35,7 +36,6 @@ func generate(dungeon_type):
 	print(rand_seed(123))
 	#rng.set_seed(21311)
 	tilemap.rng = rng
-	var dungeon_map
 	map_size = Vector2(20, 20)
 	$Ceiling.scale = Vector3(map_size.x*4, map_size.y*4, 1)
 	$Ceiling.translation.x = map_size.x*2
@@ -49,75 +49,69 @@ func generate(dungeon_type):
 		for z in range(map_size.y):
 			var biome = dungeon_map[z][x]
 			tilemap.set_cell_item(x, -1, z, tilemap.tileA)
-			if biome == 'W' or biome == 'D' or biome == '#' or biome == 'S':
-				tilemap.set_cell_item(x, 0, z, tilemap.tileB)
+			if biome == 'W' or biome == '#':
+				tilemap.set_cell_item(x, 0, z, tilemap.wall)
+			elif biome == '=':
+				tilemap.set_cell_item(x, 0, z, tilemap.window)
+			elif biome == 'D':
+				tilemap.set_cell_item(x, 0, z, tilemap.door)
 			elif biome == '^':
 				tilemap.set_cell_item(x, -1, z, tilemap.spike)
 
-	tilemap.autotile_map(Vector2.ZERO, map_size, 0)
+	tilemap.autotile_map(Vector2.ZERO, map_size, 0, true)
 
 	for x in range(map_size.x):
 		for z in range(map_size.y):
 			var biome = dungeon_map[z][x]
 			var room_objects = generator.objects[z][x]
-			if generator.biome[z][x] < .3 and x > 2 and x < map_size.x - 2 and z > 2 and z < map_size.y - 2:
-				var pos = Vector3(x, 0, z)
-				var vacant = true
-				for xx in range(-1, 2):
-					for zz in range(-1, 2):
-						if tilemap.get_cell_item(x+xx,-1,z+zz) == 999:
-							vacant = false
-				if vacant:
+			var dir = tilemap.get_cell_item_orientation(x, 0, z)
+			var tile = tilemap.get_cell_item(x,0,z)
+			if generator.biome[z][x] < .3:
+				if x > 2 and x < map_size.x - 2 and z > 2 and z < map_size.y - 2:
+					var vacant = true
 					for xx in range(-1, 2):
 						for zz in range(-1, 2):
-							tilemap.set_cell_item(x+xx,-1,z+zz,999)
-					if generator.biome[z][x] < .15:
-						build(\"derelict floor2\", pos)
-					else:
-						build(\"derelict floor\", pos)
-			if biome == 'D':
-				var dir = tilemap.get_cell_item_orientation(x, 0, z)
-				if x > 0 and x < map_size.x and z > 0 and z < map_size.y:
-					if !((dir == 16 or dir == 22) and tilemap.get_cell_item(x,0,z-1)!=-1 and tilemap.get_cell_item(x,0,z+1)!=-1) and\\
-						!((dir == 10 or dir == 0) and tilemap.get_cell_item(x-1,0,z)!=-1 and tilemap.get_cell_item(x+1,0,z)!=-1):
-						pass
-					elif (tilemap.get_cell_item(x-1,0,z)==-1 and tilemap.get_cell_item(x+1,0,z)==-1) or\\
-						(tilemap.get_cell_item(x,0,z-1)==-1 and tilemap.get_cell_item(x,0,z+1)==-1):
-						var fences = tilemap.fence_map.values()
-						if tilemap.get_cell_item(x-1,0,z) in fences or\\
-							tilemap.get_cell_item(x+1,0,z) in fences or\\
-							tilemap.get_cell_item(x,0,z-1) in fences or\\
-							tilemap.get_cell_item(x,0,z+1) in fences:
-							tilemap.set_cell_item(x, 0, z, tilemap.fencedoor, dir)
+							if tilemap.get_cell_item(x+xx,-1,z+zz) == 999:
+								vacant = false
+					if vacant:
+						for xx in range(-1, 2):
+							for zz in range(-1, 2):
+								tilemap.set_cell_item(x+xx,-1,z+zz,999)
+						if generator.biome[z][x] < .15:
+							build(\"derelict floor2\", Vector3(x, 0, z))
 						else:
-							tilemap.set_cell_item(x, 0, z, tilemap.door, dir)
-					else:
-						tilemap.set_cell_item(x, 0, z, tilemap.door, dir)
-						if dir == 16 or dir == 22:
-							tilemap.set_cell_item(x+1, 0, z, -1)
-							tilemap.set_cell_item(x-1, 0, z, -1)
-						else:
-							tilemap.set_cell_item(x, 0, z+1, -1)
-							tilemap.set_cell_item(x, 0, z-1, -1)
-						tilemap.autotile_map(Vector2(x-1,z-1), Vector2(x+1,z+1), 0)
-				var pos = Vector3(x, 0, z)
-				if !poi_near(pois.torch, pos, 5):
-					pois.torch.append(pos)
-					build(\"torch\", pos, dir)
-			elif biome == '#':
-				var tile = tilemap.get_cell_item(x,0,z)
-				if tile in tilemap.fence_map:
-					var fencetile = tilemap.fence_map[tile]
-					var dir = tilemap.get_cell_item_orientation(x, 0, z)
-					tilemap.set_cell_item(x,0,z,fencetile,dir)
-			elif biome == 'f':
+							build(\"derelict floor\", Vector3(x, 0, z))
+				if tile==tilemap.wallsingle:
+					tilemap.set_cell_item(x,0,z,tilemap.wallsingle2,dir)
+				elif tile==tilemap.wallend:
+					tilemap.set_cell_item(x,0,z,tilemap.wallend2,dir)
+				if biome == 'W' and rng.randi_range(0, 3) == 0:
+					build(\"scaffold\", Vector3(x, 0, z))
+			elif generator.biome[z][x] > .7:
+				if tile==tilemap.wall:
+					if generator.biome[z][x] > .8:
+						tilemap.set_cell_item(x,0,z,tilemap.wall2,dir)
+					elif generator.biome[z][x] > .75:
+						tilemap.set_cell_item(x,0,z,tilemap.wall3,dir)
+			if biome == 'f':
 				build(\"campfire\", Vector3(x, 0, z))
-			elif biome == 'S':
-				build(\"scaffold\", Vector3(x, 0, z))
+			elif biome == 'D' or biome == '=' or biome == '#':
+				var fences = tilemap.fence_map.values()
+				if (dungeon_map[z][x-1] == '#' or\\
+					dungeon_map[z][x+1] == '#' or\\
+					dungeon_map[z-1][x] == '#' or\\
+					dungeon_map[z+1][x] == '#') and tile in tilemap.fence_map:
+					tilemap.set_cell_item(x, 0, z, tilemap.fence_map[tile], dir)
 			elif biome == '?':
 				build(\"chest\", Vector3(x, 0, z))
 			elif biome == '!':
 				spawn(\"warrior\", Vector3(x, 0, z))
+			elif tile == tilemap.wall or tile == tilemap.door or tile == tilemap.fence or tile == tilemap.fencedoor:
+				if x > 1 and z > 1 and x < map_size.x-1 and z < map_size.y-1:
+					var pos = Vector3(x, 0, z)
+					if !poi_near(pois.torch, pos, 5):
+						pois.torch.append(pos)
+						build(\"torch\", pos, dir)
 			if room_objects != null:
 				var pos = Vector3(x, 0, z)
 				if room_objects[0] == \"torch\":
@@ -126,40 +120,11 @@ func generate(dungeon_type):
 						build(\"torch\", pos, room_objects[1])
 				else:
 					build(room_objects[0], pos, room_objects[1])
-	for room in generator.rooms:
-		if room[0] == \"end\":
-			for x in range(room[1].x, room[2].x+1):
-				for z in range(room[1].y, room[2].y+1):
-					tilemap.set_cell_item(x, -1, z, tilemap.tileB)
-					if tilemap.get_cell_item(x, 0, z) == tilemap.door:
-						spawnpoints.append(tilemap.map_to_world(x,5,z))
 
 	if spawnpoints:
-		var vec = spawnpoints.pop_front()
-		var pos = tilemap.world_to_map(vec)
-		if !poi_near(pois.torch, pos, 4):
-			pois.torch.append(pos)
-		$Units/Player/Pilot/Unit.transform.origin = vec
+		$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
 	else:
 		$Units/Player/Pilot/Unit.transform.origin = Vector3(map_size.x*2, 45, map_size.y*2)
-
-
-func generate_torches():
-	var POI_DISTANCE = 6
-	var gx = int(map_size.x / POI_DISTANCE)
-	var gz = int(map_size.y / POI_DISTANCE)
-	for x in range(gx):
-		for z in range(gz):
-			var ox = x * POI_DISTANCE + rng.randi_range(0, POI_DISTANCE-1)
-			var oz = z * POI_DISTANCE + rng.randi_range(0, POI_DISTANCE-1)
-			if tilemap.get_cell_item(ox, 0, oz) == tilemap.wall:
-				var pos = Vector3(ox, 0, oz)
-				if !poi_near(pois.torch, pos, 3):
-					pois.torch.append(pos)
-
-	for i in pois.torch:
-		var dir = tilemap.get_cell_item_orientation(i.x, i.y, i.z)
-		build(\"torch\", i, dir)
 
 
 func poi_near(arr, pos, radius):
@@ -240,9 +205,9 @@ func get_pos(vec):
 [sub_resource type="GDScript" id=2]
 script/source = "extends GridMap
 
+const tileset = preload(\"res://assets/meshlib_dungeon.tres\")
 const orientations = [0, 10, 16, 22]#Z-,Z+,X-,X+
-
-const autotile_dict = [
+const wall_autotile_map = [
 	[[1, 3, 5, -7], [1, -3, 5, 7], [1, 3, -5, 7], [-1, 3, 5, 7]],
 	[[1, -3, 5, 7], [1, 3, 5, -7], [-1, 3, 5, 7], [1, 3, -5, 7]],
 	[[1, -3, 5, -7], [1, -3, 5, -7], [-1, 3, -5, 7], [-1, 3, -5, 7]],
@@ -251,80 +216,182 @@ const autotile_dict = [
 	[[1, 3, 5, 7]],
 	[[-1, -3, -5, -7]],
 ]
-var tileset = preload(\"res://assets/meshlib_dungeon.tres\")
 var tileA = tileset.find_item_by_name(\"tile1\")
 var tileB = tileset.find_item_by_name(\"tile2\")
 var door = tileset.find_item_by_name(\"door\")
+var window = tileset.find_item_by_name(\"window1\")
 var wall = tileset.find_item_by_name(\"wall1\")
+var wall2 = tileset.find_item_by_name(\"wall2\")
+var wall3 = tileset.find_item_by_name(\"wall3\")
+var wallend = tileset.find_item_by_name(\"wallend1\")
 var wallend2 = tileset.find_item_by_name(\"wallend2\")
 var wallcorner = tileset.find_item_by_name(\"wallcorner\")
+var wallsingle = tileset.find_item_by_name(\"wallsingle1\")
+var wallsingle2 = tileset.find_item_by_name(\"wallsingle2\")
+var wallsplit = tileset.find_item_by_name(\"wallsplit\")
+var wallcross = tileset.find_item_by_name(\"wallcross\")
 var spike = tileset.find_item_by_name(\"spike\")
 var fence = tileset.find_item_by_name(\"fence\")
 var fencecorner = tileset.find_item_by_name(\"fencecorner\")
 var fencedoor = tileset.find_item_by_name(\"fencedoor\")
+var fencewindow = tileset.find_item_by_name(\"window2\")
 var walls = [
-	tileset.find_item_by_name(\"wallsplit\"),
+	wallsplit,
 	wall,
 	wall,
 	wallcorner,
-	tileset.find_item_by_name(\"wallend1\"),
-	tileset.find_item_by_name(\"wallcross\"),
-	tileset.find_item_by_name(\"wallsingle\"),
+	wallend,
+	wallcross,
+	wallsingle,
+]
+var doors = [
+	wallsplit,
+	door,
+	door,
+	wallcorner,
+	wallend,
+	wallcross,
+	wallsingle
+]
+var windows = [
+	wallsplit,
+	window,
+	window,
+	wallcorner,
+	wallend,
+	wallcross,
+	wallsingle
 ]
 var fence_map = {
 	wall: fence,
 	wallcorner: fencecorner,
-	door: fencedoor
+	door: fencedoor,
+	window: fencewindow,
 }
 
 var rng
 
-func is_landable(tile):
-	return tile != -1
-
-func is_climbable(_tile):
-	return false
-
-func is_wall(tile):
-	return tile != -1
-
-func is_tunnel(tile):
-	return tile == door
-
 func is_tile_named(tile, tilename):
 	return tile == tileset.find_item_by_name(tilename)
 
-func autotile_map(from, to, y):
+func autotile_map(from, to, y, is_border=false):
+	var item
+	var wall_autotiles = []
+	var door_autotiles = []
+	var window_autotiles = []
+	var autotile
+	for x in range(from.x, to.x+1):
+		for z in range(from.y, to.y+1):
+			item = get_cell_item(x, y, z)
+			if item == door:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					door_autotiles.append(autotile)
+			elif item == window:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					window_autotiles.append(autotile)
+			elif item == wall:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					wall_autotiles.append(autotile)
+	var updated_autotiles = []
+	var update_autotiles = []
+	for cell in wall_autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], walls[cell[3]], orientations[cell[4]])
+	for cell in door_autotiles:
+		var dir = orientations[cell[4]]
+		var doortile = doors[cell[3]]
+		var x = cell[0]
+		var z = cell[2]
+		if doortile == wallsplit or doortile == wallcross:
+			print(doortile,\" split at \",x,\",\",z)
+			set_cell_item(x,cell[1],z,door,dir)
+			if dir == 0:
+				if get_cell_item(x,cell[1],z+2) != -1:
+					updated_autotiles.append([x,cell[1],z+1,wallend,16])
+				else:
+					updated_autotiles.append([x,cell[1],z+1,-1,-1])
+				update_autotiles.append([Vector2(x-1,z+1), Vector2(x+1,z+2)])
+			elif dir == 10:
+				if get_cell_item(x,cell[1],z-2) != -1:
+					updated_autotiles.append([x,cell[1],z-1,wallend,22])
+				else:
+					updated_autotiles.append([x,cell[1],z-1,-1,-1])
+				update_autotiles.append([Vector2(x-1,z-2), Vector2(x+1,z-1)])
+			elif dir == 16:
+				if get_cell_item(x+2,cell[1],z) != -1:
+					updated_autotiles.append([x+1,cell[1],z,wallend,10])
+				else:
+					updated_autotiles.append([x+1,cell[1],z,-1,-1])
+				update_autotiles.append([Vector2(x+1,z-1), Vector2(x+2,z+1)])
+			elif dir == 22:
+				if get_cell_item(x-2,cell[1],z) != -1:
+					updated_autotiles.append([x-1,cell[1],z,wallend,0])
+				else:
+					updated_autotiles.append([x-1,cell[1],z,-1,-1])
+				update_autotiles.append([Vector2(x-2,z-1), Vector2(x-1,z+1)])
+		elif doortile == wallcorner:
+			updated_autotiles.append([x,cell[1],z,wallcorner,dir])
+			if dir == 0:
+				updated_autotiles.append([x-1,cell[1],z,door,0])
+				updated_autotiles.append([x,cell[1],z+1,door,22])
+			elif dir == 10:
+				updated_autotiles.append([x+1,cell[1],z,door,10])
+				updated_autotiles.append([x,cell[1],z-1,door,16])
+			elif dir == 16:
+				updated_autotiles.append([x+1,cell[1],z,door,0])
+				updated_autotiles.append([x,cell[1],z+1,door,16])
+			elif dir == 22:
+				updated_autotiles.append([x-1,cell[1],z,door,10])
+				updated_autotiles.append([x,cell[1],z-1,door,22])
+		else:
+			set_cell_item(cell[0], cell[1], cell[2], doors[cell[3]], dir)
+	for cell in window_autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], windows[cell[3]], orientations[cell[4]])
+	for cell in updated_autotiles:
+		if cell[3] == -1 and is_border:
+			if cell[0] == 0 or cell[0] == to.x:
+				set_cell_item(cell[0], cell[1], cell[2], wall, 16)
+				continue
+			elif cell[2] == 0 or cell[2] == to.y:
+				set_cell_item(cell[0], cell[1], cell[2], wall, 0)
+				continue
+		set_cell_item(cell[0], cell[1], cell[2], cell[3], cell[4])
+	for bounds in update_autotiles:
+		autotile_map_simple(bounds[0], bounds[1], y)
+
+func autotile_map_simple(from, to, y):
 	var item
 	var autotiles = []
 	var autotile
-	for x in range(from.x, to.x):
-		for z in range(from.y, to.y):
+	for x in range(from.x, to.x+1):
+		for z in range(from.y, to.y+1):
 			item = get_cell_item(x, y, z)
-			if item == tileB:
-				autotile = set_autotile(tileB, x, y, z, autotile_dict)
+			if item == wallsplit or item == wallcorner:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
 				if autotile:
 					autotiles.append(autotile)
 	for cell in autotiles:
 		set_cell_item(cell[0], cell[1], cell[2], walls[cell[3]], orientations[cell[4]])
 
-func set_autotile(compare, x, y, z, dict):
+func set_autotile(x, y, z, dict):
 	var adj = [-1, -2, -3, -4, -5, -6, -7, -8]
-	if get_cell_item(x+1, y, z) == compare:
+	if get_cell_item(x+1, y, z) != -1:
 		adj[0] *= -1
-	if get_cell_item(x+1, y, z+1) == compare:
+	if get_cell_item(x+1, y, z+1) != -1:
 		adj[1] *= -1
-	if get_cell_item(x, y, z+1) == compare:
+	if get_cell_item(x, y, z+1) != -1:
 		adj[2] *= -1
-	if get_cell_item(x-1, y, z+1) == compare:
+	if get_cell_item(x-1, y, z+1) != -1:
 		adj[3] *= -1
-	if get_cell_item(x-1, y, z) == compare:
+	if get_cell_item(x-1, y, z) != -1:
 		adj[4] *= -1
-	if get_cell_item(x-1, y, z-1) == compare:
+	if get_cell_item(x-1, y, z-1) != -1:
 		adj[5] *= -1
-	if get_cell_item(x, y, z-1) == compare:
+	if get_cell_item(x, y, z-1) != -1:
 		adj[6] *= -1
-	if get_cell_item(x+1, y, z-1) == compare:
+	if get_cell_item(x+1, y, z-1) != -1:
 		adj[7] *= -1
 	var count = 0
 	var orientation
@@ -396,7 +463,6 @@ environment = SubResource( 3 )
 
 [node name="OmniLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 11, 14, 15 )
-visible = false
 light_energy = 4.0
 light_bake_mode = 2
 

@@ -103,8 +103,9 @@ func _physics_process(_delta):
 		elif Input.is_action_just_pressed(\"item\"):
 			var pathing = Pathing.new(G.world)
 			var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
-			G.message(str(pathing.get_routes_debug(unit.get_interact_position())))
-			G.message(\"Dir:\"+str(G.world.tilemap.get_cell_item_orientation(pos.x, pos.y, pos.z))+\" Item:\"+str(G.world.tilemap.get_cell_item(pos.x, pos.y, pos.z)))
+			#G.message(str(pathing.get_routes_debug(unit.get_interact_position())))
+			var dir = G.world.tilemap.get_cell_item_orientation(pos.x, 0, pos.z)
+			G.message(\"Pos: \"+str(pos)+\" Item: \"+str(G.world.dungeon_map[pos.y][pos.z]) + \" Dir: \"+str(dir))
 			pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
 
 

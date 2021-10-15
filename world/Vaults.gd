@@ -1,11 +1,11 @@
 
-const walls = ['W', '#', 'S']
+const walls = ['W', '#', '=']
 const data = [
 	["WWWWWWWWW",
-	 "W.?..!..W",
-	 "W..W....W",
-	 "WW.WWWW#W",
-	 "W.!.....W",
+	 "W.?,!,..W",
+	 "W.,W,...W",
+	 "WW,WWW=WW",
+	 "W.!,,,..W",
 	 "WWW.WWWWW"],
 	["WWWWW##",
 	 "W.?W?.#",
@@ -13,37 +13,64 @@ const data = [
 	 "W..W..W",
 	 "W.!.!.W",
 	 "WWW.WWW"],
-	["WSSSSSW",
-	 "W?....W",
-	 "W.WDW.W",
-	 "W!#.#!W",
+	["WWWWWWW",
+	 "W?,,,,W",
+	 "W,WDW,W",
+	 "W!=.=!W",
 	 "WWW.WWW"],
-	["WWW.WWW",
-	 "W?!...W",
-	 "W!..f.D",
-	 "W?!...W",
-	 "WWWWWWW"],
+	["WWW,WWW",
+	 "W..,..W",
+	 ",,!f!,,",
+	 "W..,..W",
+	 "WWW,WWW"],
 	["WWWWW",
 	 "D!.!D",
 	 "D.?.D",
 	 "D!.!D",
 	 "WWWWW"],
+	["WWWWWWWWW",
+	 "W,.W,D,,=",
+	 "=.,D!Wf.W",
+	 "WWWWWWWWW"],
 	["#DWWWWW",
 	 "#..D.!W",
-	 "#..W!?W",
+	 "#..=!?W",
 	 "WWWWWWW"],
+	["W###W",
+	 "#...#",
+	 "#...#",
+	 "W###W"],
+	["W=#W",
+	 "#..=",
+	 "=..#",
+	 "W#=W"],
 	["#D##",
 	 "#.^#",
 	 "#^.#",
 	 "##D#"],
+	["WW=WWWDWWW#WW",
+	 "D...........D",
+	 "WWW#WWDWW=WWW"],
+	["WW=WW==WW=WW",
+	 "W..........W",
+	 "WWW=WWWW=WWW"],
+	["###########",
+	 "#...D^D...#",
+	 "###########"],
+	["###,,,,###",
+	 "#..!^^!..#",
+	 "###,,,,###"],
+	["WWWWW=WWW",
+	 "W.D.D.D.W",
+	 "WWW=WWWWW"],
 	["WWW.WWW",
-	 "W.D!D.W",
+	 "W.DfD.W",
 	 "W.###.W"],
 	["W###WW",
-	 ".D?..D",
+	 ".D?,,#",
 	 "W###WW"],
 	["WWW.W",
-	 "W.W.W",
+	 "=.D.=",
 	 "W.WWW"],
 	["#####",
 	 "D.^.D",
@@ -54,14 +81,23 @@ const data = [
 	["###",
 	 "#f#",
 	 "###"],
-	["###",
+	["W=W",
 	 "...",
+	 "W=W"],
+	["#W#",
+	 "=?=",
 	 "###"],
-	[".!.",
-	 ".!."],
-	[".^",
-	 "^."],
-	["W###W"],
+	["W...W",
+	 ",,W,,"],
+	["W=W",
+	 "W.W"],
+	[",,W",
+	 "W,,"],
+	[",!,",
+	 ",!,"],
+	[",^",
+	 "^,"],
+	["WW=WW"],
 	["W##W"],
 	["W#W"],
 	["###"],
@@ -114,14 +150,17 @@ func place_vault(rng, base, from, vault, startX, startY, flip, rot):
 					place_tile(base, startX + y, startY + x, vault[y][x], doors)
 				else:
 					place_tile(base, startX + x, startY + y, vault[y][x], doors)
-		for door in doors:
-			for i in range(-1, 2):
-				if base[door[1]][i + door[0]] in walls:
-					base[door[1]][i + door[0]] = '.'
-				if base[i + door[1]][door[0]] in walls:
-					base[i + door[1]][door[0]] = '.'
+		#for door in doors:
+	#		for i in range(-1, 2):
+	#			if base[door[1]][i + door[0]] in walls:
+	#				base[door[1]][i + door[0]] = '.'
+	#			if base[i + door[1]][door[0]] in walls:
+	#				base[i + door[1]][door[0]] = '.'
 
 func place_tile(base, x, y, val, doors):
+	#if val == 'D':
+	#	doors.append([x, y])
+#	else
 	if base[y][x] != 'D' or !(val in walls):
 		base[y][x] = val
 

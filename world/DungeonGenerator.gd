@@ -1,4 +1,4 @@
-extends "res://classes/Generator.gd"
+extends "res://world/Generator.gd"
 
 var vaults = preload("res://world/Vaults.gd").new()
 var biome
@@ -51,8 +51,8 @@ func make_rooms(departments):
 			sectors[s] = rng.rand_arr(fillpartments)
 
 	for room in rooms: #name, from, to, sector, door
+		print(room)
 		make_terrain(room)
-		continue
 		if room[3] == null: #halls
 			make_hall(room)
 		elif sectors[room[3]] == "living":
@@ -132,7 +132,7 @@ func make_hall(room):
 					objects[y][room[2].x] = ["torch", 22]
 
 func make_terrain(room):
-	if rng.randi_range(0, 1) >= 0:
+	if rng.randi_range(0, 3) > 0:
 		vaults.make_vault(rng, base, room[1], room[2])
 	else:
 		var size = room[2] - room[1]
@@ -152,7 +152,7 @@ func make_terrain(room):
 				gapy2 = max(1, gapy2)
 			for y in range(room[1].y+gapy+1, room[2].y-gapy2, gapry):
 				for x in range(room[1].x+gapx+1, room[2].x-gapx2, gaprx):
-					if base[y][x] != 'D' and !check_adjacent(x, y, 'D'):
+					if base[y][x] != 'D':
 						if rng.randi_range(1, 9) == 9:
 							base[y][x] = '#'
 						else:
