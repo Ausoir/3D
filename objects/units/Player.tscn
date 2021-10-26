@@ -1,11 +1,8 @@
-[gd_scene load_steps=3 format=2]
-
-[ext_resource path="res://objects/units/Pilot.tscn" type="PackedScene" id=1]
+[gd_scene load_steps=2 format=2]
 
 [sub_resource type="GDScript" id=1]
-script/source = "extends Spatial
+script/source = "extends \"res://objects/units/Pilot.gd\"
 
-# Constants
 const GRAVITY = Vector3()
 const CAMERA_X_ROT_MIN = deg2rad(-75)
 const CAMERA_X_ROT_MAX = deg2rad(40)
@@ -13,33 +10,43 @@ const CAMERA_X_ROT_MAX = deg2rad(40)
 # Mouse sensitivity
 export(float, 0.1, 1.0) var CAMERA_MOUSE_ROTATION_SPEED = 0.5
 
-# Instances ref
 onready var springarm = $CameraBase/SpringArm
 onready var camera = $CameraBase
-onready var pilot = $Pilot
-onready var unit = $Pilot/Unit
 
-# Variables (public members)
 var mouse_motion = Vector2()
 var mouse_captured = true
-var item_type = \"unit\"
-var target
+var id = 1
+var gold = 50
+var pathing = Pathing.new()
 
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	springarm.add_excluded_object(self)
-	unit.controller = self
-	unit.hit_glance = true
 	G.factions[1].add(self)
+	G.you = self
+
+func assign(punit):
+	.assign(punit)
 	unit.item_name = \"inquisitor\"
-	pilot.set_ability(\"debug\")
-	unit.set_armor(G.factory.make(\"casual wear\"))
-	unit.set_armor(G.factory.make(\"shoes\"))
+	unit.hit_glance = true
+	G.younit = unit
+	set_ability(\"debug\")
+	set_faction(1)
 
+func add_resource(p, message=true):
+	gold += p
+	if message:
+		G.ui.display_gather(p)
 
-func set_faction(faction):
-	pilot.faction = faction
+func require_resource(spend, pgold, message=true):
+	if gold - pgold >= 0:
+		if spend:
+			add_resource(-pgold, message)
+		return true
+	if spend and message:
+		G.message(\"Not enough gold!\")
+	return false
 
 
 func capture_mouse(mode = -1):
@@ -60,7 +67,6 @@ func _input(event):
 			camera.rotation.x += rot.y
 			camera.rotation.x = clamp(camera.rotation.x, CAMERA_X_ROT_MIN, CAMERA_X_ROT_MAX)
 		show_interactable_tip()
-			
 	if Input.is_action_just_pressed(\"restart\"):
 		print(\"Player._input:restart: \", get_tree().reload_current_scene())
 	elif Input.is_action_just_pressed(\"ui_fullscreen\"):
@@ -69,19 +75,21 @@ func _input(event):
 		capture_mouse()
 
 
-func _physics_process(_delta):
+func on_process(delta):
+	.on_process(delta)
 	var camera_basis = camera.global_transform.basis
 	var camera_z = camera_basis.z
 	var camera_x = camera_basis.x
 	camera_z.y = 0
 	camera_x.y = 0
-	unit.view_z = camera_z.normalized()
-	unit.view_x = camera_x.normalized()
+	if len(tasks) == 0:
+		unit.view_z = camera_z.normalized()
+		unit.view_x = camera_x.normalized()
 
 	var unit_pos = unit.transform.origin
 	var cam_pos = Vector2(unit_pos.x, unit_pos.z)
 	camera.transform.origin.x = cam_pos.x
-	camera.transform.origin.y = unit_pos.y+1.5
+	camera.transform.origin.y = unit_pos.y+6.5
 	camera.transform.origin.z = cam_pos.y
 	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5
 
@@ -90,36 +98,35 @@ func _physics_process(_delta):
 			Input.get_action_strength(\"move_back\") - Input.get_action_strength(\"move_front\")
 		)
 	if move_target != Vector2.ZERO:
-		pilot.set_task([\"moveto\", .001, move_target.x, move_target.y])
+		set_task([\"moveto\", .001, move_target.x, move_target.y])
 
 	if mouse_captured:
 		if Input.is_action_pressed(\"special\"):
-			pilot.set_task([\"special\", 1])
+			set_task([\"special\", 1])
 		elif Input.is_action_just_pressed(\"interact\"):
-			if G.ui.tooltip.visible:
-				pilot.set_task([\"interact\", 0])
-			else:
-				pilot.swing(unit.weapon)
+			swing(unit.weapon)
 		elif Input.is_action_just_pressed(\"item\"):
-			var pathing = Pathing.new(G.world)
-			var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
-			#G.message(str(pathing.get_routes_debug(unit.get_interact_position())))
-			var dir = G.world.tilemap.get_cell_item_orientation(pos.x, 0, pos.z)
-			G.message(\"Pos: \"+str(pos)+\" Item: \"+str(G.world.dungeon_map[pos.y][pos.z]) + \" Dir: \"+str(dir))
-			pilot.set_task([\"cmd\", 0, [[\"menu\", \"hand\"]], unit])
-
+			if G.ui.tooltip.visible:
+				set_task([\"interact\", 0])
+			else:
+				var tpathing = Pathing.new()
+				tpathing.height = unit.get_position().y+.2
+				var pos = G.world.tilemap.world_to_map(unit.get_interact_position())
+				G.message(str(tpathing.get_routes_debug(unit.get_interact_position())))
+				var dir = G.world.tilemap.get_cell_item_orientation(pos.x, 0, pos.z)
+				G.message(\"Pos: \"+str(pos)+\" Item: \"+str(G.world.dungeon_map[pos.y][pos.z]) + \" Dir: \"+str(dir))
+				set_task([\"cmd\", 0, [[\"menu\", \"hand\", id]]])
 
 func show_interactable_tip():
 	G.ui.set_tooltip(null)
-	if camera.rotation.x > 0:
-		var item = pilot.get_interactable()
-		if item:
-			if item.item_type == \"item\":
-				G.ui.set_tooltip(\"Pick up [\" + item.item_name.capitalize() + \"]\")
-			elif item.item_type == \"object\":
-				G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
-			elif item.item_type == \"building\":
-				G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
+	var item = get_interactable()
+	if item and unit.get_view_position().direction_to(item.global_transform.origin+Vector3(0,2,0)).dot(camera.global_transform.basis.z) > .7:
+		if item.item_type == \"item\":
+			G.ui.set_tooltip(\"Pick up [\" + item.item_name.capitalize() + \"]\")
+		elif item.item_type == \"object\":
+			G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
+		elif item.item_type == \"building\":
+			G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
 
 
 func on_hit(_pos, _hitter, _damage):
@@ -137,8 +144,6 @@ func hear(_vec):
 [node name="Player" type="Spatial"]
 script = SubResource( 1 )
 CAMERA_MOUSE_ROTATION_SPEED = 0.001
-
-[node name="Pilot" parent="." instance=ExtResource( 1 )]
 
 [node name="CameraBase" type="Spatial" parent="."]
 

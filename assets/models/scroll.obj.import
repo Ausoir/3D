@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/scroll.obj-c1cdf25e55e147c63146bdd1cb0fb55e.mesh"
+
+[deps]
+
+files=[ "res://.import/scroll.obj-c1cdf25e55e147c63146bdd1cb0fb55e.mesh" ]
+
+source_file="res://assets/models/scroll.obj"
+dest_files=[ "res://.import/scroll.obj-c1cdf25e55e147c63146bdd1cb0fb55e.mesh", "res://.import/scroll.obj-c1cdf25e55e147c63146bdd1cb0fb55e.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

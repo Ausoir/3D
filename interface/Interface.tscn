@@ -1,20 +1,23 @@
 [gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=1]
 [ext_resource path="res://assets/Baumans-Regular.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=3]
 [ext_resource path="res://interface/health.tscn" type="PackedScene" id=4]
+[ext_resource path="res://interface/SkillTree.tscn" type="PackedScene" id=5]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends CanvasLayer
 
 const Menubutton = preload(\"res://interface/button_resource.tscn\")
 const Itembutton = preload(\"res://interface/button_item.tscn\")
+const Healthbar = preload(\"res://interface/health.tscn\")
 onready var menu = $Menu
 onready var tint = $Menu/Tint
 onready var tooltip = $Interaction
+onready var tabs = $Menu/Tabs
+onready var tab_character = $Menu/Tabs/Character/Buttons
 onready var tab_equipment = $Menu/Tabs/Equipment/Buttons
-onready var tab_construct = $Menu/Tabs/Construct/Buttons
+onready var tab_shop = $Menu/Tabs/Shop/Buttons
 var on = false
 var host
 var argument
@@ -22,7 +25,6 @@ var argument
 
 func _ready():
 	tint.connect(\"gui_input\", self, \"on_background_click\")
-	update_resources()
 
 
 func _process(_delta):
@@ -34,26 +36,18 @@ func on_background_click(event):
 		clear()
 
 
-func update_resources():
-	var team = G.factions[G.you.pilot.faction]
-	$Menu/Resources/ManaAmount.set_text(str(team.resource[\"mana\"]))
-	$Menu/Resources/FoodAmount.set_text(str(team.resource[\"food\"]))
-
-
-func display(arg, phost):
+func display(arg, playerID):
 	if on:
 		clear()
 	on = true
-	host = phost
+	host = G.get_player(playerID)
 	argument = arg
 	G.you.capture_mouse(0)
 	tint.show()
 	tint.set_size(get_viewport().size)
 	menu.show()
-	$Menu/Tabs.rect_position = get_viewport().size / 2 - $Menu/Tabs.rect_size / 2
-	$Menu/Health.rect_position.x = get_viewport().size.x / 2 - $Menu/Health.progress_bar.rect_size.x / 2
-	$Menu/Health.display(G.younit.health.x, G.younit.health.y, G.younit.item_name, G.younit.level)
-	on_tab_select($Menu/Tabs.current_tab)
+	tabs.rect_position = get_viewport().size / 2 - tabs.rect_size / 2
+	on_tab_select(tabs.current_tab)
 
 
 func clear():
@@ -63,46 +57,17 @@ func clear():
 	menu.hide()
 
 
-func add_button(name, reqs, args):
-	var button = Menubutton.instance()
-	button.get_node(\"Name\").set_text(name)
-	button.set_reqs(reqs[0], reqs[1])
-	button.set_size(Vector2(380, 80))
-	button.connect(\"pressed\", self, \"button_pressed\", [args])
-	button.set_use_parent_material(true)
-	var team = G.factions[G.you.pilot.faction]
-	if !team.require_resource(false, reqs[0], reqs[1]):
-		button.disabled = true
-	var desc = button.get_node(\"Reqs\")
-	if len(reqs) > 2:
-		var reqsUnmet = \"\"
-		for reqbuilding in reqs[2]:
-			if !team.has_building(reqbuilding):
-				reqsUnmet = \"Requires \" + reqbuilding.capitalize() + \"\\n\"
-				button.disabled = true
-		desc.add_color_override(\"font_color\", Color(1,0,0))
-		desc.set_text(reqsUnmet)
-	if !button.disabled:
-		desc.add_color_override(\"font_color\", Color(1,1,1))
-		desc.set_text(G.factory.get_description(name))
-	tab_construct.add_child(button)
-
-
 func button_pressed(args):
-	G.cmds(args, host)
+	G.cmds(args, host.unit)
 	clear()
 
 
-func display_gather(mana, food):
+func display_gather(gold):
 	var plus = \"\"
-	if mana != 0:
-		if mana > 0:
+	if gold != 0:
+		if gold > 0:
 			plus = \"+\"
-		message(plus+str(mana) + \" Mana\")
-	if food != 0:
-		if food > 0:
-			plus = \"+\"
-		message(plus+str(food) + \" Food\")
+		message(plus+str(gold) + \" Gold\")
 
 
 func set_tooltip(msg):
@@ -119,47 +84,83 @@ func message(msg):
 
 
 func on_tab_select(tab):
-	for child in $Menu/Tabs/Equipment/Buttons.get_children():
+	for child in tab_character.get_children():
 		child.queue_free()
-	for child in $Menu/Tabs/Construct/Buttons.get_children():
+	for child in tab_equipment.get_children():
+		child.queue_free()
+	for child in tab_shop.get_children():
 		child.queue_free()
 	if tab == 0:
-		var items = G.factory.craftables[argument]
-		for item in items:
-			add_button(item[0], item[1], item[2])
+		fill_character()
 	elif tab == 1:
-		if host.weapon:
-			fill_equipment(\"HELD\", host.weapon)
-		for i in host.armors:
-			fill_equipment(i.to_upper(), host.armors[i])
+		fill_equipment()
+	elif tab == 3:
+		fill_shop()
 
+func fill_equipment():
+	var equipments = []
+	var hostUnit = host.unit
+	if hostUnit.weapon:
+		equipments.append([\"HELD\", hostUnit.weapon])
+	for i in hostUnit.armors:
+		equipments.append([i.to_upper(), hostUnit.armors[i]])
+	for equipment in equipments:
+		var item = equipment[1]
+		var button = Itembutton.instance()
+		button.connect(\"pressed\", self, \"button_pressed\", [[[\"v\",\"parent\"],[\"order\",[[\"drop\", 6]]]]])
+		button.get_node(\"Container/Category\").set_text(equipment[0])
+		button.get_node(\"Container/Name\").set_text(item.item_name.capitalize())
+		for property in item.properties:
+			if property in [\"weight\", \"defense\", \"health\", \"damage\", \"speed\"]:
+				var label = Label.new()
+				label.set_text(property.capitalize() + \"   \" + str(item.properties[property]))
+				button.get_node(\"Container\").add_child(label)
+			elif property == \"tags\":
+				for tag in item.properties.tags:
+					var desc = G.factory.get_description(tag)
+					if !desc.empty():
+						var label = Label.new()
+						label.set_text(desc)
+						button.get_node(\"Container\").add_child(label)
+		tab_equipment.add_child(button)
+		button.get_node(\"Container/Category\").rect_min_size.x = tab_equipment.rect_size.x - 14
+		button.rect_min_size.y = button.get_node(\"Container\").rect_size.y + 14
 
-func fill_equipment(category, item):
-	var button = Itembutton.instance()
-	button.connect(\"pressed\", self, \"button_pressed\", [[[\"v\",\"parent\"],[\"order\",[[\"drop\", 6]]]]])
-	button.get_node(\"Container/Category\").set_text(category)
-	button.get_node(\"Container/Name\").set_text(item.item_name.capitalize())
-	for property in item.properties:
-		if property in [\"defense\", \"health\", \"damage\", \"speed\"]:
-			var label = Label.new()
-			label.set_text(property.capitalize() + \"   \" + str(item.properties[property]))
-			button.get_node(\"Container\").add_child(label)
-		elif property == \"tags\":
-			for tag in item.properties.tags:
-				var desc = G.factory.get_description(tag)
-				if !desc.empty():
-					var label = Label.new()
-					label.set_text(desc)
-					button.get_node(\"Container\").add_child(label)
-	tab_equipment.add_child(button)
-	button.get_node(\"Container/Category\").rect_min_size.x = tab_equipment.rect_size.x - 14
-	button.rect_min_size.y = button.get_node(\"Container\").rect_size.y + 14
+func fill_character():
+	tab_character.add_child(Healthbar.instance())
+	var stats = G.younit.update_stats()
+	stats['gold'] = G.you.gold
+	var label = Label.new()
+	label.add_font_override(\"font\", G.font)
+	tab_character.add_child(label)
+	for stat in stats:
+		label = Label.new()
+		label.add_font_override(\"font\", G.font)
+		label.set_text(stat.capitalize() + \": \" + str(stats[stat]))
+		tab_character.add_child(label)
+
+func fill_shop():
+	var items = G.factory.craftables[argument]
+	for item in items:
+		var reqs = item[1]
+		var button = Menubutton.instance()
+		button.get_node(\"Name\").set_text(item[0])
+		button.set_reqs(reqs[0])
+		button.set_size(Vector2(380, 80))
+		button.connect(\"pressed\", self, \"button_pressed\", [item[2]])
+		button.set_use_parent_material(true)
+		if !G.you.require_resource(false, reqs[0]):
+			button.disabled = true
+		if !button.disabled:
+			var desc = button.get_node(\"Reqs\")
+			desc.add_color_override(\"font_color\", Color(1,1,1))
+			desc.set_text(G.factory.get_description(name))
+		tab_shop.add_child(button)
 "
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Control
 
-const font = preload(\"res://assets/font_message.tres\")
 var pos_v = 0
 var timeout = 0
 
@@ -167,7 +168,7 @@ var timeout = 0
 func add(msg):
 	set_position(Vector2(64, get_viewport().size.y - 64))
 	var label = Label.new()
-	label.add_font_override(\"font\", font)
+	label.add_font_override(\"font\", G.font)
 	label.set_text(msg)
 	for child in get_children():
 		var pos = child.get_position()
@@ -206,11 +207,19 @@ light_mode = 1
 size = 24
 font_data = ExtResource( 2 )
 
-[sub_resource type="StyleBoxFlat" id=5]
-bg_color = Color( 0, 0, 0, 0.392157 )
+[sub_resource type="GDScript" id=5]
+script/source = "extends ViewportContainer
+
+
+func _gui_input(event):
+	if Input.is_action_pressed(\"interact\"):
+		if event is InputEventMouseMotion:
+			var pos = $Viewport/SkillTree.rect_position + event.relative
+			$Viewport/SkillTree.rect_position = pos
+"
 
 [sub_resource type="StyleBoxFlat" id=6]
-bg_color = Color( 0.352941, 0.352941, 0.352941, 0.470588 )
+bg_color = Color( 0, 0, 0, 0.470588 )
 
 [sub_resource type="DynamicFont" id=7]
 size = 24
@@ -250,7 +259,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Construct" type="ScrollContainer" parent="Menu/Tabs"]
+[node name="Character" type="ScrollContainer" parent="Menu/Tabs"]
 use_parent_material = true
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -264,11 +273,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Construct"]
+[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Character"]
 margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
-alignment = 1
+
+[node name="Health" parent="Menu/Tabs/Character/Buttons" instance=ExtResource( 4 )]
+margin_right = 480.0
 
 [node name="Equipment" type="ScrollContainer" parent="Menu/Tabs"]
 visible = false
@@ -289,62 +300,53 @@ __meta__ = {
 margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
-alignment = 1
 
-[node name="Health" parent="Menu" instance=ExtResource( 4 )]
+[node name="Skills" type="ViewportContainer" parent="Menu/Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 47.0
+margin_right = -4.0
+margin_bottom = -4.0
+mouse_default_cursor_shape = 6
+script = SubResource( 5 )
 
-[node name="Resources" type="Panel" parent="Menu"]
-margin_right = 280.0
-margin_bottom = 40.0
-custom_styles/panel = SubResource( 5 )
+[node name="Viewport" type="Viewport" parent="Menu/Tabs/Skills"]
+size = Vector2( 488, 600 )
+transparent_bg = true
+handle_input_locally = false
+render_target_update_mode = 0
+
+[node name="SkillTree" parent="Menu/Tabs/Skills/Viewport" instance=ExtResource( 5 )]
+anchor_right = 0.0
+anchor_bottom = 0.0
+margin_left = 4.0
+margin_top = 47.0
+margin_right = 4.0
+margin_bottom = 47.0
+
+[node name="Shop" type="ScrollContainer" parent="Menu/Tabs"]
+visible = false
+use_parent_material = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 47.0
+margin_right = -4.0
+margin_bottom = -4.0
+mouse_filter = 1
+scroll_horizontal_enabled = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ManaAmount" type="Label" parent="Menu/Resources"]
-use_parent_material = true
-margin_left = 48.0
-margin_top = 8.0
-margin_right = 96.0
-margin_bottom = 37.0
-rect_scale = Vector2( 2, 2 )
-text = "0"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ManaIcon" type="Sprite" parent="Menu/Resources/ManaAmount"]
-use_parent_material = true
-position = Vector2( -20, -2 )
-scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 1 )
-centered = false
-region_enabled = true
-region_rect = Rect2( 0, 0, 32, 32 )
-
-[node name="FoodAmount" type="Label" parent="Menu/Resources"]
-use_parent_material = true
-margin_left = 192.0
-margin_top = 8.0
-margin_right = 240.0
-margin_bottom = 24.0
-rect_scale = Vector2( 2, 2 )
-text = "0"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FoodIcon" type="Sprite" parent="Menu/Resources/FoodAmount"]
-use_parent_material = true
-position = Vector2( -20, -2 )
-scale = Vector2( 0.5, 0.5 )
-texture = ExtResource( 1 )
-centered = false
-region_enabled = true
-region_rect = Rect2( 32, 0, 32, 32 )
+[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Shop"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
 
 [node name="Interaction" type="Button" parent="."]
-visible = false
 margin_left = 506.0
 margin_top = 282.0
 margin_right = 518.0

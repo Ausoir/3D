@@ -1,0 +1,178 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://assets/textures/rocky.png" type="Texture" id=1]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends Panel
+
+var learned
+
+func _ready():
+	learned = StyleBoxFlat.new()
+	learned.set_bg_color(Color(.4, .4, .4))
+
+	for child in $Skills.get_children():
+		add_signals(child)
+
+func add_signals(node):
+	node.connect(\"toggled\", self, \"on_select\", [node])
+	for child in node.get_children():
+		add_signals(child)
+
+func on_select(_toggle, node):
+	node.disabled = true
+	node.set(\"custom_styles/disabled\", learned)
+	for child in node.get_children():
+		child.show()
+"
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.0705882, 0.054902, 0.333333, 1 )
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.180392, 0.239216, 0.294118, 1 )
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="SkillTree" type="Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 176.0
+margin_bottom = 600.0
+script = SubResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PoolVector2Array( 138.093, 115.328, 118.476, 274.708, 135.466, 438.942 )
+default_color = Color( 1, 1, 1, 1 )
+texture = ExtResource( 1 )
+texture_mode = 1
+
+[node name="Line2D2" type="Line2D" parent="."]
+points = PoolVector2Array( 138.093, 115.328, -45.1226, -0.774826, -167.826, -125.366 )
+default_color = Color( 1, 1, 1, 1 )
+texture = ExtResource( 1 )
+texture_mode = 1
+
+[node name="Line2D3" type="Line2D" parent="."]
+points = PoolVector2Array( 138.093, 115.328, 364.827, 69.8873, 610.234, 119.913 )
+default_color = Color( 1, 1, 1, 1 )
+texture = ExtResource( 1 )
+texture_mode = 1
+
+[node name="Skills" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="1" type="Button" parent="Skills"]
+margin_left = 80.0
+margin_top = 80.0
+margin_right = 200.0
+margin_bottom = 140.0
+hint_tooltip = "Increase max health by 5."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+disabled = true
+text = "+5 Health"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="11" type="Button" parent="Skills/1"]
+margin_left = -22.1307
+margin_top = 161.682
+margin_right = 97.8692
+margin_bottom = 221.682
+hint_tooltip = "Increase max health by 3."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+text = "+3 Health"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="111" type="Button" parent="Skills/1/11"]
+margin_left = 19.313
+margin_top = 158.22
+margin_right = 139.313
+margin_bottom = 218.22
+hint_tooltip = "Increase max health by 3."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+text = "+3 Health"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="12" type="Button" parent="Skills/1"]
+margin_left = -185.421
+margin_top = -108.266
+margin_right = -65.4211
+margin_bottom = -48.2656
+hint_tooltip = "Increase strength by 1.
+
+Strength negates weight, reducing speed penalties from armor and weapons."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+shortcut_in_tooltip = false
+text = "+1 Strength"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="121" type="Button" parent="Skills/1/12"]
+margin_left = -122.268
+margin_top = -128.718
+margin_right = -2.26819
+margin_bottom = -68.7177
+hint_tooltip = "Increase strength by 1.
+
+Strength negates weight, reducing speed penalties from armor and weapons."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+text = "+1 Strength"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="13" type="Button" parent="Skills/1"]
+margin_left = 228.94
+margin_top = -41.2505
+margin_right = 348.94
+margin_bottom = 18.7495
+hint_tooltip = "Increase max stamina by 1.
+
+Stamina is used to cast spells and perform abilities.
+Stamina regenerates by drinking a potion of stamina or at the end of every dungeon level."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+text = "+1 Stamina"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="131" type="Button" parent="Skills/1/13"]
+margin_left = 238.292
+margin_top = 50.6184
+margin_right = 358.292
+margin_bottom = 110.618
+hint_tooltip = "Increase max stamina by 1.
+
+Stamina is used to cast spells and perform abilities.
+
+Stamina regenerates by drinking a potion of stamina or at the end of every dungeon level.
+
+If you find a tome of spell or ability, hold space bar to cast."
+custom_styles/pressed = SubResource( 2 )
+custom_styles/normal = SubResource( 3 )
+text = "+1 Stamina"
+__meta__ = {
+"_edit_use_anchors_": false
+}

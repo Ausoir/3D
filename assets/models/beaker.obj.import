@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/beaker.obj-b97ba03e0e7d3ebc6cd7a88abe5205af.mesh"
+
+[deps]
+
+files=[ "res://.import/beaker.obj-b97ba03e0e7d3ebc6cd7a88abe5205af.mesh" ]
+
+source_file="res://assets/models/beaker.obj"
+dest_files=[ "res://.import/beaker.obj-b97ba03e0e7d3ebc6cd7a88abe5205af.mesh", "res://.import/beaker.obj-b97ba03e0e7d3ebc6cd7a88abe5205af.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

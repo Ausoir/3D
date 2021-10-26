@@ -3,6 +3,7 @@
 [ext_resource path="res://assets/textures/stone.png" type="Texture" id=1]
 
 [resource]
+albedo_color = Color( 0.811765, 0.811765, 0.811765, 1 )
 albedo_texture = ExtResource( 1 )
-metallic = 0.4
-uv1_scale = Vector3( 0.2, 0.2, 0.2 )
+metallic = 0.6
+uv1_scale = Vector3( 4, 4, 4 )

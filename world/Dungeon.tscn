@@ -1,48 +1,53 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://objects/units/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://assets/meshlib_dungeon.tres" type="MeshLibrary" id=2]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Spatial
 
 const DGenerator = preload(\"res://world/DungeonGenerator.gd\")
-const dungeon_types = {
-	\"derelict\": [[\"defense\", \"living\", \"lab\", \"storage\"], [\"storage\"]]
-}
+const Levels = preload(\"res://world/Levels.gd\")
 onready var tilemap = $GridMap
 onready var objects = $Objects
 onready var others = $Others
 onready var units = $Units
+onready var players = $Players
 
 var rng = preload(\"res://classes/Random.gd\").new()
-var map_size = Vector2(0, 0)
-var pois = {\"torch\":[],
-			\"camps\":[]}
+var map_size
 var dungeon_map
 var spawnpoints = []
-
-var aggro_turn = 0
 
 
 func _ready():
 	G.initialize(self)
-	generate(\"derelict\")
 	G.world.get_node(\"WorldEnvironment\").environment.set_ambient_light_energy(0)
+	G.level = Levels.new(3)
+	generate(G.level)
+	add_player()
 
+func add_player():
+	var unit = G.cmds([[\"make\",\"dummy\"]], null)
+	var player = preload(\"res://objects/units/Player.tscn\").instance()
+	unit.transform.origin = get_spawnpoint() + Vector3(0,10,0)
+	player.assign(unit)
+	$Players.add_child(player)
 
-func generate(dungeon_type):
+func generate(level):
+	var current_level = level.get_dungeon()
 	rng.randomize()
-	print(rand_seed(123))
-	#rng.set_seed(21311)
+	#rng.set_seed(854124)
 	tilemap.rng = rng
-	map_size = Vector2(20, 20)
-	$Ceiling.scale = Vector3(map_size.x*4, map_size.y*4, 1)
+	map_size = current_level[0]
+	$Ceiling.scale = Vector3(map_size.x*4, 1, map_size.y*4)
+	$Floor.scale = Vector3(map_size.x*4, 1, map_size.y*4)
 	$Ceiling.translation.x = map_size.x*2
 	$Ceiling.translation.z = map_size.y*2
+	$Floor.translation.x = map_size.x*2
+	$Floor.translation.z = map_size.y*2
 	var generator = DGenerator.new(rng, map_size)
-	dungeon_map = generator.make_dungeon(4, 2)
-	generator.make_rooms(dungeon_types[dungeon_type])
+	dungeon_map = generator.make_dungeon(current_level[1][0], current_level[1][1])
+	generator.make_rooms(current_level[2])
 	dungeon_map = generator.make_border('W')
 
 	for x in range(map_size.x):
@@ -60,10 +65,12 @@ func generate(dungeon_type):
 
 	tilemap.autotile_map(Vector2.ZERO, map_size, 0, true)
 
+	var torchs = []
 	for x in range(map_size.x):
 		for z in range(map_size.y):
 			var biome = dungeon_map[z][x]
 			var room_objects = generator.objects[z][x]
+			var room_floors = generator.floors[z][x]
 			var dir = tilemap.get_cell_item_orientation(x, 0, z)
 			var tile = tilemap.get_cell_item(x,0,z)
 			if generator.biome[z][x] < .3:
@@ -96,35 +103,37 @@ func generate(dungeon_type):
 			if biome == 'f':
 				build(\"campfire\", Vector3(x, 0, z))
 			elif biome == 'D' or biome == '=' or biome == '#':
-				var fences = tilemap.fence_map.values()
 				if (dungeon_map[z][x-1] == '#' or\\
 					dungeon_map[z][x+1] == '#' or\\
 					dungeon_map[z-1][x] == '#' or\\
 					dungeon_map[z+1][x] == '#') and tile in tilemap.fence_map:
 					tilemap.set_cell_item(x, 0, z, tilemap.fence_map[tile], dir)
 			elif biome == '?':
-				build(\"chest\", Vector3(x, 0, z))
+				build(\"treasure\", Vector3(x, 0, z))
 			elif biome == '!':
-				spawn(\"warrior\", Vector3(x, 0, z))
-			elif tile == tilemap.wall or tile == tilemap.door or tile == tilemap.fence or tile == tilemap.fencedoor:
+				spawn(tilemap.map_to_world(x, 1, z))
+			elif biome == 'P':
+				spawnpoints.append(tilemap.map_to_world(x, 2, z))
+			elif tile == tilemap.door or tile == tilemap.fencedoor:
 				if x > 1 and z > 1 and x < map_size.x-1 and z < map_size.y-1:
 					var pos = Vector3(x, 0, z)
-					if !poi_near(pois.torch, pos, 5):
-						pois.torch.append(pos)
-						build(\"torch\", pos, dir)
+					#if !poi_near(torchs, pos, 5):
+					torchs.append(pos)
+					build(\"walltorch\", pos, dir)
 			if room_objects != null:
 				var pos = Vector3(x, 0, z)
 				if room_objects[0] == \"torch\":
-					if !poi_near(pois.torch, pos, 3):
-						pois.torch.append(pos)
-						build(\"torch\", pos, room_objects[1])
+					#if !poi_near(torchs, pos, 3):
+					torchs.append(pos)
+					build(\"walltorch\", pos, room_objects[1])
 				else:
 					build(room_objects[0], pos, room_objects[1])
+			if room_floors != null:
+				build(room_floors, Vector3(x, 0, z), 0)
 
-	if spawnpoints:
-		$Units/Player/Pilot/Unit.transform.origin = spawnpoints.pop_front()
-	else:
-		$Units/Player/Pilot/Unit.transform.origin = Vector3(map_size.x*2, 45, map_size.y*2)
+
+func get_spawnpoint():
+	return spawnpoints.pop_front()
 
 
 func poi_near(arr, pos, radius):
@@ -134,15 +143,19 @@ func poi_near(arr, pos, radius):
 			return true
 	return false
 
-func spawn(unit, pos):
-	var r = G.cmds([[\"t\", pos],[\"spawn\",unit]], null)
+func spawn(pos):
+	for _i in range(1, rng.randi_range(1, 5)):
+		var unit = G.level.get_loot(\"mobs\")
+		G.cmds([[\"t\", pos],[\"make\",unit],[\"rotate\"]], null)
 
 func build(building, pos, orientation=-1):
 	if orientation == -1:
 		orientation = [16,22,0,10][rng.randi_range(0, 3)]
 	var vec = tilemap.map_to_world(pos.x,pos.y,pos.z)
 	var ortho = G.dir_to_offset(orientation, 0)
-	var t = Transform().translated(vec).looking_at(vec+Vector3(ortho.x, 0, ortho.y), Vector3.UP)
+	var t = Transform().translated(vec)
+	if ortho != Vector2.ZERO:
+		t = t.looking_at(vec+Vector3(ortho.x, 0, ortho.y), Vector3.UP)
 	var r = G.cmds([[\"t\", t],[\"make\",building]], null)
 	return r
 
@@ -308,25 +321,25 @@ func autotile_map(from, to, y, is_border=false):
 			print(doortile,\" split at \",x,\",\",z)
 			set_cell_item(x,cell[1],z,door,dir)
 			if dir == 0:
-				if get_cell_item(x,cell[1],z+2) != -1:
+				if get_cell_item(x,cell[1],z+2) in walls:
 					updated_autotiles.append([x,cell[1],z+1,wallend,16])
 				else:
 					updated_autotiles.append([x,cell[1],z+1,-1,-1])
 				update_autotiles.append([Vector2(x-1,z+1), Vector2(x+1,z+2)])
 			elif dir == 10:
-				if get_cell_item(x,cell[1],z-2) != -1:
+				if get_cell_item(x,cell[1],z-2) in walls:
 					updated_autotiles.append([x,cell[1],z-1,wallend,22])
 				else:
 					updated_autotiles.append([x,cell[1],z-1,-1,-1])
 				update_autotiles.append([Vector2(x-1,z-2), Vector2(x+1,z-1)])
 			elif dir == 16:
-				if get_cell_item(x+2,cell[1],z) != -1:
+				if get_cell_item(x+2,cell[1],z) in walls:
 					updated_autotiles.append([x+1,cell[1],z,wallend,10])
 				else:
 					updated_autotiles.append([x+1,cell[1],z,-1,-1])
 				update_autotiles.append([Vector2(x+1,z-1), Vector2(x+2,z+1)])
 			elif dir == 22:
-				if get_cell_item(x-2,cell[1],z) != -1:
+				if get_cell_item(x-2,cell[1],z) in walls:
 					updated_autotiles.append([x-1,cell[1],z,wallend,0])
 				else:
 					updated_autotiles.append([x-1,cell[1],z,-1,-1])
@@ -423,15 +436,14 @@ glow_strength = 0.0
 glow_hdr_luminance_cap = 8.0
 glow_hdr_scale = 1.0
 
-[sub_resource type="QuadMesh" id=4]
+[sub_resource type="BoxShape" id=4]
 
-[sub_resource type="SpatialMaterial" id=5]
+[sub_resource type="QuadMesh" id=5]
+
+[sub_resource type="SpatialMaterial" id=6]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 1, 1, 1, 0.054902 )
-
-[sub_resource type="BoxShape" id=6]
-extents = Vector3( 5, 0.1, 5 )
 
 [node name="Dungeon" type="Spatial"]
 script = SubResource( 1 )
@@ -454,28 +466,34 @@ __meta__ = {
 
 [node name="Units" type="Spatial" parent="."]
 
-[node name="Player" parent="Units" instance=ExtResource( 1 )]
-
 [node name="Others" type="Spatial" parent="."]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource( 3 )
 
 [node name="OmniLight" type="DirectionalLight" parent="WorldEnvironment"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 11, 14, 15 )
-light_energy = 4.0
+transform = Transform( 0.913212, 4.20386e-09, -0.407486, 0.358434, -0.47567, 0.803282, -0.193829, -0.879624, -0.434388, 11, 14, 15 )
 light_bake_mode = 2
 
-[node name="Ceiling" type="MeshInstance" parent="."]
-transform = Transform( 10, 0, 0, 0, -4.37114e-07, -1, 0, 10, -4.37114e-08, 0, 20, 0 )
-visible = false
-mesh = SubResource( 4 )
-material/0 = SubResource( 5 )
-
-[node name="StaticBody" type="StaticBody" parent="Ceiling"]
-transform = Transform( 0.1, 0, 0, 0, -4.37114e-09, 0.1, 0, -1, -4.37114e-08, 0, 0, 0 )
+[node name="Ceiling" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 20, 0 )
 collision_layer = 3
 collision_mask = 3
 
-[node name="CollisionShape" type="CollisionShape" parent="Ceiling/StaticBody"]
-shape = SubResource( 6 )
+[node name="CollisionShape" type="CollisionShape" parent="Ceiling"]
+shape = SubResource( 4 )
+
+[node name="CeilingMesh" type="MeshInstance" parent="Ceiling"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 5 )
+material/0 = SubResource( 6 )
+
+[node name="Floor" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0 )
+collision_layer = 0
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape" parent="Floor"]
+shape = SubResource( 4 )
+
+[node name="Players" type="Spatial" parent="."]

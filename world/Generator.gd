@@ -13,8 +13,8 @@ func set_heightmap(size, map):
 	image.create(size.x, size.y, false, 4)
 	image.fill(Color(0, 0, 0))
 	image.lock()
-	for x in range(size.x):
-		for y in range(size.y):
+	for x in range(size.x+1):
+		for y in range(size.y+1):
 			var val = float(floor(map[y][x] * 3)) / 3
 			image.set_pixel(x, y, Color(val, val, val))
 	texture.create_from_image(image)

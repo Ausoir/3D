@@ -6,6 +6,12 @@ var sector_borders
 var sectors
 var rooms
 var objects
+var floors
+var special_terrain = {
+	"chapel": ["altar", "bookcase", "benchs"],
+	"lab": ["cauldron", "desk", "bookcase", "mageaura", "bubblelight", "dissection", "bench"],
+	"entrance": ["chest", "bookcase", "benchs"],
+}
 
 
 func _init(prng, psize).(prng, psize):
@@ -18,6 +24,7 @@ func make_dungeon(times, halls):
 	sectors = {}
 	rooms = []
 	objects = make_base(map_size.x, map_size.y, null)
+	floors = make_base(map_size.x, map_size.y, null)
 	divide(Vector2(), map_size-Vector2.ONE, times, halls, .5)
 	return base
 
@@ -40,82 +47,112 @@ func make_rooms(departments):
 		room.append(sector)
 		room.append(doors)
 
-	var tpartments = departments[0].duplicate()
-	var fillpartments = departments[1]
-	tpartments.shuffle()
+	var tpartments = departments.duplicate()
 	for s in sectors:
-		var department = tpartments.pop_back()
-		if department != null:
-			sectors[s] = department
+		if tpartments.empty():
+			sectors[s] = rng.rand_arr(departments)
 		else:
-			sectors[s] = rng.rand_arr(fillpartments)
+			var idx = rng.randi_range(0, len(tpartments)-1)
+			sectors[s] = tpartments[idx]
+			tpartments.remove(idx)
+	print(sectors)
 
+	var unique_rooms = []
+	var queue_make = []
 	for room in rooms: #name, from, to, sector, door
 		print(room)
-		make_terrain(room)
 		if room[3] == null: #halls
 			make_hall(room)
 		elif sectors[room[3]] == "living":
-			make_living(room)
+			if room[0] == "large" and !("chapel" in unique_rooms):
+				unique_rooms.append("chapel")
+				make_terrain(room, .5, false, "chapel")
+				queue_make.append(["chapel", room])
+			else:
+				make_terrain(room, .9)
+				queue_make.append(["living", room])
 		elif sectors[room[3]] == "storage":
-			make_storage(room)
-		elif sectors[room[3]] == "defense":
-			make_defense(room)
+			if room[0] != "large" and !("entrance" in unique_rooms):
+				unique_rooms.append("entrance")
+				make_terrain(room, .9, false, "entrance")
+				queue_make.append(["entrance", room])
+			else:
+				make_terrain(room, .8)
+				if rng.randi_range(0, 3) == 0:
+					queue_make.append(["defense", room])
+				else:
+					queue_make.append(["storage", room])
 		elif sectors[room[3]] == "lab":
-			make_defense(room)
+			if room[0] != "tiny":
+				make_terrain(room, .8, true, "lab")
+				queue_make.append(["lab", room])
+			else:
+				make_terrain(room, 1)
+				queue_make.append(["storage", room])
+
+	for make_room in queue_make:
+		call("make_"+make_room[0], make_room[1])
+
+func make_chapel(room):
+	var objs = [["bench"], ["bookcase"], ["bench"]]
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
+			floors[y][x] = "carpet"
+			if base[y][x] == '.':
+				allocate_object(objs, x, y)
+
+func make_entrance(room):
+	var objs = [["mageaura"], ["barrels", "crates", "chest"]]
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
+			if base[y][x] == '.':
+				if rng.randi_range(0, 1) == 0:
+					allocate_object(objs, x, y)
+				else:
+					base[y][x] = 'P'
+
+func make_lab(room):
+	var objs = [["bubblelight",null,null,null,null],["desk","wand rack","bookcase"],["bookcase"]]
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
+			floors[y][x] = "carpet"
+			if base[y][x] == '.':
+				allocate_object(objs, x, y)
 
 func make_defense(room):
+	var objs = [["beds", "bed cluster"], ["barrels", "crates"]]
 	for y in range(room[1].y+1, room[2].y):
 		for x in range(room[1].x+1, room[2].x):
 			if base[y][x] == '.':
-				var objs = ["beds", "bed cluster", "barrels", "crates"]
-				var obj = objs[rng.randi_range(0, len(objs)-1)]
-				place_object(obj, x, y)
+				allocate_object(objs, x, y)
 
 func make_living(room):
+	var objs = [["table", "large table", "pots", "beds", "bed cluster"],
+				["pots", "bookcase", "barrels", "kegs"]]
+	var flooring = room[0] == "large"
 	for y in range(room[1].y+1, room[2].y):
 		for x in range(room[1].x+1, room[2].x):
-			if base[y][x] == '.':
-				var objs = ["table", "large table", "pots", "beds", "bed cluster", "bookcase", "bookcase", "barrels"]
-				var obj = objs[rng.randi_range(0, len(objs)-1)]
-				place_object(obj, x, y)
+			allocate_object(objs, x, y)
+			if flooring:
+				floors[y][x] = "floor"
 
 func make_storage(room):
+	var objs = [[],["chest", "crates", "barrels"]]
 	for y in range(room[1].y+1, room[2].y):
 		for x in range(room[1].x+1, room[2].x):
 			if base[y][x] == '.':
-				var objs = ["chest", "crates", "crates", "crates", "crates", "barrels", "barrels", null, null]
-				var obj = objs[rng.randi_range(0, len(objs)-1)]
-				place_object(obj, x, y)
-
-func place_object(obj, x, y):
-	if obj == "chest" or obj == "crates" or obj == "barrels" or obj == "bookcase":
-		if base[y][x] == '.':
-			var possibleSides = get_possible_sides(x, y, 'W')
-			if !possibleSides.empty():
-				objects[y][x] = [obj, rng.rand_arr(possibleSides)]
-	elif obj == "pots" or obj == "beds":
-		if base[y][x] == '.':
-			var possibleSides = get_possible_sides(x, y, 'W')
-			if len(possibleSides) >= 2:
-				objects[y][x] = [obj, rng.rand_arr(possibleSides)]
-	elif obj == "bed cluster":
-		if base[y][x] == '.' and !check_adjacent(x, y, 'W') and !check_adjacent(x, y, 'D'):
-			var possibleSides = get_possible_sides(x, y, '.')
-			if len(possibleSides) >= 4:
-				objects[y][x] = [obj, rng.rand_arr(possibleSides)]
-	elif obj == "table" or obj == "large table":
-		if base[y][x] == '.' and !check_adjacent(x, y, 'D') and !check_adjacent_object(x, y, obj):
-			var possibleSides = get_possible_sides(x, y, '.')
-			if len(possibleSides) >= 1:
-				objects[y][x] = [obj, rng.rand_arr(possibleSides)]
-	if objects[y][x] != null:
-		base[y][x] = ','
+				if rng.randi_range(0, 9) == 0:
+					base[y][x] = 'P'
+				else:
+					allocate_object(objs, x, y)
 
 func make_hall(room):
 	var size = room[2] - room[1]
 	if size.y <= 4:
 		for x in range(room[1].x+1, room[2].x-1, 5):
+			if rng.randi_range(0, 4) == 0:
+				base[room[1].y+1][x] = '!'
+			base[room[1].y+1][x] = 'P'
 			if rng.randi_range(0, 1) == 0:
 				if base[room[1].y][x] == 'W' and base[room[1].y][x+1] == 'W':
 					objects[room[1].y][x] = ["torch", 10]
@@ -124,6 +161,9 @@ func make_hall(room):
 					objects[room[2].y][x] = ["torch", 0]
 	elif size.x <= 4:
 		for y in range(room[1].y+1, room[2].y-1, 5):
+			if rng.randi_range(0, 4) == 0:
+				base[y][room[1].x+1] = '!'
+			base[y][room[1].x+1] = 'P'
 			if rng.randi_range(0, 1) == 0:
 				if base[y][room[1].x] == 'W' and base[y-1][room[1].x] == 'W':
 					objects[y][room[1].x] = ["torch", 16]
@@ -131,9 +171,49 @@ func make_hall(room):
 				if base[y][room[2].x] == 'W' and base[y+1][room[2].x] == 'W':
 					objects[y][room[2].x] = ["torch", 22]
 
-func make_terrain(room):
-	if rng.randi_range(0, 3) > 0:
-		vaults.make_vault(rng, base, room[1], room[2])
+func allocate_object(objs, x, y):
+	var open = objs[0]
+	var sides = objs[1]
+	var cramped = sides
+	if len(objs) > 2:
+		cramped = objs[2]
+	var candidate
+	var possibleSides = get_possible_sides(x, y, 'W')
+	if !check_adjacent(x, y, 'D'):
+		if possibleSides.empty():
+			candidate = place_object(open, possibleSides)
+		elif len(possibleSides) == 1:
+			candidate = place_object(sides, possibleSides)
+		elif len(possibleSides) >= 2:
+			candidate = place_object(cramped, possibleSides)
+		if candidate != null:
+			objects[y][x] = [candidate[0], candidate[1]]
+			base[y][x] = ','
+
+func place_object(objs, possibleSides):
+	var obj = rng.rand_arr(objs)
+	if obj == null:
+		return null
+	elif obj == "bench":
+		return [obj, rng.rand_arr([0,10,16,22])]
+	elif obj == "chest" or obj == "crates" or obj == "barrels" or obj == "bookcase" or obj == "kegs" or obj == "wallshelf" or obj == "wand rack":
+		return [obj, rng.rand_arr(possibleSides)]
+	elif obj == "pots" or obj == "beds" or obj == "desk":
+		return [obj, rng.rand_arr(possibleSides)]
+	elif obj == "bed cluster" or obj == "bubblelight" or obj == "mageaura" or obj == "cauldron":
+		return [obj, rng.rand_arr([0,10,16,22])]
+	elif obj == "table" or obj == "large table":
+		return [obj, rng.rand_arr(possibleSides)]
+
+func make_terrain(room, ratio, vault_container_only=false, vault_type="default"):
+	if rng.randf() < ratio:
+		var rot = vaults.make_vault(rng, base, room[1], room[2], vault_type, vault_container_only)
+		if rot != -1:
+			for y in range(room[1].y, room[2].y+1):
+				for x in range(room[1].x, room[2].x+1):
+					if base[y][x].is_valid_integer():
+						objects[y][x] = [special_terrain[vault_type][int(base[y][x])], rot]
+						base[y][x] = ','
 	else:
 		var size = room[2] - room[1]
 		if size.x >= 3 and size.y >= 3:
@@ -161,11 +241,12 @@ func make_terrain(room):
 func divide(from, to, times, times_hall, horizontal):
 	var size = to - from
 	if (size.x <= 4 and size.y <= 4) or times <= 0:
-		if size.x > 6 or size.y > 6:
-			if abs(size.x-size.y) > (size.x+size.y)/2:
-				rooms.append(["long", from, to])
-			else:
-				rooms.append(["large", from, to])
+		if size.x >= 4 and size.y >= 4:
+			rooms.append(["large", from, to])
+		elif size.x == 2 or size.y == 2:
+			rooms.append(["tiny", from, to])
+		elif size.x == 3 or size.y == 3:
+			rooms.append(["small", from, to])
 		else:
 			rooms.append(["room", from, to])
 		return times <= 0
@@ -226,6 +307,8 @@ func divide(from, to, times, times_hall, horizontal):
 
 func get_sector(pos):
 	var count = 1
+	if sector_borders.empty():
+		return count
 	for sector in sector_borders:
 		if pos.x >= sector[0].x and pos.x <= sector[1].x and\
 			pos.y >= sector[0].y and pos.y <= sector[1].y:

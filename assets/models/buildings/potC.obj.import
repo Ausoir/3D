@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/potC.obj-8ef269d8304756dc51861e55ee016f5d.mesh"
+
+[deps]
+
+files=[ "res://.import/potC.obj-8ef269d8304756dc51861e55ee016f5d.mesh" ]
+
+source_file="res://assets/models/buildings/potC.obj"
+dest_files=[ "res://.import/potC.obj-8ef269d8304756dc51861e55ee016f5d.mesh", "res://.import/potC.obj-8ef269d8304756dc51861e55ee016f5d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

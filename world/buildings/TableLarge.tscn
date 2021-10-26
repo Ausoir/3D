@@ -1,24 +1,28 @@
 [gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://assets/materials/mat_plank.tres" type="Material" id=1]
-[ext_resource path="res://assets/models/potB_decorated.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://assets/models/plate.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/models/buildings/potB_decorated.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/models/buildings/plate.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/models/mug.obj" type="ArrayMesh" id=4]
-[ext_resource path="res://assets/models/plateHalf.obj" type="ArrayMesh" id=5]
-[ext_resource path="res://assets/models/potA_decorated.obj" type="ArrayMesh" id=6]
-[ext_resource path="res://assets/models/stool.obj" type="ArrayMesh" id=7]
-[ext_resource path="res://assets/models/tableLarge.obj" type="ArrayMesh" id=8]
-[ext_resource path="res://assets/models/plateFull.obj" type="ArrayMesh" id=9]
+[ext_resource path="res://assets/models/buildings/plateHalf.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://assets/models/buildings/potA_decorated.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://assets/models/buildings/stool.obj" type="ArrayMesh" id=7]
+[ext_resource path="res://assets/models/buildings/tableLarge.obj" type="ArrayMesh" id=8]
+[ext_resource path="res://assets/models/buildings/plateFull.obj" type="ArrayMesh" id=9]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends \"res://objects/Building.gd\"
 
 
 func open_walls():
-	if G.world.rng.randi_range(0, 3) == 0:
+	if G.world.rng.randi_range(0, 2) == 0:
 		rid(\"Bench\")
-	if G.world.rng.randi_range(0, 3) == 0:
+	if G.world.rng.randi_range(0, 2) == 0:
 		rid(\"Bench2\")
+	if G.world.rng.randi_range(0, 2) == 0:
+		rid(\"Bench3\")
+	if G.world.rng.randi_range(0, 2) == 0:
+		rid(\"Bench4\")
 	for i in range(1, 9):
 		if G.world.rng.randi_range(0, 1) == 0:
 			rid(\"Plate\"+str(i))

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/plateFull.obj-4effb536c9cd1ca9a68f21e989e7107e.mesh"
+
+[deps]
+
+files=[ "res://.import/plateFull.obj-4effb536c9cd1ca9a68f21e989e7107e.mesh" ]
+
+source_file="res://assets/models/buildings/plateFull.obj"
+dest_files=[ "res://.import/plateFull.obj-4effb536c9cd1ca9a68f21e989e7107e.mesh", "res://.import/plateFull.obj-4effb536c9cd1ca9a68f21e989e7107e.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

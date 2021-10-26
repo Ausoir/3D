@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://assets/textures/dirt.png" type="Texture" id=1]
+
+[sub_resource type="CubeMesh" id=1]
+size = Vector3( 4, 0.02, 4 )
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.364706, 0.180392, 0.470588, 1 )
+albedo_texture = ExtResource( 1 )
+uv1_scale = Vector3( 24, 16, 1 )
+
+[node name="Spatial" type="Spatial"]
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+cast_shadow = 0
+generate_lightmap = false
+mesh = SubResource( 1 )
+software_skinning_transform_normals = false
+material/0 = SubResource( 2 )

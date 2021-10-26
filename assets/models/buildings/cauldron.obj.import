@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/cauldron.obj-905485ed5d4bd768ab29a3eb6ccd6ade.mesh"
+
+[deps]
+
+files=[ "res://.import/cauldron.obj-905485ed5d4bd768ab29a3eb6ccd6ade.mesh" ]
+
+source_file="res://assets/models/buildings/cauldron.obj"
+dest_files=[ "res://.import/cauldron.obj-905485ed5d4bd768ab29a3eb6ccd6ade.mesh", "res://.import/cauldron.obj-905485ed5d4bd768ab29a3eb6ccd6ade.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

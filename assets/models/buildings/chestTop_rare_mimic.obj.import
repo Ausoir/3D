@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/chestTop_rare_mimic.obj-f17cad0bead456007c4d657ece81d46d.mesh"
+
+[deps]
+
+files=[ "res://.import/chestTop_rare_mimic.obj-f17cad0bead456007c4d657ece81d46d.mesh" ]
+
+source_file="res://assets/models/buildings/chestTop_rare_mimic.obj"
+dest_files=[ "res://.import/chestTop_rare_mimic.obj-f17cad0bead456007c4d657ece81d46d.mesh", "res://.import/chestTop_rare_mimic.obj-f17cad0bead456007c4d657ece81d46d.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/keg.obj-7dcbaae0960244f1f87fff0c740a4a58.mesh"
+
+[deps]
+
+files=[ "res://.import/keg.obj-7dcbaae0960244f1f87fff0c740a4a58.mesh" ]
+
+source_file="res://assets/models/buildings/keg.obj"
+dest_files=[ "res://.import/keg.obj-7dcbaae0960244f1f87fff0c740a4a58.mesh", "res://.import/keg.obj-7dcbaae0960244f1f87fff0c740a4a58.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

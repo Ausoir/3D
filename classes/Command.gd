@@ -35,7 +35,7 @@ func run(args):
 				return Transform()
 			return host.global_transform
 		elif args[1] == "spawnpoint":
-			return host.get_spawnpoint(args[2])
+			return host.get_spawnpoint()
 		elif args[1] == "snap":
 			return G.world.snap_to_tile(tgt)
 	elif args[0] == "r":
@@ -53,13 +53,17 @@ func run(args):
 		if tgt != args[1]:
 			stop = true
 	elif args[0] == "req":
-		if !host.get_team().require_resource(false, args[1], args[2]):
-			stop = true
+		var player = G.get_unit_player(host)
+		if player:
+			if !player.require_resource(false, args[1]):
+				stop = true
 	elif args[0] == "cost":
-		if len(args) > 3:
-			host.get_team().add_resource(-args[1], -args[2], true)
-		else:
-			host.get_team().add_resource(-args[1], -args[2])
+		var player = G.get_unit_player(host)
+		if player:
+			if len(args) > 2:
+				player.add_resource(-args[1], true)
+			else:
+				player.add_resource(-args[1])
 	elif args[0] == "order":
 		tgt.set_tasks(args[1])
 	elif args[0] == "ability":
@@ -89,7 +93,7 @@ func run(args):
 	elif args[0] == "alert":
 		var nearby_units = G.world.get_units_near(args[1], args[2])
 		for unit in nearby_units:
-			unit.hear(args[1])
+			unit.controller.hear(args[1])
 	elif args[0] == "setwork":
 		host.set_work(args[1])
 		host.set_progress_bar(args[2])
@@ -100,23 +104,16 @@ func run(args):
 		tgt.set_tasks(args[1])
 	elif args[0] == "make":
 		var newitem = G.factory.make(args[1])
+		if newitem == null:
+			newitem = G.factory.make_unit(args[1])
 		if tgt is Transform:
 			newitem.transform = tgt.translated(newitem.translation)
 		elif tgt is Vector3:
 			newitem.translate(tgt)
-		if len(args) > 2:
-			G.factions[args[2]].add(newitem)
-		G.world.objects.add_child(newitem)
 		newitem.on_make()
 		return newitem
 	elif args[0] == "drop":
 		G.drop(tgt, [tgt])
-	elif args[0] == "spawn":
-		var newitem = G.factory.make_unit(args[1])
-		newitem.transform.origin = tgt
-		if len(args) > 2:
-			G.factions[args[2]].add(newitem)
-		return newitem
 	elif args[0] == "die":
 		if tgt:
 			tgt.die()
@@ -126,19 +123,19 @@ func run(args):
 		if tgt:
 			tgt.damage(args[1])
 	elif args[0] == "menu":
-		G.ui.display(args[1], tgt)
+		G.ui.display(args[1], args[2])
 	elif args[0] == "message":
 		G.message(args[1])
 	elif args[0] == "claim":
+		G.factions[args[1]].add(tgt)
+		return tgt
+	elif args[0] == "rotate":
+		var t
 		if len(args) > 1:
-			G.factions[args[1]].add(tgt)
-			return tgt
-		if host.get("faction"):
-			G.factions[host.faction].add(tgt)
-			return tgt
-		elif host.get_parent() and host.get_parent().get("faction"):
-			G.factions[host.get_parent().faction].add(tgt)
-			return tgt
+			t = Transform().looking_at(args[1], Vector3.UP)
+		else:
+			t = Transform().looking_at(Vector3(G.rng.randf_range(-1,1),0,G.rng.randf_range(-1,1)), Vector3.UP)
+		tgt.transform.basis = t.basis.orthonormalized()
 	elif args[0] == "tile":
 		G.world.set_tile_at(tgt, args[1])
 	elif args[0] == "iftile":

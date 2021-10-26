@@ -5,19 +5,16 @@ const BLOCK = 2
 const HALFBLOCK = BLOCK / 2
 const ORTHO = [Vector3(-BLOCK-HALFBLOCK,0,0),Vector3(BLOCK+HALFBLOCK,0,0),Vector3(0,0,-BLOCK-HALFBLOCK),Vector3(0,0,BLOCK+HALFBLOCK)]
 var target
+var height = 0
 var pathing_length = 16
-var pathing_times = 8
+var pathing_times = 36
 var open
 var closed = []
 var closest
+var closestLength = 999
 var result = []
 var next_reset = 0
 var heuristic_threshold = 0
-var world
-
-
-func _init(arg):
-	world = arg
 
 
 class pathnode:
@@ -51,11 +48,12 @@ func iterate(node):
 			node = v
 	open.remove(index)
 	closed.append(node)
-	if node.pos == target:
-		return node
 	var achieved = (node.pos - target).length()
-	if achieved < (closest.pos - target).length():
+	if achieved < 1.4:
+		return node
+	if achieved < closestLength:
 		closest = node
+		closestLength = achieved
 	var options = get_routes(node.pos)
 	for i in options:
 		var pos = Vector3(i[0], i[1], i[2])
@@ -83,6 +81,8 @@ func reset(hostpos):
 	open = [pathnode.new(null, hostpos)]
 	closed = []
 	closest = open[0]
+	result = []
+	next_reset = 0
 
 
 func update(hostposv, targetv):	
@@ -110,7 +110,7 @@ func update(hostposv, targetv):
 			next_reset = 0
 			result = []
 			while done.parent:
-				#G.make_particle("smoke", to_tile_pos(done.pos), 3)
+				#G.make_particle("smoke", to_tile_pos(done.pos), 2)
 				done = done.parent
 				if done.pos == hostpos:
 					break
@@ -118,10 +118,10 @@ func update(hostposv, targetv):
 		return result
 
 func to_tile_coord(vec):
-	return ((vec + Vector3(HALFBLOCK,0,HALFBLOCK)) / BLOCK).floor()
+	return ((vec + Vector3(HALFBLOCK,HALFBLOCK,HALFBLOCK)) / BLOCK).floor()
 
 func to_tile_pos(vec):
-	return vec * BLOCK + Vector3(HALFBLOCK,0,HALFBLOCK)
+	return vec * BLOCK
 
 func update_nodes(hostposv):
 	var done = closest
@@ -140,7 +140,7 @@ func update_nodes(hostposv):
 
 func get_routes(pos):
 	var ways = []
-	var vec = Vector3(pos.x*BLOCK, 2, pos.z*BLOCK)
+	var vec = Vector3(pos.x*BLOCK, pos.y*BLOCK, pos.z*BLOCK)
 	if check_ray(vec, ORTHO[0]):
 		ways.append(pos + Vector3.LEFT)
 	if check_ray(vec, ORTHO[1]):
@@ -152,112 +152,11 @@ func get_routes(pos):
 	return ways
 
 func check_ray(vec, add):
+	vec = Vector3(vec.x, height, vec.z)
 	var added = vec + add
-	var r = G.space.intersect_ray(vec, added, [], 0b00000000000000100001)
+	var r = G.space.intersect_ray(vec, added, [], 0b00000000000000100011)
 	return r.empty()
 
 func get_routes_debug(vec):
 	var pos = to_tile_coord(vec)
 	return str(get_routes(pos)) + " : " + str(pos)
-
-
-func get_direction_routes(orientation, open_type):
-	var r = []
-	var entrance
-	if orientation == -1:
-		return [[-1,0,0], [1,0,0], [0,0,-1], [0,0,1]]
-	elif orientation == 0:
-		entrance = [0,0,1]
-	elif orientation == 10:
-		entrance = [0,0,-1]
-	elif orientation == 16:
-		entrance = [-1,0,0]
-	elif orientation == 22:
-		entrance = [1,0,0]
-	if entrance:
-		r.append(entrance)
-		if open_type == 1:
-			r.append([entrance[2],0,-entrance[0]])
-		elif open_type == 2:
-			r.append([-entrance[2],0,entrance[0]])
-		elif open_type == 3:
-			r.append([entrance[2],0,-entrance[0]])
-			r.append([-entrance[2],0,entrance[0]])
-		elif open_type == 4:
-			r.append([entrance[0]*-1,0,entrance[2]*-1])
-		elif open_type == 5:
-			r.append([entrance[0]*-1,0,entrance[2]*-1])
-			r.append([entrance[2],0,-entrance[0]])
-		elif open_type == 6:
-			r.append([entrance[0]*-1,0,entrance[2]*-1])
-			r.append([-entrance[2],0,entrance[0]])
-		elif open_type == 7:
-			r.append([entrance[0]*-1,0,entrance[2]*-1])
-			r.append([entrance[2],0,-entrance[0]])
-			r.append([-entrance[2],0,entrance[0]])
-	return r
-
-
-func routes_check_send(sender, pos):
-	var r = []
-	if sender >= 990:
-		var sender_orientation = world.tilemap.get_cell_item_orientation(pos[0], pos[1], pos[2])
-		var sender_open_type = sender % 10
-		r.append_array(get_direction_routes(sender_orientation, sender_open_type))
-	elif world.tilemap.is_climbable(sender):
-		var sender_orientation = world.tilemap.get_cell_item_orientation(pos[0], pos[1], pos[2])
-		if sender_orientation == 0:#Z-
-			r.append_array([[0,1,-1],[0,0,1]])
-		elif sender_orientation == 10:#Z+
-			r.append_array([[0,1,1],[0,0,-1]])
-		elif sender_orientation == 16:#X-
-			r.append_array([[-1,1,0],[1,0,0]])
-		elif sender_orientation == 22:#X+
-			r.append_array([[1,1,0],[-1,0,0]])
-	elif world.tilemap.is_tunnel(sender):
-		var sender_orientation = world.tilemap.get_cell_item_orientation(pos[0], pos[1], pos[2])
-		if sender_orientation == 0 or sender_orientation == 10:#Z-
-			r = [[0,0,-1],[0,0,1]]
-		elif sender_orientation == 16 or sender_orientation == 22:#X-
-			r = [[-1,0,0],[1,0,0]]
-	else:
-		r = [[-1,0,0], [1,0,0], [0,0,-1], [0,0,1]]
-	return r
-
-
-func routes_check_receive(pos, direction):
-	var newpos = [pos.x+direction[0],pos.y+direction[1],pos.z+direction[2]]
-	var receiver = world.tilemap.get_cell_item(newpos[0], newpos[1], newpos[2])
-	if receiver >= 990:
-		var orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
-		var receiver_open_type = receiver % 10
-		var routes = get_direction_routes(orientation, receiver_open_type)
-		var receive_direction = [direction[0]*-1,direction[1]*-1,direction[2]*-1]
-		for route in routes:
-			if receive_direction[0] == route[0] and receive_direction[2] == route[2]:
-				return newpos
-	elif world.tilemap.is_wall(receiver):
-		return
-	elif world.tilemap.is_climbable(receiver):
-		var tile_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
-		if (tile_orientation == 0 and direction==[0,0,-1]) or\
-			(tile_orientation == 10 and direction==[0,0,1]) or\
-			(tile_orientation == 16 and direction==[-1,0,0]) or\
-			(tile_orientation == 22 and direction==[1,0,0]):
-			return newpos
-	else:
-		if world.tilemap.is_tunnel(receiver): #Check if tunnel
-			var tileunder_orientation = world.tilemap.get_cell_item_orientation(newpos[0], newpos[1], newpos[2])
-			if ((tileunder_orientation == 0 or tileunder_orientation == 10) and\
-				(direction == [0,0,-1] or direction == [0,0,1])) or\
-				((tileunder_orientation == 16 or tileunder_orientation == 22) and\
-				(direction == [1,0,0] or direction == [-1,0,0])):
-				return newpos
-		else:
-			var tileunder = world.tilemap.get_cell_item(newpos[0], newpos[1]-1, newpos[2])
-			if tileunder == -1:
-				return
-			elif world.tilemap.is_climbable(tileunder):
-				return [newpos[0], newpos[1]-1, newpos[2]]
-			elif world.tilemap.is_landable(tileunder):
-				return newpos

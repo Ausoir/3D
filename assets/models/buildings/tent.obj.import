@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/tent.obj-8e86fd14fd0ff22c181b5e76e99b2178.mesh"
+
+[deps]
+
+files=[ "res://.import/tent.obj-8e86fd14fd0ff22c181b5e76e99b2178.mesh" ]
+
+source_file="res://assets/models/buildings/tent.obj"
+dest_files=[ "res://.import/tent.obj-8e86fd14fd0ff22c181b5e76e99b2178.mesh", "res://.import/tent.obj-8e86fd14fd0ff22c181b5e76e99b2178.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

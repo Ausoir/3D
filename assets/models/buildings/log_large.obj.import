@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/log_large.obj-8cd4a9732639039710e86edc4dceae25.mesh"
+
+[deps]
+
+files=[ "res://.import/log_large.obj-8cd4a9732639039710e86edc4dceae25.mesh" ]
+
+source_file="res://assets/models/buildings/log_large.obj"
+dest_files=[ "res://.import/log_large.obj-8cd4a9732639039710e86edc4dceae25.mesh", "res://.import/log_large.obj-8cd4a9732639039710e86edc4dceae25.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

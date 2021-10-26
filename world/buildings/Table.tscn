@@ -1,20 +1,20 @@
 [gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://assets/materials/mat_plank.tres" type="Material" id=1]
-[ext_resource path="res://assets/models/tableMedium.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://assets/models/plate.obj" type="ArrayMesh" id=3]
-[ext_resource path="res://assets/models/potA.obj" type="ArrayMesh" id=4]
-[ext_resource path="res://assets/models/plateHalf.obj" type="ArrayMesh" id=5]
-[ext_resource path="res://assets/models/stool.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://assets/models/buildings/tableMedium.obj" type="ArrayMesh" id=2]
+[ext_resource path="res://assets/models/buildings/plate.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/models/buildings/potA.obj" type="ArrayMesh" id=4]
+[ext_resource path="res://assets/models/buildings/plateHalf.obj" type="ArrayMesh" id=5]
+[ext_resource path="res://assets/models/buildings/stool.obj" type="ArrayMesh" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends \"res://objects/Building.gd\"
 
 
 func open_walls():
-	if G.world.rng.randi_range(0, 3) == 0:
+	if G.world.rng.randi_range(0, 2) == 0:
 		rid(\"Bench\")
-	if G.world.rng.randi_range(0, 3) == 0:
+	if G.world.rng.randi_range(0, 2) == 0:
 		rid(\"Bench2\")
 	if G.world.rng.randi_range(0, 1) == 0:
 		rid(\"Plate\")

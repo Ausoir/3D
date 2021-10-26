@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://assets/models/crateDark.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/models/buildings/crateDark.obj" type="ArrayMesh" id=1]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends \"res://objects/Building.gd\"

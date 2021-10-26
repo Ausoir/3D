@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/wood_table.obj-b21507a6ec39d4d13a985179ce4467ee.mesh"
+
+[deps]
+
+files=[ "res://.import/wood_table.obj-b21507a6ec39d4d13a985179ce4467ee.mesh" ]
+
+source_file="res://assets/models/buildings/wood_table.obj"
+dest_files=[ "res://.import/wood_table.obj-b21507a6ec39d4d13a985179ce4467ee.mesh", "res://.import/wood_table.obj-b21507a6ec39d4d13a985179ce4467ee.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

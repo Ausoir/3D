@@ -14,21 +14,23 @@ const particles = {
 }
 const Command = preload("res://classes/Command.gd")
 const Faction = preload("res://classes/Faction.gd")
-var Skills = preload("res://objects/units/Ability.gd").new()
+const font = preload("res://assets/font_message.tres")
+var skills = preload("res://objects/units/Ability.gd").new()
+var time = preload("res://classes/Time.gd").new()
 var ui
 var factory
 var enemy
 var you
 var younit
 var world
+var level
 var space
-var tick_events = []
+var controllers = []
 var factions = [
 	Faction.new(0),
 	Faction.new(1),
 	Faction.new(2),
 ]
-var frame = 0
 
 var rng = preload("res://classes/Random.gd").new()
 
@@ -36,30 +38,33 @@ var rng = preload("res://classes/Random.gd").new()
 func _init():
 	factory = preload("res://classes/Factory.gd").new()
 
+func _process(delta):
+	time.on_process(delta)
+
 
 func initialize(pworld):
 	ui = preload("res://interface/Interface.tscn").instance()
 	G.world = pworld
 	G.space = pworld.get_world().direct_space_state
-	G.you = pworld.get_node("Units/Player")
-	G.younit = G.you.get_node("Pilot/Unit")
 	factory._ready()
 	pworld.others.add_child(ui)
+
+
+func get_player(idx):
+	for player in world.players.get_children():
+		if player.id == idx:
+			return player
+
+
+func get_unit_player(unit):
+	for player in world.players.get_children():
+		if player.unit == unit:
+			return player
 
 
 func on_hour(hour):
 	for faction in factions:
 		faction.on_hour(hour)
-
-
-func _process(_delta):
-	frame += 1
-	if frame > 8:
-		if len(tick_events) > 0:
-			var event = tick_events.pop_back()
-			if event.is_valid():
-				event.call_func()
-		frame = 0
 
 
 func make_particle(arg, pos, lifetime):

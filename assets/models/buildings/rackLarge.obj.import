@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/rackLarge.obj-21c1fe2a1ba75d90fa2a23a04d09cc3f.mesh"
+
+[deps]
+
+files=[ "res://.import/rackLarge.obj-21c1fe2a1ba75d90fa2a23a04d09cc3f.mesh" ]
+
+source_file="res://assets/models/buildings/rackLarge.obj"
+dest_files=[ "res://.import/rackLarge.obj-21c1fe2a1ba75d90fa2a23a04d09cc3f.mesh", "res://.import/rackLarge.obj-21c1fe2a1ba75d90fa2a23a04d09cc3f.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true
