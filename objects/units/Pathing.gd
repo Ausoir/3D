@@ -154,7 +154,7 @@ func get_routes(pos):
 func check_ray(vec, add):
 	vec = Vector3(vec.x, height, vec.z)
 	var added = vec + add
-	var r = G.space.intersect_ray(vec, added, [], 0b00000000000000100011)
+	var r = G.space.intersect_ray(vec, added, [], 0b00000000000000100001)
 	return r.empty()
 
 func get_routes_debug(vec):

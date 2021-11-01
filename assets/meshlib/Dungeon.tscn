@@ -1,4 +1,4 @@
-[gd_scene load_steps=33 format=2]
+[gd_scene load_steps=35 format=2]
 
 [ext_resource path="res://assets/meshlib/dungeon/wall.obj" type="ArrayMesh" id=1]
 [ext_resource path="res://assets/meshlib/dungeon/tileBrickB_medium.obj" type="ArrayMesh" id=2]
@@ -9,6 +9,8 @@
 [ext_resource path="res://assets/meshlib/dungeon/wall_end.obj" type="ArrayMesh" id=7]
 [ext_resource path="res://assets/meshlib/dungeon/tileSpikes_large.obj" type="ArrayMesh" id=8]
 [ext_resource path="res://assets/meshlib/dungeon/wall_end_broken.obj" type="ArrayMesh" id=9]
+[ext_resource path="res://assets/materials/mat_tile.tres" type="Material" id=10]
+[ext_resource path="res://assets/materials/mat_toon_stone.tres" type="Material" id=11]
 [ext_resource path="res://assets/meshlib/dungeon/wall_door.obj" type="ArrayMesh" id=12]
 [ext_resource path="res://assets/meshlib/dungeon/wall_window.obj" type="ArrayMesh" id=13]
 [ext_resource path="res://assets/meshlib/dungeon/wall_gateDoor.obj" type="ArrayMesh" id=14]
@@ -33,30 +35,30 @@ extents = Vector3( 0.5, 2, 0.8 )
 extents = Vector3( 1, 0.7, 0.8 )
 
 [sub_resource type="BoxShape" id=5]
-extents = Vector3( 2, 2, 0.8 )
+extents = Vector3( 2, 0.5, 0.8 )
 
 [sub_resource type="BoxShape" id=6]
-extents = Vector3( 2, 2, 0.8 )
+extents = Vector3( 0.5, 0.5, 0.8 )
 
-[sub_resource type="BoxShape" id=7]
-extents = Vector3( 0.5, 2, 0.8 )
-
-[sub_resource type="ConvexPolygonShape" id=8]
+[sub_resource type="ConvexPolygonShape" id=7]
 points = PoolVector3Array( 0, 0, 0, -2.5, 0, 0, -2.5, 0, 1.2, -1.2, 0, 2.5, 0, 0, 2.5, 0, 4, 0, -2.5, 4, 0, -2.5, 4, 1.2, -1.2, 4, 2.5, 0, 4, 2.5 )
 
+[sub_resource type="BoxShape" id=8]
+extents = Vector3( 0.8, 2, 0.8 )
+
 [sub_resource type="BoxShape" id=9]
+extents = Vector3( 2, 2, 0.8 )
+
+[sub_resource type="BoxShape" id=10]
+extents = Vector3( 1.1, 2, 0.8 )
+
+[sub_resource type="BoxShape" id=11]
+extents = Vector3( 1.5, 2, 0.8 )
+
+[sub_resource type="BoxShape" id=12]
 extents = Vector3( 0.8, 2, 0.8 )
 
 [sub_resource type="BoxShape" id=13]
-extents = Vector3( 1.1, 2, 0.8 )
-
-[sub_resource type="BoxShape" id=10]
-extents = Vector3( 1.5, 2, 0.8 )
-
-[sub_resource type="BoxShape" id=11]
-extents = Vector3( 0.8, 2, 0.8 )
-
-[sub_resource type="BoxShape" id=12]
 extents = Vector3( 1.4, 2, 0.8 )
 
 [node name="Spatial" type="Spatial"]
@@ -66,7 +68,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 2 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 10 )
 
 [node name="StaticBody" type="StaticBody" parent="tile1"]
 
@@ -115,7 +117,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 12 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="door"]
@@ -140,7 +142,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 13 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="window1"]
@@ -169,7 +171,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 19 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 material/2 = null
 
@@ -178,8 +180,20 @@ collision_layer = 35
 collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="window2/StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 5 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2, 0 )
+shape = SubResource( 3 )
+
+[node name="CollisionShape2" type="CollisionShape" parent="window2/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2, 0 )
+shape = SubResource( 3 )
+
+[node name="CollisionShape3" type="CollisionShape" parent="window2/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 0 )
+shape = SubResource( 4 )
+
+[node name="CollisionShape4" type="CollisionShape" parent="window2/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0 )
+shape = SubResource( 4 )
 
 [node name="fence" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 16 )
@@ -187,7 +201,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 16 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 material/2 = null
 
@@ -196,8 +210,12 @@ collision_layer = 35
 collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="fence/StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 6 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
+shape = SubResource( 5 )
+
+[node name="CollisionShape2" type="CollisionShape" parent="fence/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 0 )
+shape = SubResource( 5 )
 
 [node name="fencedoor" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 16 )
@@ -205,7 +223,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 14 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 material/2 = null
 
@@ -214,12 +232,20 @@ collision_layer = 35
 collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="fencedoor/StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 2, 0 )
-shape = SubResource( 7 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.5, 0 )
+shape = SubResource( 6 )
 
 [node name="CollisionShape2" type="CollisionShape" parent="fencedoor/StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 2, 0 )
-shape = SubResource( 7 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.5, 0 )
+shape = SubResource( 6 )
+
+[node name="CollisionShape4" type="CollisionShape" parent="fencedoor/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 3.5, 0 )
+shape = SubResource( 6 )
+
+[node name="CollisionShape5" type="CollisionShape" parent="fencedoor/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 3.5, 0 )
+shape = SubResource( 6 )
 
 [node name="CollisionShape3" type="CollisionShape" parent="fencedoor/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.3, 0 )
@@ -231,7 +257,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 15 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 material/2 = null
 
@@ -240,8 +266,12 @@ collision_layer = 35
 collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="fencecorner/StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, -0.8 )
-shape = SubResource( 8 )
+transform = Transform( 1, 0, 0, 0, 0.25, 0, 0, 0, 1, 0.8, 0, -0.8 )
+shape = SubResource( 7 )
+
+[node name="CollisionShape2" type="CollisionShape" parent="fencecorner/StaticBody"]
+transform = Transform( 1, 0, 0, 0, 0.25, 0, 0, 0, 1, 0.799999, 3, -0.8 )
+shape = SubResource( 7 )
 
 [node name="wallsingle1" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 0 )
@@ -249,7 +279,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 20 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallsingle1"]
@@ -258,7 +288,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallsingle1/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 9 )
+shape = SubResource( 8 )
 
 [node name="wallsingle2" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 0 )
@@ -266,7 +296,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 21 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallsingle2"]
@@ -275,7 +305,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallsingle2/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 9 )
+shape = SubResource( 8 )
 
 [node name="wall1" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8 )
@@ -283,7 +313,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 1 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wall1"]
@@ -292,7 +322,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wall1/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 9 )
 
 [node name="wallend1" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 0, 8 )
@@ -300,7 +330,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 7 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallend1"]
@@ -309,7 +339,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallend1/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.9, 2, 0 )
-shape = SubResource( 13 )
+shape = SubResource( 10 )
 
 [node name="wallend2" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 8 )
@@ -317,7 +347,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 9 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallend2"]
@@ -326,7 +356,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallend2/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 2, 0 )
-shape = SubResource( 10 )
+shape = SubResource( 11 )
 
 [node name="wall2" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 0, 8 )
@@ -334,7 +364,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 18 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wall2"]
@@ -343,7 +373,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wall2/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 9 )
 
 [node name="wall3" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 0, 8 )
@@ -351,7 +381,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 17 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wall3"]
@@ -360,7 +390,7 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wall3/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 9 )
 
 [node name="wallcorner" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 8 )
@@ -368,7 +398,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 3 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallcorner"]
@@ -377,11 +407,11 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallcorner/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 1.2 )
-shape = SubResource( 11 )
+shape = SubResource( 12 )
 
 [node name="CollisionShape2" type="CollisionShape" parent="wallcorner/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 2, 0 )
-shape = SubResource( 12 )
+shape = SubResource( 13 )
 
 [node name="wallsplit" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 8 )
@@ -389,7 +419,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 4 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallsplit"]
@@ -398,11 +428,11 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallsplit/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 9 )
 
 [node name="CollisionShape2" type="CollisionShape" parent="wallsplit/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 1.2 )
-shape = SubResource( 11 )
+shape = SubResource( 12 )
 
 [node name="wallcross" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0, 8 )
@@ -410,7 +440,7 @@ cast_shadow = 0
 generate_lightmap = false
 mesh = ExtResource( 6 )
 software_skinning_transform_normals = false
-material/0 = null
+material/0 = ExtResource( 11 )
 material/1 = null
 
 [node name="StaticBody" type="StaticBody" parent="wallcross"]
@@ -419,8 +449,8 @@ collision_mask = 35
 
 [node name="CollisionShape" type="CollisionShape" parent="wallcross/StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 9 )
 
 [node name="CollisionShape2" type="CollisionShape" parent="wallcross/StaticBody"]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 2, 0 )
-shape = SubResource( 6 )
+shape = SubResource( 9 )

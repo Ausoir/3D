@@ -3,6 +3,7 @@ extends Node
 var tick_events = []
 var frame = 0
 var frames = 0
+var seconds = 0
 var second
 var half_second
 var quarter_second
@@ -25,4 +26,5 @@ func on_process(delta):
 			half_second = true
 		elif frames == 4:
 			second = true
+			seconds += 1
 			frames = 0

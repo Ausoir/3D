@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://assets/meshlib/dungeon/tileBrickB_medium.obj" type="ArrayMesh" id=1]
 [ext_resource path="res://assets/meshlib/dungeon/tileBrickB_largeCrackedA.obj" type="ArrayMesh" id=2]
 [ext_resource path="res://assets/meshlib/dungeon/tileBrickB_small.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://assets/materials/mat_tile.tres" type="Material" id=4]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 6, 0.5, 6 )
@@ -12,67 +13,67 @@ extents = Vector3( 6, 0.5, 6 )
 [node name="MeshInstance" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1 )
 mesh = ExtResource( 2 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance2" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -1, 1 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance3" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -1, -1 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance4" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -1, 3 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance5" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5, -1, 5 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance6" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3, -1, 5 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance7" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -1, 5 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance8" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -1, 5 )
 mesh = ExtResource( 3 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance9" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -4, 4 )
 mesh = ExtResource( 1 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance10" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -4, 0 )
 mesh = ExtResource( 1 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance11" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -4, -4 )
 mesh = ExtResource( 1 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance12" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, -4 )
 mesh = ExtResource( 1 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="MeshInstance13" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -4, -4 )
 mesh = ExtResource( 1 )
-material/0 = null
+material/0 = ExtResource( 4 )
 
 [node name="StaticBody" type="StaticBody" parent="."]
 collision_layer = 35

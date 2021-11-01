@@ -1,5 +1,6 @@
 extends "res://objects/units/Pilot.gd"
 
+const UNSTUCKING = 4
 const CHASING = 3
 const PATHING = 2
 const SEARCHING = 1
@@ -42,19 +43,18 @@ func set_alert(level):
 func reach_to(unit_pos, target_pos):
 	var collision = G.space.intersect_ray(unit_pos, target_pos, [], 0b00000000000000100101)
 	if not collision:
-		if abs(unit_pos.y - target_pos.y) < 2:
-			var dir = unit_pos.direction_to(target_pos)
-			dir.y = 0
-			alertness = CHASING
-			set_task(["move", 9999, target_pos, 0])
-			return true
+		var dir = unit_pos.direction_to(target_pos)
+		dir.y = 0
+		alertness = CHASING
+		set_task(["move", 9999, target_pos, 0])
+		return true
 
 func path_to(repath, from, to):
 	var path
 	if repath:
 		pathing.result = []
 		pathing.next_reset = 0
-		pathing.height = unit.get_position().y+.2
+		pathing.height = unit.get_position().y+.1
 	path = pathing.update(from, to)
 	if path:
 		set_task(["idle", 0])
@@ -62,15 +62,10 @@ func path_to(repath, from, to):
 			add_task(["move", 9999, Vector3(p.x,from.y,p.z), .1])
 		next_task()
 
-func unstuck():
-	alertness = -1
-	var target_pos = target.get_interact_position()
-	if G.rng.randi_range(0,1) == 0:
-		set_task(["attack", 9999, target_pos])
-	else:
-		var unit_pos = unit.get_interact_position()
-		var strafe = unit_pos.cross(target_pos) * (40 * G.rng.randi_range(0, 1) - 20)
-		set_task(["move", G.rng.randi_range(20, 40), unit_pos + strafe, 0])
+func unstuck(target_pos):
+	var unit_pos = unit.get_interact_position()
+	var strafe = unit_pos.cross(target_pos) * (40 * G.rng.randi_range(0, 1) - 20)
+	set_task(["move", G.rng.randi_range(20, 40), unit_pos + strafe, 0])
 
 func perceive():
 	for obj in G.world.units.get_children():
@@ -86,37 +81,46 @@ func perceive():
 
 func hear(vec):
 	if alertness == IDLE:
-		search_pos = Vector3(vec.x, unit.get_interact_position().y, vec.z)
-		G.make_particle("repair", search_pos, 3)
+		var unitpos = unit.get_interact_position()
+		if (vec - unitpos).length() > 4:
+			search_pos = Vector3(vec.x, unitpos.y, vec.z)
 
 func on_hit(_pos, hitter, _damage):
 	target = hitter
 	update_target(target.get_interact_position(), true)
 
 func die():
-	set_alert(0)
-	unit.status.die()
-	unit.queue_free()
+	set_alert(IDLE)
 	queue_free()
 
 func on_process(delta):
 	.on_process(delta)
-	if target and !is_instance_valid(target):
+	if target and (!is_instance_valid(target) or target.state == "death"):
 		target = null
-		set_alert(0)
+		set_alert(IDLE)
 		return
 	perform(alertness)
 
 func perform(current_state):
 	if G.time.second:
+		if target and G.time.seconds % 4 == 0:
+			var unit_pos = unit.get_position()
+			if (last_pos - unit_pos).length() < .5:
+				var pos = target.get_interact_position()
+				unstuck(pos)
+				set_alert(UNSTUCKING)
+				G.message("Unstucking")
+				last_pos = unit_pos + Vector3(9,9,9)
+				return
+			last_pos = unit_pos
 		var t = perceive()
 		if t:
 			target = t
 			update_target(target.get_interact_position(), true)
 			return
 	if current_state == IDLE:
-		if search_pos:
-			if G.time.second:
+		if G.time.second:
+			if search_pos:
 				update_target(search_pos, true)
 				set_alert(SEARCHING)
 				unit.talk(npc_search)
@@ -125,18 +129,27 @@ func perform(current_state):
 			update_target(search_pos, false)
 			set_alert(SEARCHING)
 			if (unit.get_interact_position() - search_pos).length() < 1.5:
-				G.message("search end")
-				set_alert(0)
+				set_alert(IDLE)
+				set_task()
 	elif current_state == PATHING:
 		if G.time.quarter_second:
-			update_target(target.get_interact_position(), false)
+			update_target(target.get_interact_position(), tasks.empty())
 	elif current_state == CHASING:
-		var target_pos = target.get_interact_position()
-		if task[0] == "move":
-			var dist = (target_pos - unit.get_interact_position()).length()
-			if dist < unit.get_reach()+1:
-				set_task(["attack", 9999, target_pos])
-			else:
+		if G.time.quarter_second:
+			var target_pos = target.get_interact_position()
+			if task[0] == "move":
+				var unit_pos = unit.get_interact_position()
+				var dist = (target_pos - unit_pos).length()
+				if dist < unit.get_reach()+1:
+					last_pos = unit_pos + Vector3(9,9,9)
+					set_task(["attack", 9999, target_pos])
+				else:
+					update_target(target_pos, true)
+			elif task[0] == "attack":
 				task[2] = target_pos
-		elif task[0] == "attack":
-			task[2] = target_pos
+	elif current_state == UNSTUCKING:
+		if G.time.second and G.time.seconds % 3 == 0:
+			if target:
+				update_target(target.get_interact_position(), true)
+			else:
+				alertness = IDLE

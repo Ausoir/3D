@@ -1,4 +1,4 @@
 models - kennys cc0
-audio - from tps demo (unknown, replace)
-minerals - https://ipoly3d.com/
+dungeon models - kaykit cc0
 
+shaders - stylized fire - (Code) https://github.com/GDQuest/godot-shaders (Art) GDQuest and contributors (https://www.gdquest.com/)

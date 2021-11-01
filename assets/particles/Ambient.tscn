@@ -1,28 +1,38 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://assets/textures/leaf.png" type="Texture" id=1]
+[ext_resource path="res://assets/textures/dust.png" type="Texture" id=1]
+
+[sub_resource type="Curve" id=5]
+_data = [ Vector2( 0, 0.163636 ), 0.0, 2.87945, 0, 0, Vector2( 1, 0.627273 ), -1.57086, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=6]
+width = 1024
+curve = SubResource( 5 )
 
 [sub_resource type="ParticlesMaterial" id=1]
 emission_shape = 2
-emission_box_extents = Vector3( 16, 16, 16 )
+emission_box_extents = Vector3( 12, 5, 12 )
 flag_align_y = true
 flag_rotate_y = true
 direction = Vector3( 1, -1, 0 )
 spread = 12.0
 gravity = Vector3( 0, 0, 0 )
 initial_velocity = 2.0
-initial_velocity_random = 0.5
+initial_velocity_random = 1.0
 angular_velocity = 0.24
 angular_velocity_random = 1.0
 angle_random = 1.0
-scale = 0.1
-scale_random = 0.5
+scale = 0.02
+scale_random = 0.4
+scale_curve = SubResource( 6 )
 
 [sub_resource type="SpatialMaterial" id=2]
 flags_transparent = true
+params_diffuse_mode = 4
 params_specular_mode = 4
+params_blend_mode = 1
 params_cull_mode = 2
-albedo_color = Color( 0.0862745, 0.678431, 0, 1 )
+albedo_color = Color( 0.301961, 0.301961, 0.301961, 1 )
 albedo_texture = ExtResource( 1 )
 
 [sub_resource type="QuadMesh" id=3]
@@ -44,9 +54,10 @@ func _process(_delta):
 "
 
 [node name="Particle" type="Particles"]
-amount = 16
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0 )
+amount = 32
 lifetime = 16.0
-visibility_aabb = AABB( -8, -8, -8, 16, 16, 16 )
+visibility_aabb = AABB( -8, -5, -8, 16, 10, 16 )
 local_coords = false
 process_material = SubResource( 1 )
 draw_pass_1 = SubResource( 3 )

@@ -3,19 +3,19 @@ const Item_Script = preload("res://objects/Item.gd")
 const Despawn = preload("res://assets/materials/mat_despawn.tres")
 const Progress = preload("res://interface/progress_bar.tscn")
 const Status = preload("res://objects/Status.gd")
-const Unit = preload("res://objects/units/Unit.tscn")
+const Man = preload("res://objects/units/Man.tscn")
 const Ai = preload("res://objects/units/Ai.gd")
 const Bag = preload("res://assets/models/bag.obj")
 const Type_Object = preload("res://objects/Object.tscn")
 const Type_Item = preload("res://objects/Item.tscn")
 
 const unit_data = {
-	"dummy": [0, {}, []],
-	"miner": [1, {}, ["cloth armor", "boots", "pickaxe"]],
-	"digger": [1, {}, ["cloth armor", "boots", "shovel"]],
-	"guard": [1, {}, ["shortsword", "leather armor", "boots"]],
-	"warrior": [1, {}, ["spear", "leather armor", "leather gloves", "leather boots"]],
-	"soldier": [1, {}, ["longsword", "iron armor", "iron gauntlets", "iron boots", "full helmet"]],
+	"dummy": [Man, 0, {}, []],
+	"miner": [Man, 1, {}, ["cloth armor", "boots", "pickaxe"]],
+	"digger": [Man, 1, {}, ["cloth armor", "boots", "shovel"]],
+	"guard": [Man, 1, {}, ["shortsword", "leather armor", "boots"]],
+	"warrior": [Man, 1, {}, ["spear", "leather armor", "leather gloves", "leather boots"]],
+	"soldier": [Man, 1, {}, ["longsword", "iron armor", "iron gauntlets", "iron boots", "full helmet"]],
 }
 
 const data = {
@@ -125,6 +125,9 @@ const data = {
 	"wand rack": ["building", preload("res://world/buildings/Rack.tscn"),
 		{health=6,onuse=[["wait",12,"work"],["cmd",0,[["trigger",""]]]]},
 		 {defense="1d6", loot="wands"}],
+	"waste": ["building", preload("res://world/buildings/Waste.tscn"), {
+		onmake=[["v","spawnpoint",0],["r","cmd",[[],[["make","shovel"]]]]]
+	},{}],
 	"table": ["building", preload("res://world/buildings/Table.tscn"), {health=4},{}],
 	"large table": ["building", preload("res://world/buildings/TableLarge.tscn"), {health=8},{}],
 	"pots": ["building", preload("res://world/buildings/Pots.tscn"), {health=1},{}],
@@ -149,6 +152,14 @@ const data = {
 	"altar": ["building", preload("res://world/buildings/Altar.tscn"),{},{}],
 	"benchs": ["building", preload("res://world/buildings/Benchs.tscn"),{},{}],
 	"dissection": ["building", preload("res://world/buildings/Dissection.tscn"),{health=12},{}],
+	"occluder": ["building", preload("res://world/buildings/Occluder.tscn"),{},{}],
+	"portal": ["building", preload("res://world/buildings/Portal.tscn"),{
+		onmake=[["v","host"],["state","work",9999],["setwork",24,"Destabilizing..."]],
+		onwork=[["setwork"],["v","host"],["trigger",""]]
+	},{}],
+	"trapdoor": ["building", preload("res://world/buildings/Trapdoor.tscn"),{
+		onuse=[["wait",12,"work"],["cmd",0,[["trigger",""]]]]
+	},{}],
 }
 
 var descriptions = {
@@ -194,17 +205,18 @@ func get_description(name):
 func make_unit(arg):
 	if arg in unit_data:
 		var item = unit_data[arg]
-		var itemdata = item[1]
-		var r = Unit.instance()
-		if item[0] == 1:
+		var itemdata = item[2]
+		var r = item[0].instance()
+		if item[1] == 1:
 			var ai = Ai.new(r)
 			G.controllers.append(ai)
 		r.item_name = arg
 		if itemdata.has("health"):
 			r.health = Vector2(itemdata.health, itemdata.health)
 		G.world.units.add_child(r)
-		for i in item[2]:
-			G.cmds([["v","pos"],["make", i],["equip"]], r)
+		if item[0] == Man:
+			for i in item[3]:
+				G.cmds([["v","pos"],["make", i],["equip"]], r)
 		r.orientation.basis = Transform().looking_at(Vector3(G.rng.randf_range(-1,1),0,G.rng.randf_range(-1,1)), Vector3.UP).basis.orthonormalized()
 		var size = G.rng.randf_range(.8, 1.2)
 		r.unit_size = Vector3(size,size,size)

@@ -15,7 +15,7 @@ func perform(ability, unit):
 
 func debug_flight(unit):
 	if unit.cast == 2:
-		unit.transform.origin.y -= 12
+		unit.transform.origin.y -= 2
 	elif unit.cast == 1:
 		G.cmds([["v","host"],["state","night vision",24]], unit)
 		G.cmds([["v","host"],["state","light",24],["v","host"],["state","haste",24],["v","host"],["state","slowfall",3]], unit)

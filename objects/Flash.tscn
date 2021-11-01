@@ -1,0 +1,66 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends OmniLight
+
+func _ready():
+	$AnimationPlayer.play(\"Flash\")
+
+func set_flash(speed, dist, energy):
+	$AnimationPlayer.set_speed_scale(speed)
+	var flash = $AnimationPlayer.get_animation(\"Flash\")
+	flash.track_set_key_value(0, 1, dist)
+	flash.track_set_key_value(1, 1, energy)
+"
+
+[sub_resource type="Animation" id=2]
+resource_name = "Flash"
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:omni_range")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ 0.0, 8.0, 0.0 ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath(".:light_energy")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 0.0192366, 1 ),
+"update": 0,
+"values": [ 0.0, 16.0, 0.0 ]
+}
+tracks/2/type = "method"
+tracks/2/path = NodePath(".")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 1 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "queue_free"
+} ]
+}
+
+[node name="Flash" type="OmniLight"]
+light_energy = 0.0
+shadow_enabled = true
+omni_range = 0.0
+omni_attenuation = 0.03125
+omni_shadow_mode = 0
+script = SubResource( 1 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/Flash = SubResource( 2 )

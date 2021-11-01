@@ -10,6 +10,7 @@ const particles = {
 	"repair": preload("res://assets/particles/Repair.tscn"),
 	"spark": preload("res://assets/particles/Spark.tscn"),
 	"light": preload("res://assets/particles/Light.tscn"),
+	"overcharge": preload("res://assets/particles/Overcharge.tscn"),
 	"debug": preload("res://assets/particles/Debug.tscn"),
 }
 const Command = preload("res://classes/Command.gd")

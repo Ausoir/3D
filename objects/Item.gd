@@ -17,7 +17,6 @@ var properties = {}
 var work = 1
 var work_max = 0
 var progress_bar
-var frame = 0
 
 
 func set_faction(pfaction):
@@ -95,7 +94,5 @@ func on_work():
 
 func _process(delta):
 	status.update(delta)
-	frame += delta
-	if frame > 1:
-		frame -= 1
+	if G.time.quarter_second:
 		check_workdone()

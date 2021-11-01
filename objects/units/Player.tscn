@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://assets/particles/Ambient.tscn" type="PackedScene" id=1]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends \"res://objects/units/Pilot.gd\"
@@ -18,6 +20,7 @@ var mouse_captured = true
 var id = 1
 var gold = 50
 var pathing = Pathing.new()
+var opening_menu = 0
 
 
 func _ready():
@@ -68,7 +71,7 @@ func _input(event):
 			camera.rotation.x = clamp(camera.rotation.x, CAMERA_X_ROT_MIN, CAMERA_X_ROT_MAX)
 		show_interactable_tip()
 	if Input.is_action_just_pressed(\"restart\"):
-		print(\"Player._input:restart: \", get_tree().reload_current_scene())
+		restart()
 	elif Input.is_action_just_pressed(\"ui_fullscreen\"):
 		OS.window_fullscreen = !OS.window_fullscreen
 	elif Input.is_action_just_pressed(\"ui_mouse\"):
@@ -89,18 +92,18 @@ func on_process(delta):
 	var unit_pos = unit.transform.origin
 	var cam_pos = Vector2(unit_pos.x, unit_pos.z)
 	camera.transform.origin.x = cam_pos.x
-	camera.transform.origin.y = unit_pos.y+6.5
+	camera.transform.origin.y = unit_pos.y+(1.5*unit.transform.basis.get_scale().y)
 	camera.transform.origin.z = cam_pos.y
 	unit.anim_tree[\"parameters/head_v/add_amount\"] = camera.rotation.x * 1.5
 
-	var move_target = Vector2(
-			Input.get_action_strength(\"move_right\") - Input.get_action_strength(\"move_left\"),
-			Input.get_action_strength(\"move_back\") - Input.get_action_strength(\"move_front\")
-		)
-	if move_target != Vector2.ZERO:
-		set_task([\"moveto\", .001, move_target.x, move_target.y])
-
 	if mouse_captured:
+		var move_target = Vector2(
+				Input.get_action_strength(\"move_right\") - Input.get_action_strength(\"move_left\"),
+				Input.get_action_strength(\"move_back\") - Input.get_action_strength(\"move_front\")
+			)
+		if move_target != Vector2.ZERO:
+			set_task([\"moveto\", .001, move_target.x, move_target.y])
+
 		if Input.is_action_pressed(\"special\"):
 			set_task([\"special\", 1])
 		elif Input.is_action_just_pressed(\"interact\"):
@@ -115,7 +118,14 @@ func on_process(delta):
 				G.message(str(tpathing.get_routes_debug(unit.get_interact_position())))
 				var dir = G.world.tilemap.get_cell_item_orientation(pos.x, 0, pos.z)
 				G.message(\"Pos: \"+str(pos)+\" Item: \"+str(G.world.dungeon_map[pos.y][pos.z]) + \" Dir: \"+str(dir))
-				set_task([\"cmd\", 0, [[\"menu\", \"hand\", id]]])
+		elif Input.is_action_pressed(\"item\"):
+			if !G.ui.tooltip.visible:
+				set_task([\"wait\", 1, \"work\"])
+				opening_menu += 1
+				if opening_menu > 32:
+					set_task([\"cmd\", 0, [[\"menu\", \"hand\", id]]])
+		elif Input.is_action_just_released(\"item\"):
+			opening_menu = 0
 
 func show_interactable_tip():
 	G.ui.set_tooltip(null)
@@ -134,8 +144,13 @@ func on_hit(_pos, _hitter, _damage):
 
 
 func die():
-	pass
+	set_process(false)
+	set_process_input(false)
+	G.ui.get_node(\"AnimationPlayer/Fade\").set_size(get_viewport().size)
+	G.ui.get_node(\"AnimationPlayer\").play(\"FadeOut\")
 
+func restart():
+	print(\"Player:restart: \", get_tree().reload_current_scene())
 
 func hear(_vec):
 	pass
@@ -154,3 +169,5 @@ spring_length = 2.0
 [node name="Camera" type="Camera" parent="CameraBase/SpringArm"]
 current = true
 far = 120.0
+
+[node name="Particle" parent="CameraBase" instance=ExtResource( 1 )]

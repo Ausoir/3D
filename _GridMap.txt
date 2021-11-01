@@ -1,0 +1,205 @@
+extends GridMap
+
+const tileset = preload("res://assets/meshlib_dungeon.tres")
+const orientations = [0, 10, 16, 22]#Z-,Z+,X-,X+
+const wall_autotile_map = [
+	[[1, 3, 5, -7], [1, -3, 5, 7], [1, 3, -5, 7], [-1, 3, 5, 7]],
+	[[1, -3, 5, 7], [1, 3, 5, -7], [-1, 3, 5, 7], [1, 3, -5, 7]],
+	[[1, -3, 5, -7], [1, -3, 5, -7], [-1, 3, -5, 7], [-1, 3, -5, 7]],
+	[[-1, 3, 5, -7], [1, -3, -5, 7], [1, 3, -5, -7], [-1, -3, 5, 7]],
+	[[-1, -3, 5, -7], [1, -3, -5, -7], [-1, 3, -5, -7], [-1, -3, -5, 7]],
+	[[1, 3, 5, 7]],
+	[[-1, -3, -5, -7]],
+]
+var tileA = tileset.find_item_by_name("tile1")
+var tileB = tileset.find_item_by_name("tile2")
+var door = tileset.find_item_by_name("door")
+var window = tileset.find_item_by_name("window1")
+var wall = tileset.find_item_by_name("wall1")
+var wall2 = tileset.find_item_by_name("wall2")
+var wall3 = tileset.find_item_by_name("wall3")
+var wallend = tileset.find_item_by_name("wallend1")
+var wallend2 = tileset.find_item_by_name("wallend2")
+var wallcorner = tileset.find_item_by_name("wallcorner")
+var wallsingle = tileset.find_item_by_name("wallsingle1")
+var wallsingle2 = tileset.find_item_by_name("wallsingle2")
+var wallsplit = tileset.find_item_by_name("wallsplit")
+var wallcross = tileset.find_item_by_name("wallcross")
+var spike = tileset.find_item_by_name("spike")
+var fence = tileset.find_item_by_name("fence")
+var fencecorner = tileset.find_item_by_name("fencecorner")
+var fencedoor = tileset.find_item_by_name("fencedoor")
+var fencewindow = tileset.find_item_by_name("window2")
+var walls = [
+	wallsplit,
+	wall,
+	wall,
+	wallcorner,
+	wallend,
+	wallcross,
+	wallsingle,
+]
+var doors = [
+	wallsplit,
+	door,
+	door,
+	wallcorner,
+	wallend,
+	wallcross,
+	wallsingle
+]
+var windows = [
+	wallsplit,
+	window,
+	window,
+	wallcorner,
+	wallend,
+	wallcross,
+	wallsingle
+]
+var fence_map = {
+	wall: fence,
+	wallcorner: fencecorner,
+	door: fencedoor,
+	window: fencewindow,
+}
+
+var rng
+
+func is_tile_named(tile, tilename):
+	return tile == tileset.find_item_by_name(tilename)
+
+func autotile_map(from, to, y, is_border=false):
+	var item
+	var wall_autotiles = []
+	var door_autotiles = []
+	var window_autotiles = []
+	var autotile
+	for x in range(from.x, to.x+1):
+		for z in range(from.y, to.y+1):
+			item = get_cell_item(x, y, z)
+			if item == door:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					door_autotiles.append(autotile)
+			elif item == window:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					window_autotiles.append(autotile)
+			elif item == wall:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					wall_autotiles.append(autotile)
+	var updated_autotiles = []
+	var update_autotiles = []
+	for cell in wall_autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], walls[cell[3]], orientations[cell[4]])
+	for cell in door_autotiles:
+		var dir = orientations[cell[4]]
+		var doortile = doors[cell[3]]
+		var x = cell[0]
+		var z = cell[2]
+		if doortile == wallsplit or doortile == wallcross:
+			print(doortile," split at ",x,",",z)
+			set_cell_item(x,cell[1],z,door,dir)
+			if dir == 0:
+				if get_cell_item(x,cell[1],z+2) in walls:
+					updated_autotiles.append([x,cell[1],z+1,wallend,16])
+				else:
+					updated_autotiles.append([x,cell[1],z+1,-1,-1])
+				update_autotiles.append([Vector2(x-1,z+1), Vector2(x+1,z+2)])
+			elif dir == 10:
+				if get_cell_item(x,cell[1],z-2) in walls:
+					updated_autotiles.append([x,cell[1],z-1,wallend,22])
+				else:
+					updated_autotiles.append([x,cell[1],z-1,-1,-1])
+				update_autotiles.append([Vector2(x-1,z-2), Vector2(x+1,z-1)])
+			elif dir == 16:
+				if get_cell_item(x+2,cell[1],z) in walls:
+					updated_autotiles.append([x+1,cell[1],z,wallend,10])
+				else:
+					updated_autotiles.append([x+1,cell[1],z,-1,-1])
+				update_autotiles.append([Vector2(x+1,z-1), Vector2(x+2,z+1)])
+			elif dir == 22:
+				if get_cell_item(x-2,cell[1],z) in walls:
+					updated_autotiles.append([x-1,cell[1],z,wallend,0])
+				else:
+					updated_autotiles.append([x-1,cell[1],z,-1,-1])
+				update_autotiles.append([Vector2(x-2,z-1), Vector2(x-1,z+1)])
+		elif doortile == wallcorner:
+			updated_autotiles.append([x,cell[1],z,wallcorner,dir])
+			if dir == 0:
+				updated_autotiles.append([x-1,cell[1],z,door,0])
+				updated_autotiles.append([x,cell[1],z+1,door,22])
+			elif dir == 10:
+				updated_autotiles.append([x+1,cell[1],z,door,10])
+				updated_autotiles.append([x,cell[1],z-1,door,16])
+			elif dir == 16:
+				updated_autotiles.append([x+1,cell[1],z,door,0])
+				updated_autotiles.append([x,cell[1],z+1,door,16])
+			elif dir == 22:
+				updated_autotiles.append([x-1,cell[1],z,door,10])
+				updated_autotiles.append([x,cell[1],z-1,door,22])
+		else:
+			set_cell_item(cell[0], cell[1], cell[2], doors[cell[3]], dir)
+	for cell in window_autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], windows[cell[3]], orientations[cell[4]])
+	for cell in updated_autotiles:
+		if cell[3] == -1 and is_border:
+			if cell[0] == 0 or cell[0] == to.x:
+				set_cell_item(cell[0], cell[1], cell[2], wall, 16)
+				continue
+			elif cell[2] == 0 or cell[2] == to.y:
+				set_cell_item(cell[0], cell[1], cell[2], wall, 0)
+				continue
+		set_cell_item(cell[0], cell[1], cell[2], cell[3], cell[4])
+	for bounds in update_autotiles:
+		autotile_map_simple(bounds[0], bounds[1], y)
+
+func autotile_map_simple(from, to, y):
+	var item
+	var autotiles = []
+	var autotile
+	for x in range(from.x, to.x+1):
+		for z in range(from.y, to.y+1):
+			item = get_cell_item(x, y, z)
+			if item == wallsplit or item == wallcorner:
+				autotile = set_autotile(x, y, z, wall_autotile_map)
+				if autotile:
+					autotiles.append(autotile)
+	for cell in autotiles:
+		set_cell_item(cell[0], cell[1], cell[2], walls[cell[3]], orientations[cell[4]])
+
+func set_autotile(x, y, z, dict):
+	var adj = [-1, -2, -3, -4, -5, -6, -7, -8]
+	if get_cell_item(x+1, y, z) != -1:
+		adj[0] *= -1
+	if get_cell_item(x+1, y, z+1) != -1:
+		adj[1] *= -1
+	if get_cell_item(x, y, z+1) != -1:
+		adj[2] *= -1
+	if get_cell_item(x-1, y, z+1) != -1:
+		adj[3] *= -1
+	if get_cell_item(x-1, y, z) != -1:
+		adj[4] *= -1
+	if get_cell_item(x-1, y, z-1) != -1:
+		adj[5] *= -1
+	if get_cell_item(x, y, z-1) != -1:
+		adj[6] *= -1
+	if get_cell_item(x+1, y, z-1) != -1:
+		adj[7] *= -1
+	var count = 0
+	var orientation
+	for v in dict:
+		orientation = 0
+		for sidereqs in v:
+			if is_matching(adj, sidereqs):
+				return [x, y, z, count, orientation]
+			orientation += 1
+		count += 1
+
+func is_matching(adj, req):
+	for side in req:
+		if adj[abs(side)-1] != side:
+			return false
+	return true

@@ -123,15 +123,18 @@ func fill(from, to, val):
 			base[y][x] = val
 
 
-func make_border(val):
+func make_border(val, exc=[]):
+	var list = []
 	for i in range(len(base)):
-		base[i][0] = val
-		base[i][len(base[0])-1] = val
+		list.append([i, 0])
+		list.append([i, len(base[0])-1])
 	for i in range(len(base[0])):
-		base[0][i] = val
-		base[len(base)-1][i] = val
+		list.append([0, i])
+		list.append([len(base)-1, i])
+	for i in list:
+		if not base[i[0]][i[1]] in exc:
+			base[i[0]][i[1]] = val
 	return base
-
 
 func check_adjacent(x, y, tile):
 	if base[y][x] == tile or\
@@ -142,15 +145,31 @@ func check_adjacent(x, y, tile):
 			return true
 	return false
 
+func boundary_dist(x, y):
+	var xdist = min(x, len(base[0])-1-x)
+	var ydist = min(y, len(base)-1-y)
+	return min(xdist, ydist)
 
-func get_possible_sides(x, y, valid):
+func get_possible_sides(x, y, valids, dist=1, default=false):
 	var r = []
-	if base[y+1][x] == valid:
+	if y+dist > map_size.y - 1:
+		if default:
+			r.append(0)
+	elif base[y+dist][x] in valids:
 		r.append(0)
-	if base[y-1][x] == valid:
+	if y-dist < 0:
+		if default:
+			r.append(10)
+	elif base[y-dist][x] in valids:
 		r.append(10)
-	if base[y][x-1] == valid:
-		r.append(16)
-	if base[y][x+1] == valid:
+	if x+dist > map_size.x - 1:
+		if default:
+			r.append(22)
+	elif base[y][x+dist] in valids:
 		r.append(22)
+	if x-dist < 0:
+		if default:
+			r.append(16)
+	elif base[y][x-dist] in valids:
+		r.append(16)
 	return r

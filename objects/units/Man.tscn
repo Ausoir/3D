@@ -1,17 +1,16 @@
-[gd_scene load_steps=73 format=2]
+[gd_scene load_steps=75 format=2]
 
-[ext_resource path="res://assets/materials/mat_skin.tres" type="Material" id=1]
+[ext_resource path="res://assets/materials/toon.gdshader" type="Shader" id=1]
 [ext_resource path="res://assets/audio/step.wav" type="AudioStream" id=2]
+[ext_resource path="res://assets/textures/wood_bare.png" type="Texture" id=3]
 [ext_resource path="res://assets/audio/land.wav" type="AudioStream" id=7]
 [ext_resource path="res://interface/health_quad.tscn" type="PackedScene" id=9]
 [ext_resource path="res://interface/damage.tscn" type="PackedScene" id=10]
 
 [sub_resource type="GDScript" id=1]
-script/source = "extends KinematicBody
+script/source = "extends \"res://objects/units/Unit.gd\"
 
-const GRAVITY = -.98
-const JUMP_SPEED = 20
-const HEIGHT = Vector3(0, 16, 0)
+
 const state_map = {
 	\"grab\": 1,
 	\"work\": 2,
@@ -33,54 +32,16 @@ const attack_map = {
 const skin_map = {
 	\"skin\": 0, \"eyes\": 1, \"mouth\": 2, \"armor\": 3, \"arms\": 4, \"legs\": 5
 }
-onready var sfx_land = $Sound/Land
-onready var sfx_step = $Sound/Step
-onready var sfx_voice = $Sound/Voice
-onready var anim_tree = $AnimationTree
-onready var anim_player = $AnimationPlayer
-onready var skeleton = $CharacterArmature/Skeleton
-onready var body_mesh = $CharacterArmature/Skeleton/Body
-onready var health_bar = $Health
-onready var damage_label = $Damage
-var item_name = \"unit\"
-var controller
-var unit_size = Vector3.ONE
-var move_speed = Vector2(4,4)
-var motion_target = Vector2()
-var motion = Vector2()
-var view_x = Vector3()
-var view_z = Vector3()
-var orientation = Transform()
-var velocity = Vector3()
-var prev_post_velocity = 0
-var state = \"move\"
-var state_time = 0
-var state_lock = false
-var status
-var airborne_time = -2
-var frame = 0
-var hit_glance = true #hit bounces off object. Disabled for AI's
-var hitbox
-var hitshape
-var head
+const skin = preload(\"res://assets/materials/mat_skin.tres\")
 var hand
 var weapon
 var helm
-var level = 1
 var armors = {}
-var health = Vector2(5, 5)
 var cast = 0
 
-
 func _ready():
-	status = G.factory.Status.new()
-	orientation = global_transform
-	orientation.origin = Vector3()
-	head = skeleton.find_bone(\"Head\")
+	._ready()
 	hand = skeleton.find_bone(\"Fist.R\")
-
-func on_make():
-	pass
 
 func set_state(arg=\"move\", force=false):
 	if state != arg:
@@ -93,6 +54,7 @@ func set_state(arg=\"move\", force=false):
 					state_lock = true
 					anim_tree[\"parameters/hardstate/current\"] = hardstate_map[arg]
 					if arg == \"death\":
+						velocity *= 0
 						set_collision_layer_bit(1, 0)
 						set_collision_mask_bit(1, 0)
 				elif arg in attack_map:
@@ -104,95 +66,8 @@ func set_state(arg=\"move\", force=false):
 				state = arg
 				state_time = 0
 
-
-func _physics_process(delta):
-	controller.on_process(delta)
-	move_speed.x = move_speed.y
-	status.update(delta)
-	update_equipment()
-	if is_on_floor():
-		if airborne_time > .3:
-			airborne_time = 0
-			on_hit(get_position(), null, 1, [\"penetrate\"])
-			set_state(\"drop\", true)
-			sfx_land.play()
-		else:
-			airborne_time = 0
-			if !state_lock:
-				if state == \"move\":
-					if motion_target == Vector2.ZERO and velocity == Vector3.ZERO:
-						return
-					else:
-						anim_tree[\"parameters/lunge/blend_amount\"] *= .8
-						motion_target *= .8
-				else:
-					motion_target *= 0
-			elif state == \"drop\":
-				motion_target *= 0
-			elif state == \"hit\":
-				motion_target *= 0
-			elif state == \"death\":
-				velocity *= 0
-				var mat_override = body_mesh.get_material_override()
-				if mat_override == null:
-					var mat = SpatialMaterial.new()
-					mat.albedo_color = Color(.2,0,.3,1)
-					mat.flags_transparent = true
-					body_mesh.set_material_override(mat)
-				elif mat_override.albedo_color.a > 0:
-					mat_override.albedo_color.a -= .003
-				else:
-					die()
-				return
-			else: #state in attack_map
-				anim_tree[\"parameters/lunge/blend_amount\"] += (1-anim_tree[\"parameters/lunge/blend_amount\"])*.1
-				if state == \"swing\":
-					var atkspd = 1/anim_tree[\"parameters/attack speed/scale\"]
-					motion_target *= .8
-					if state_time > (.3 * atkspd) and state_time < (.7 * atkspd):
-						move_speed.x = move_speed.y * 1.5
-					elif state_time > (.7 * atkspd):
-						motion_target *= .3
-				elif state == \"charge\" and state_time > .5:
-					move_speed.x = move_speed.y * 1.2
-				else:
-					motion_target *= .2
-			state_time += delta
-	elif velocity.y < GRAVITY * .15:
-		airborne_time += delta
-		if airborne_time > .1:
-			set_state(\"fall\")
-			if get_position().y < 1:
-				die()
-				return
-	else:
-		motion_target *= 0
-	motion = motion.linear_interpolate(motion_target, 8 * delta)
-	var speed = max(abs(motion.x), abs(motion.y))
-	if speed > 0.1:
-		var target = motion.x * view_x + motion.y * view_z
-		var q_from = orientation.basis.get_rotation_quat()
-		var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
-		orientation.basis = Basis(q_from.slerp(q_to, delta * 10))
-	var rotdiff = orientation.basis.x.dot(view_z)
-	anim_tree[\"parameters/head_h/add_amount\"] = rotdiff * -2
-	var h_velocity = Vector2(0, move_speed.x*speed).rotated(-orientation.basis.get_euler().y)
-	velocity.x = h_velocity.x
-	velocity.z = h_velocity.y
-	velocity.y += GRAVITY
-	velocity = move_and_slide(velocity, Vector3.UP)
-	var post_velocity = Vector2(velocity.x, velocity.z).length() / move_speed.y
-	post_velocity = prev_post_velocity + (post_velocity - prev_post_velocity) * .1
-	anim_tree[\"parameters/movement/blend_position\"] = post_velocity
-	prev_post_velocity = post_velocity
-
-	orientation = orientation.orthonormalized() # Orthonormalize orientation.
-	global_transform.basis = orientation.basis.scaled(unit_size)
-
-
 func on_cast():
 	cast += 1
-
 
 func on_anim_finish():
 	if state != \"death\":
@@ -203,16 +78,6 @@ func on_anim_finish():
 		if anim_tree[\"parameters/state/current\"] == 0:
 			anim_tree[\"parameters/attack/current\"] = 0
 
-func on_step():
-	if abs(motion.x) > .5 or abs(motion.y) > .5:
-		sfx_step.seek(0)
-		sfx_step.play()
-
-func talk(stream):
-	G.cmds([[\"alert\", get_view_position(), 12]], self)
-	sfx_voice.set_stream(stream)
-	sfx_voice.seek(0)
-	sfx_voice.play()
 
 func update_equipment():
 	if helm:
@@ -259,18 +124,28 @@ func set_weapon(item):
 
 func get_reach():
 	if weapon != null:
-		return hitshape.extents.y
+		return hitshape.extents.y + global_transform.basis.get_scale().x
 	else:
-		return 1
+		return global_transform.basis.get_scale().x
 
-func set_armor(arg):
-	var data = arg.properties
-	if data.part in armors:
-		var oldarmor = armors[data.part]
+func unset_armor(part, update=true):
+	if part in armors:
+		var oldarmor = armors[part]
 		if oldarmor.get_parent() == self:
 			remove_child(oldarmor)
 		G.world.objects.add_child(oldarmor)
 		oldarmor.transform.origin = get_position()
+		if update:
+			armors.erase(part)
+			if part == \"head\":
+				helm = null
+			else:
+				body_mesh.set_surface_material(skin_map[part], skin)
+			update_stats()
+
+func set_armor(arg):
+	var data = arg.properties
+	unset_armor(data.part, false)
 	if arg.holder == self:
 		set_weapon(null)
 	G.rid(arg, false)
@@ -302,7 +177,7 @@ func update_stats():
 		if \"weight\" in item.properties:
 			var encumber = item.properties.weight - m_strength
 			m_attack_speed -= encumber
-			m_cast_speed -= encumber
+			m_cast_speed -= encumber * 4
 			m_move_speed -= encumber
 	if m_attack_speed > 0:
 		anim_tree[\"parameters/attack speed/scale\"] = 1*(1+m_attack_speed*.1)
@@ -329,24 +204,12 @@ func update_stats():
 func set_special(ptype):
 	anim_tree[\"parameters/cast type/current\"] = ptype
 
-func on_hit(pos, hitter, damage, tags):
-	if !(\"penetrate\" in tags):
-		var ac = 0
-		for v in armors.values():
-			if \"defense\" in v.properties:
-				ac += v.properties.defense
-		damage -= G.roll(\"1d\"+str(ac))
-	if hitter:
-		controller.on_hit(pos, hitter, damage)
-	if damage <= 0:
-		G.make_particle(\"spark\", pos, 1)
-	else:
-		damage_label.display(damage)
-		G.make_particle(\"blood\", pos, 1)
-		set_state(\"hit\", true)
-		damage(damage)
-		health_bar.display(health.x, health.y, item_name, level)
-
+func get_defense():
+	var ac = 0
+	for v in armors.values():
+		if \"defense\" in v.properties:
+			ac += v.properties.defense
+	return ac
 
 func on_attack():
 	if weapon != null:
@@ -384,48 +247,103 @@ func on_attack():
 				else:
 					victim.on_hit(hitpos, self, weapon_damage, weapon_tags)
 
-func glance(hitpos, weapon_tags):
-	if hit_glance and !(\"blunt\" in weapon_tags):
-		G.make_particle(\"spark\", hitpos, 1)
-		set_state(\"hit\", true)
-
-
-func get_view_position():
-	return (global_transform * skeleton.get_bone_global_pose(head)).origin
-
-
-func get_position():
-	return global_transform.origin
-
-
-func get_interact_position():
-	return global_transform.origin + Vector3.UP
-
-
-func get_adjacent(x, y):
-	var h = Vector2(x, y).rotated(-transform.basis.get_euler().y)
-	var pos = get_position()
-	var target_pos = Vector3(pos.x + h.x, pos.y, pos.z + h.y)
-	return target_pos
-
-
 func damage(dmg):
+	.damage(dmg)
 	if health.x > 0:
-		health.x -= dmg
-		if health.x <= 0:
-			controller.set_task()
-			set_state(\"death\", true)
-		else:
-			anim_tree[\"parameters/limp/blend_amount\"] = .9 - (health.x / health.y)
+		anim_tree[\"parameters/limp/blend_amount\"] = .9 - (health.x / health.y)
 
+func on_process(delta):
+	move_speed.x = move_speed.y
+	status.update(delta)
+	update_equipment()
+	if is_on_floor():
+		if airborne_time > .3:
+			airborne_time = 0
+			on_hit(get_position(), null, 1, [\"true\"])
+			set_state(\"drop\", true)
+			sfx_land.play()
+		else:
+			airborne_time = 0
+			if !state_lock:
+				if state == \"move\":
+					if motion_target == Vector2.ZERO and velocity == Vector3.ZERO:
+						return
+					else:
+						anim_tree[\"parameters/lunge/blend_amount\"] *= .8
+						motion_target *= .8
+				else:
+					motion_target *= 0
+			elif state == \"drop\":
+				motion_target *= 0
+			elif state == \"hit\":
+				motion_target *= 0
+			elif state == \"death\":
+				return dying(delta)
+			else: #state in attack_map
+				anim_tree[\"parameters/lunge/blend_amount\"] += (1-anim_tree[\"parameters/lunge/blend_amount\"])*.1
+				if state == \"swing\":
+					var atkspd = 1/anim_tree[\"parameters/attack speed/scale\"]
+					motion_target *= .8
+					if state_time > (.3 * atkspd) and state_time < (.7 * atkspd):
+						move_speed.x = move_speed.y * 1.5
+					elif state_time > (.7 * atkspd):
+						motion_target *= .3
+				elif state == \"charge\" and state_time > .5:
+					move_speed.x = move_speed.y * 1.2
+				else:
+					motion_target *= .2
+			state_time += delta
+	elif velocity.y < GRAVITY * .15:
+		airborne_time += delta
+		if airborne_time > .1:
+			set_state(\"fall\")
+			if get_position().y < 1:
+				if state != \"death\":
+					on_hit(get_position(), null, 4, [\"true\"])
+				else:
+					return dying(delta)
+	else:
+		motion_target *= 0
+	motion = motion.linear_interpolate(motion_target, 8 * delta)
+	var speed = max(abs(motion.x), abs(motion.y))
+	if speed > 0.1:
+		var target = motion.x * view_x + motion.y * view_z
+		var q_from = orientation.basis.get_rotation_quat()
+		var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
+		orientation.basis = Basis(q_from.slerp(q_to, delta * 10))
+	var rotdiff = orientation.basis.x.dot(view_z)
+	anim_tree[\"parameters/head_h/add_amount\"] = rotdiff * -2
+	var h_velocity = Vector2(0, move_speed.x*speed).rotated(-orientation.basis.get_euler().y)
+	velocity.x = h_velocity.x
+	velocity.z = h_velocity.y
+	velocity.y += GRAVITY
+	velocity = move_and_slide(velocity, Vector3.UP)
+	var post_velocity = Vector2(velocity.x, velocity.z).length() / move_speed.y
+	post_velocity = prev_post_velocity + (post_velocity - prev_post_velocity) * .1
+	anim_tree[\"parameters/movement/blend_position\"] = post_velocity
+	prev_post_velocity = post_velocity
+	#push_objects(h_velocity)
+
+	orientation = orientation.orthonormalized() # Orthonormalize orientation.
+	global_transform.basis = orientation.basis.scaled(unit_size)
+
+func dying(delta):
+	if state_time > 3:
+		var mat_override = body_mesh.get_material_override()
+		if mat_override == null:
+			body_mesh.set_material_override(dissolve)
+		elif state_time < 6:
+			dissolve.set_shader_param(\"dissolve_amount\", ease((state_time-3)/3.0, 0.4))
+		else:
+			die()
+	state_time += delta
 
 func die():
-	status.die()
 	if weapon:
 		weapon.die()
 	for v in armors.values():
 		v.die()
-	controller.die()
+	.die()
 "
 
 [sub_resource type="AnimationNodeAnimation" id=2]
@@ -573,7 +491,7 @@ animation = "Swing"
 animation = "Work"
 
 [sub_resource type="AnimationNodeBlendTree" id=35]
-graph_offset = Vector2( -785, -199 )
+graph_offset = Vector2( 18, 541 )
 nodes/2swings/node = SubResource( 2 )
 nodes/2swings/position = Vector2( -700, -40 )
 nodes/Animation/node = SubResource( 3 )
@@ -637,7 +555,7 @@ nodes/swing/node = SubResource( 33 )
 nodes/swing/position = Vector2( -700, -140 )
 nodes/work/node = SubResource( 34 )
 nodes/work/position = Vector2( -140, 200 )
-node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "attack speed", 0, "attack", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "lunge", 0, "limp", "lunge", 1, "attack speed", "cast speed", 0, "cast type", "limp", 0, "movement", "limp", 1, "limping", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation" ]
+node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "lunge", 0, "limp", "lunge", 1, "attack speed", "attack speed", 0, "attack", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation", "cast speed", 0, "cast type", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "limp", 0, "movement", "limp", 1, "limping" ]
 
 [sub_resource type="CapsuleShape" id=36]
 radius = 0.5
@@ -646,19 +564,16 @@ radius = 0.5
 size = Vector3( 0.4, 2, 0.4 )
 
 [sub_resource type="SpatialMaterial" id=38]
-resource_name = "Skin"
 vertex_color_use_as_albedo = true
 params_cull_mode = 2
 metallic = 1.0
 
 [sub_resource type="SpatialMaterial" id=39]
-resource_name = "FaceU"
 vertex_color_use_as_albedo = true
 params_cull_mode = 2
 metallic = 1.0
 
 [sub_resource type="SpatialMaterial" id=40]
-resource_name = "FaceD"
 vertex_color_use_as_albedo = true
 params_cull_mode = 2
 albedo_color = Color( 0.906332, 0.906332, 0.906332, 1 )
@@ -670,7 +585,6 @@ emission_operator = 0
 emission_on_uv2 = false
 
 [sub_resource type="SpatialMaterial" id=41]
-resource_name = "Body"
 vertex_color_use_as_albedo = true
 params_cull_mode = 2
 albedo_color = Color( 0.906332, 0.906332, 0.906332, 1 )
@@ -682,7 +596,6 @@ emission_operator = 0
 emission_on_uv2 = false
 
 [sub_resource type="SpatialMaterial" id=42]
-resource_name = "Hands"
 vertex_color_use_as_albedo = true
 params_cull_mode = 2
 albedo_color = Color( 0.906332, 0.906332, 0.906332, 1 )
@@ -694,7 +607,6 @@ emission_operator = 0
 emission_on_uv2 = false
 
 [sub_resource type="SpatialMaterial" id=43]
-resource_name = "Feet"
 vertex_color_use_as_albedo = true
 params_cull_mode = 2
 albedo_color = Color( 0.906332, 0.906332, 0.906332, 1 )
@@ -851,7 +763,17 @@ bind/22/name = "PoleTarget.R"
 bind/22/bone = -1
 bind/22/pose = Transform( 1.42857, 0, 1.02179e-06, -8.12049e-14, 1.42857, -1.70299e-07, -1.02179e-06, 0, 1.42857, 0.260682, -0.722117, -0.963032 )
 
-[sub_resource type="Animation" id=46]
+[sub_resource type="ShaderMaterial" id=46]
+shader = ExtResource( 1 )
+shader_param/albedo = Color( 1, 0.764706, 0.764706, 1 )
+shader_param/cuts = 2
+shader_param/wrap = -0.1
+shader_param/steepness = 1.0
+shader_param/specular_strength = 0.0
+shader_param/specular_shininess = 0.0
+shader_param/albedo_texture = ExtResource( 3 )
+
+[sub_resource type="Animation" id=47]
 length = 2.29167
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -1015,7 +937,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 2.29167, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=47]
+[sub_resource type="Animation" id=48]
 length = 2.5
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -1199,7 +1121,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=48]
+[sub_resource type="Animation" id=49]
 length = 1.25
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -1377,7 +1299,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=49]
+[sub_resource type="Animation" id=50]
 length = 1.66667
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -1541,7 +1463,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 1.66667, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=50]
+[sub_resource type="Animation" id=51]
 length = 0.833333
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -1705,7 +1627,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 0.833333, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=51]
+[sub_resource type="Animation" id=52]
 length = 2.5
 loop = true
 tracks/0/type = "transform"
@@ -1870,7 +1792,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 2.5, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=52]
+[sub_resource type="Animation" id=53]
 length = 1.66667
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -2034,7 +1956,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 1.66667, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=53]
+[sub_resource type="Animation" id=54]
 length = 2.5
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -2212,7 +2134,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=54]
+[sub_resource type="Animation" id=55]
 length = 0.541667
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -2376,7 +2298,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 0.541667, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=55]
+[sub_resource type="Animation" id=56]
 length = 0.001
 loop = true
 tracks/0/type = "transform"
@@ -2541,7 +2463,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=56]
+[sub_resource type="Animation" id=57]
 length = 0.001
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -2705,7 +2627,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=57]
+[sub_resource type="Animation" id=58]
 length = 0.001
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -2869,7 +2791,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=58]
+[sub_resource type="Animation" id=59]
 length = 0.001
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -3033,7 +2955,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=59]
+[sub_resource type="Animation" id=60]
 length = 0.001
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -3197,7 +3119,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=60]
+[sub_resource type="Animation" id=61]
 loop = true
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -3378,7 +3300,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=61]
+[sub_resource type="Animation" id=62]
 length = 1.25
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -3542,7 +3464,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 1.25, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=62]
+[sub_resource type="Animation" id=63]
 length = 0.833333
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -3720,7 +3642,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=63]
+[sub_resource type="Animation" id=64]
 length = 0.833333
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -3901,7 +3823,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=64]
+[sub_resource type="Animation" id=65]
 length = 0.833333
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -4082,7 +4004,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=65]
+[sub_resource type="Animation" id=66]
 length = 2.5
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -4263,7 +4185,7 @@ tracks/23/keys = {
 } ]
 }
 
-[sub_resource type="Animation" id=66]
+[sub_resource type="Animation" id=67]
 length = 0.001
 tracks/0/type = "transform"
 tracks/0/path = NodePath("CharacterArmature/Skeleton:Foot.L")
@@ -4427,7 +4349,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[sub_resource type="Animation" id=67]
+[sub_resource type="Animation" id=68]
 length = 0.75
 loop = true
 tracks/0/type = "transform"
@@ -4592,7 +4514,7 @@ tracks/22/imported = true
 tracks/22/enabled = true
 tracks/22/keys = PoolRealArray( 0, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1, 0.75, 1, -1.16415e-10, 0, 7.27596e-12, -3.61112e-35, -1.42109e-14, 8.47033e-22, 1, 1, 1, 1 )
 
-[node name="Unit" type="KinematicBody"]
+[node name="Man" type="KinematicBody"]
 collision_layer = 2
 collision_mask = 2
 script = SubResource( 1 )
@@ -4624,13 +4546,14 @@ shape = SubResource( 36 )
 stream = ExtResource( 2 )
 unit_db = 80.0
 max_db = 6.0
-max_distance = 12.0
+max_distance = 4.0
 
 [node name="Land" type="AudioStreamPlayer3D" parent="Sound"]
 stream = ExtResource( 7 )
 max_distance = 30.0
 
 [node name="Voice" type="AudioStreamPlayer3D" parent="Sound"]
+pitch_scale = 4.0
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 visible = false
@@ -4769,34 +4692,34 @@ bones/22/bound_children = [  ]
 generate_lightmap = false
 mesh = SubResource( 44 )
 skin = SubResource( 45 )
-material/0 = ExtResource( 1 )
-material/1 = ExtResource( 1 )
-material/2 = null
-material/3 = null
-material/4 = null
-material/5 = null
+material/0 = SubResource( 46 )
+material/1 = SubResource( 46 )
+material/2 = SubResource( 46 )
+material/3 = SubResource( 46 )
+material/4 = SubResource( 46 )
+material/5 = SubResource( 46 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 method_call_mode = 1
-anims/Death = SubResource( 46 )
-anims/DoubleSwing = SubResource( 47 )
-anims/Drop = SubResource( 48 )
-anims/Fall = SubResource( 49 )
-anims/Focus = SubResource( 50 )
-anims/Idle = SubResource( 51 )
-anims/Jump = SubResource( 52 )
-anims/Knockdown = SubResource( 53 )
-anims/Land = SubResource( 54 )
-anims/Limp = SubResource( 55 )
-anims/LookDown = SubResource( 56 )
-anims/LookLeft = SubResource( 57 )
-anims/LookRight = SubResource( 58 )
-anims/LookUp = SubResource( 59 )
-anims/Move = SubResource( 60 )
-anims/PickUp = SubResource( 61 )
-anims/RecieveHit = SubResource( 62 )
-anims/SkillHold = SubResource( 63 )
-anims/SpellHold = SubResource( 64 )
-anims/Swing = SubResource( 65 )
-anims/Whirlwind = SubResource( 66 )
-anims/Work = SubResource( 67 )
+anims/Death = SubResource( 47 )
+anims/DoubleSwing = SubResource( 48 )
+anims/Drop = SubResource( 49 )
+anims/Fall = SubResource( 50 )
+anims/Focus = SubResource( 51 )
+anims/Idle = SubResource( 52 )
+anims/Jump = SubResource( 53 )
+anims/Knockdown = SubResource( 54 )
+anims/Land = SubResource( 55 )
+anims/Limp = SubResource( 56 )
+anims/LookDown = SubResource( 57 )
+anims/LookLeft = SubResource( 58 )
+anims/LookRight = SubResource( 59 )
+anims/LookUp = SubResource( 60 )
+anims/Move = SubResource( 61 )
+anims/PickUp = SubResource( 62 )
+anims/RecieveHit = SubResource( 63 )
+anims/SkillHold = SubResource( 64 )
+anims/SpellHold = SubResource( 65 )
+anims/Swing = SubResource( 66 )
+anims/Whirlwind = SubResource( 67 )
+anims/Work = SubResource( 68 )

@@ -1,0 +1,66 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://assets/textures/spark.png" type="Texture" id=2]
+[ext_resource path="res://assets/audio/explode.wav" type="AudioStream" id=3]
+[ext_resource path="res://objects/Flash.tscn" type="PackedScene" id=4]
+
+[sub_resource type="Curve" id=1]
+_data = [ Vector2( 0, 0.759091 ), 0.0, 0.508658, 0, 0, Vector2( 1, 0 ), -3.98514, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=2]
+curve = SubResource( 1 )
+
+[sub_resource type="ParticlesMaterial" id=3]
+flag_align_y = true
+direction = Vector3( 0, 1, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 1.0
+initial_velocity_random = 1.0
+angular_velocity = 124.72
+angular_velocity_random = 1.0
+angular_velocity_curve = SubResource( 2 )
+scale = 5.0
+scale_random = 1.0
+scale_curve = SubResource( 2 )
+
+[sub_resource type="SpatialMaterial" id=4]
+params_diffuse_mode = 4
+params_specular_mode = 4
+params_blend_mode = 1
+params_cull_mode = 2
+params_billboard_mode = 2
+params_billboard_keep_scale = true
+albedo_color = Color( 0, 0.717647, 1, 1 )
+albedo_texture = ExtResource( 2 )
+
+[sub_resource type="QuadMesh" id=5]
+material = SubResource( 4 )
+
+[sub_resource type="GDScript" id=6]
+script/source = "extends \"res://objects/Particle.gd\"
+
+func _ready():
+	$Flash.set_flash(2, 8, 16)
+"
+
+[node name="Particle" type="Particles"]
+emitting = false
+amount = 16
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+fract_delta = false
+process_material = SubResource( 3 )
+draw_pass_1 = SubResource( 5 )
+script = SubResource( 6 )
+
+[node name="Sound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 3 )
+unit_db = 20.0
+max_distance = 20.0
+
+[node name="Flash" parent="." instance=ExtResource( 4 )]
+light_color = Color( 0.223529, 0.490196, 1, 1 )
+light_energy = 16.0
+shadow_color = Color( 0.686275, 0, 1, 1 )

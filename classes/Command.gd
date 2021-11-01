@@ -18,6 +18,8 @@ func run(args):
 			return t
 		elif args[1] == "parent":
 			return host.get_parent()
+		elif args[1] == "controller":
+			return host.controller
 		elif args[1] == "usepos":
 			return host.get_interact_position()
 		elif args[1] == "frontpos":
@@ -77,10 +79,14 @@ func run(args):
 			host.set_armor(tgt)
 		else:
 			host.set_weapon(tgt)
+	elif args[0] == "unequip":
+		host.unset_armor(args[1])
 	elif args[0] == "unstate":
 		tgt.status.remove_state(args[1])
 	elif args[0] == "state":
 		tgt.status.add_state(tgt, args[1], args[2])
+	elif args[0] == "particle":
+		G.make_particle(args[1],tgt,args[2])
 	elif args[0] == "oncall":
 		if args[1] == "onmake":
 			host.onmake = args[2]
@@ -95,8 +101,11 @@ func run(args):
 		for unit in nearby_units:
 			unit.controller.hear(args[1])
 	elif args[0] == "setwork":
-		host.set_work(args[1])
-		host.set_progress_bar(args[2])
+		if len(args) == 1:
+			host.progress_bar = null
+		else:
+			host.set_work(args[1])
+			host.set_progress_bar(args[2])
 	elif args[0] == "getobj":
 		return G.world.get_item_type_at(args[1], tgt, 0)
 	elif args[0] == "task":
