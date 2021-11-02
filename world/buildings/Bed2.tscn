@@ -12,6 +12,7 @@ script/source = "extends \"res://objects/Findable.gd\"
 
 
 func open_walls():
+	resize(.1)
 	if G.world.rng.randi_range(0, 1) == 0:
 		rid(\"Bed1\")
 	if G.world.rng.randi_range(0, 1) == 0:

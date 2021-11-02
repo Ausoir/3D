@@ -33,15 +33,15 @@ func _ready():
 func add_player():
 	var unit = G.cmds([[\"make\",\"dummy\"]], null)
 	var player = preload(\"res://objects/units/Player.tscn\").instance()
-	unit.transform.origin = get_spawnpoint() + Vector3(0,24,0)
+	unit.transform.origin = get_spawnpoint()# + Vector3(0,24,0)
 	player.assign(unit)
 	$Players.add_child(player)
 
 func generate(level):
 	var current_level = level.get_dungeon()
 	rng.randomize()
-	var seeed = rng.randi_range(123, 999999)
-	#seeed = 832957
+	var seeed = rng.randi_range(1, 999999)
+	#seeed = 428113
 	print(seeed)
 	rng.set_seed(seeed)
 	tilemap.rng = rng
@@ -57,23 +57,22 @@ func generate(level):
 	dungeon_map = generator.make_border('W')
 	generator.make_rooms(current_level[2])
 	print(dungeon_map)
-	dungeon_map = generator.make_border('W', ['#', '-', '='])
+	dungeon_map = generator.make_border('W', ['#', '='])
 	Autotile.new(tilemap, dungeon_map).autotile()
 	spawnpoints = generator.spawn_points
 
 	var torchs = []
-	for x in range(0,map_size.x):
-		for z in range(0,map_size.y):
+	for x in range(0,map_size.x+1):
+		for z in range(0,map_size.y+1):
 			var isOdd = x % 2 == 1 or z % 2 == 1
 			var terrain = dungeon_map[z][x]
-			var hx = x/2
-			var hz = z/2
+			var hx = x*.5
+			var hz = z*.5
 			var room_objects = generator.dungeon_objects[z][x]
 			var room_floors = generator.dungeon_floors[z][x]
 			var dir = tilemap.get_cell_item_orientation(hx, 0, hz)
 			var tile = tilemap.get_cell_item(hx,0,hz)
-			if isOdd:
-				tilemap.set_cell_item(hx, -1, hz, tilemap.tileA)
+			if !isOdd:
 				if generator.biome[z][x] < .3:
 					if x > 2 and x < map_size.x - 2 and z > 2 and z < map_size.y - 2:
 						var vacant = true
@@ -103,8 +102,9 @@ func generate(level):
 					if tile in tilemap.fence_map:
 						tilemap.set_cell_item(hx, 0, hz, tilemap.fence_map[tile], dir)
 				elif terrain == '^':
-					tilemap.set_cell_item(hx, -1, hz, tilemap.spike, dir)
-					make_occluder(hx, 0, hz)
+					if tilemap.get_cell_item(hx, -1, hz) == -1:
+						tilemap.set_cell_item(hx, -1, hz, tilemap.spike, dir)
+						make_occluder(hx, 0, hz)
 				elif terrain == '?':
 					build(\"treasure\", Vector3(hx, 0, hz))
 				elif terrain == '!':
@@ -115,8 +115,14 @@ func generate(level):
 						if !poi_near(torchs, pos, 5):
 							torchs.append(pos)
 							build(\"walltorch\", pos, dir)
-			else:
-				if room_floors != null:
+				if tilemap.get_cell_item(hx, -1, hz) == -1:
+					tilemap.set_cell_item(hx, -1, hz, tilemap.tileA)
+			if room_floors != null:
+				if room_floors == \"planks\":
+					var plank = build(room_floors, Vector3(hx, 0, hz), 0)
+					if generator.biome[z][x] < .3:
+						plank.trigger(generator.biome[z][x] * 30)
+				else:
 					build(room_floors, Vector3(hx, 0, hz), 0)
 			if generator.biome[z][x] < .3 and terrain == 'W' and rng.randi_range(0, 3) == 0:
 				build(\"scaffold\", Vector3(hx, 0, hz))
@@ -134,8 +140,8 @@ func generate(level):
 func get_spawnpoint():
 	if spawnpoints:
 		var t = spawnpoints.pop_front()
-		return Vector3(t[0], 2, t[1])
-	return Vector3(floor(map_size.x/2), 2, floor(map_size.y/2))
+		return Vector3(t[0]*2, 2, t[1]*2)
+	return Vector3(map_size.x*2, 2, map_size.y*2)
 
 
 func poi_near(arr, pos, radius):
@@ -153,7 +159,7 @@ func spawn(pos):
 func build(building, pos, orientation=-1):
 	if orientation == -1:
 		orientation = [16,22,0,10][rng.randi_range(0, 3)]
-	var vec = tilemap.map_to_world(pos.x,pos.y,pos.z)
+	var vec = pos * tilemap.cell_size + Vector3(2,2,2)
 	var ortho = G.dir_to_offset(orientation, 0)
 	var t = Transform().translated(vec)
 	if ortho != Vector2.ZERO:
@@ -496,10 +502,11 @@ environment = SubResource( 3 )
 
 [node name="OmniLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( 1, 0, 0, 0, 0.400429, 0.916328, 0, -0.916328, 0.400429, 11, 14, 15 )
+visible = false
 light_energy = 2.0
 light_specular = 0.0
 light_bake_mode = 0
-shadow_color = Color( 0.866667, 0.866667, 0.866667, 1 )
+shadow_color = Color( 0.356863, 0.356863, 0.356863, 1 )
 
 [node name="Ceiling" type="StaticBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 24, 0 )

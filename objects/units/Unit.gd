@@ -204,7 +204,7 @@ func dying(delta):
 		var mat_override = body_mesh.get_material_override()
 		if mat_override == null:
 			body_mesh.set_material_override(dissolve)
-		elif state_time < 6:
+		elif state_time < 5.5:
 			dissolve.set_shader_param("dissolve_amount", ease((state_time-3)/3.0, 0.4))
 		else:
 			die()

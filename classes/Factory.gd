@@ -10,7 +10,7 @@ const Type_Object = preload("res://objects/Object.tscn")
 const Type_Item = preload("res://objects/Item.tscn")
 
 const unit_data = {
-	"dummy": [Man, 0, {}, []],
+	"dummy": [Man, 0, {}, ["torch"]],
 	"miner": [Man, 1, {}, ["cloth armor", "boots", "pickaxe"]],
 	"digger": [Man, 1, {}, ["cloth armor", "boots", "shovel"]],
 	"guard": [Man, 1, {}, ["shortsword", "leather armor", "boots"]],
@@ -135,13 +135,13 @@ const data = {
 	"beds": ["building", preload("res://world/buildings/Bed2.tscn"), {health=4},{loot="beds"}],
 	"campfire": ["building", preload("res://world/buildings/Campfire.tscn"),{health=4},{}],
 	"walltorch": ["building", preload("res://world/buildings/Torch.tscn"),{health=2},{}],
-	"crates": ["building", preload("res://world/buildings/Crates.tscn"),{health=12},{}],
-	"barrels": ["building", preload("res://world/buildings/Barrels.tscn"),{health=8},{}],
+	"crates": ["building", preload("res://world/buildings/Crates.tscn"),{health=2},{}],
+	"barrels": ["building", preload("res://world/buildings/Barrels.tscn"),{health=4},{}],
 	"derelict floor": ["building", preload("res://world/buildings/DerelictFloor.tscn"),{},{}],
 	"derelict floor2": ["building", preload("res://world/buildings/DerelictFloor2.tscn"),{},{}],
 	"bookcase": ["building", preload("res://world/buildings/Bookcase.tscn"),{},{}],
 	"scaffold": ["building", preload("res://assets/models/buildings/scaffold_small_high.obj"),{},{}],
-	"floor": ["building", preload("res://world/buildings/Floor.tscn"),{},{}],
+	"planks": ["building", preload("res://world/buildings/Planks.tscn"),{},{}],
 	"carpet": ["building", preload("res://world/buildings/Carpet.tscn"),{},{}],
 	"kegs": ["building", preload("res://world/buildings/Kegs.tscn"),{health=12},{}],
 	"desk": ["building", preload("res://world/buildings/Desk.tscn"),{health=4},{}],

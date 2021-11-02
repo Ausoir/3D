@@ -28,7 +28,6 @@ func _init(p, pmap):
 	]
 
 func autotile():
-	var item
 	var wall_autotiles = []
 	var autotile
 	var walls = G.world.SEMIWALLTILES
@@ -36,7 +35,7 @@ func autotile():
 		for y in range(0, size.y+1, 2):
 			var at = map[y][x]
 			if at in walls:
-				autotile = set_autotile(map, walls, x, y, autotile_map)
+				autotile = set_autotile(walls, x, y, autotile_map)
 				if autotile:
 					wall_autotiles.append(autotile)
 	for cell in wall_autotiles:
@@ -57,7 +56,7 @@ func autotile():
 			tile = autotile_map_to[cell[2]]
 		gridmap.set_cell_item(x/2, 0, y/2, tile, orientations[cell[3]])
 
-func set_autotile(map, compare, x, y, dict):
+func set_autotile(compare, x, y, dict):
 	var adj = [0,0,0,0]
 	if y > 0 and map[y-1][x] in compare:
 		adj[0] = 1

@@ -82,8 +82,7 @@ func perceive():
 func hear(vec):
 	if alertness == IDLE:
 		var unitpos = unit.get_interact_position()
-		if (vec - unitpos).length() > 4:
-			search_pos = Vector3(vec.x, unitpos.y, vec.z)
+		search_pos = Vector3(vec.x, unitpos.y, vec.z)
 
 func on_hit(_pos, hitter, _damage):
 	target = hitter
@@ -103,16 +102,15 @@ func on_process(delta):
 
 func perform(current_state):
 	if G.time.second:
+		var unit_pos = unit.get_position()
 		if target and G.time.seconds % 4 == 0:
-			var unit_pos = unit.get_position()
 			if (last_pos - unit_pos).length() < .5:
 				var pos = target.get_interact_position()
 				unstuck(pos)
 				set_alert(UNSTUCKING)
-				G.message("Unstucking")
 				last_pos = unit_pos + Vector3(9,9,9)
 				return
-			last_pos = unit_pos
+		last_pos = unit_pos
 		var t = perceive()
 		if t:
 			target = t

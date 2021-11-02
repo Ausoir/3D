@@ -30,7 +30,7 @@ func make_dungeon(times, halls):
 	spawn_points = []
 	dungeon_objects = make_base(map_size.x, map_size.y, null)
 	dungeon_floors = make_base(map_size.x, map_size.y, null)
-	divide(Vector2.ZERO, map_size-Vector2.ONE, times, halls, .5)
+	divide(Vector2.ZERO, map_size, times, halls, .5)
 	return base
 
 func make_rooms(departments):
@@ -69,7 +69,7 @@ func make_rooms(departments):
 		if room[3] == null: #halls
 			make_hall(room)
 		elif sectors[room[3]] == "living":
-			if room[0] == "large" and !("chapel" in unique_rooms):
+			if room[0] != "small" and !("chapel" in unique_rooms):
 				unique_rooms.append("chapel")
 				make_terrain(room, "chapel")
 				queue_make.append(["chapel", room])
@@ -77,12 +77,12 @@ func make_rooms(departments):
 				make_terrain(room)
 				queue_make.append(["living", room])
 		elif sectors[room[3]] == "storage":
-			if room[0] == "room" and !("entrance" in unique_rooms):
+			if !("entrance" in unique_rooms):
 				unique_rooms.append("entrance")
 				if !make_terrain(room, "entrance"):
 					queue_make.append(["entrance", room])
-			elif room[0] != "large" and !("waste" in unique_rooms):
-				unique_rooms.append("entrance")
+			elif !("waste" in unique_rooms):
+				unique_rooms.append("waste")
 				make_terrain(room)
 				queue_make.append(["waste", room])
 			else:
@@ -92,15 +92,19 @@ func make_rooms(departments):
 				else:
 					queue_make.append(["storage", room])
 		elif sectors[room[3]] == "lab":
-			if room[0] != "small":
+			if rng.randi_range(0, 3) == 0:
+				make_terrain(room)
+				if rng.randf() < .5:
+					queue_make.append(["storage", room])
+				else:
+					queue_make.append(["living", room])
+			else:
 				make_terrain(room, "lab")
 				queue_make.append(["lab", room])
-			else:
-				make_terrain(room)
-				queue_make.append(["storage", room])
 	for make_room in queue_make:
 		call("make_"+make_room[0], make_room[1])
 	make_doors()
+	#clear_doorways()
 	clear_doorways()
 
 func make_doors():
@@ -152,89 +156,108 @@ func make_doors():
 func clear_doorways():
 	var walltiles = G.world.WALLTILES
 	var doorCandidates = []
-	var doors = []
-	for x in range(0,map_size.x, 2):
-		for y in range(0,map_size.y, 2):
-			if base[y][x] in ['d', 'D', '-', '=']:
-				if boundary_dist(x, y) > 1:
-					doorCandidates.append([x, y])
-				else:
-					base[y][x] = 'W'
-	for i in doorCandidates:
-		var x = i[0]
-		var y = i[1]
-		var wall = 'W'
-		if base[y][x] == 'd':
-			wall = '#'
-		var wallX = 0
-		var wallY = 0
-		if base[y+1][x] in walltiles:
-			wallY += 1
-		if base[y-1][x] in walltiles:
-			wallY += 1
-		if base[y][x+1] in walltiles:
-			wallX += 1
-		if base[y][x-1] in walltiles:
-			wallX += 1
-		if wallX == 2 and wallY == 2:
-			base[y][x] = ','
-			base[y+1][x] = ','
-			base[y-1][x] = ','
-			base[y][x+1] = ','
-			base[y][x-1] = ','
-		elif wallX == 2:
-			base[y+1][x] = ','
-			base[y-1][x] = ','
-		elif wallY == 2:
-			base[y][x+1] = ','
-			base[y][x-1] = ','
-		else:
-			base[y][x] = wall
+	for x in range(0,map_size.x):
+		for y in range(0,map_size.y):
+			var isOdd = x%2==1 or y%2==1
+			if !isOdd:
+				if base[y][x] in ['D', '=']:
+					if boundary_dist(x, y) > 1:
+						doorCandidates.append([x, y])
+					else:
+						base[y][x] = 'W'
+			elif base[y][x] in G.world.SEMIWALLTILES:
+				var opens = len(get_possible_sides(x, y, '.'))
+				opens += len(get_possible_sides(x, y, ','))
+				if opens == 3:
+					base[y][x] = '.'
+	for _i in range(2):
+		for i in doorCandidates:
+			var x = i[0]
+			var y = i[1]
+			var wall = 'W'
+			if base[y][x] == 'd':
+				wall = '#'
+			var wallX = 0
+			var wallY = 0
+			if base[y+1][x] in walltiles:
+				wallY += 1
+			if base[y-1][x] in walltiles:
+				wallY += 1
+			if base[y][x+1] in walltiles:
+				wallX += 1
+			if base[y][x-1] in walltiles:
+				wallX += 1
+			if wallX == 2 and wallY == 2:
+				base[y][x] = ','
+				base[y+1][x] = ','
+				base[y-1][x] = ','
+				base[y][x+1] = ','
+				base[y][x-1] = ','
+			elif wallX == 2:
+				base[y+1][x] = ','
+				base[y-1][x] = ','
+				dungeon_objects[y+1][x] = null
+				dungeon_objects[y-1][x] = null
+			elif wallY == 2:
+				base[y][x+1] = ','
+				base[y][x-1] = ','
+				dungeon_objects[y][x+1] = null
+				dungeon_objects[y][x-1] = null
+			else:
+				base[y][x] = wall
+
 
 func make_entrance(room):
-	dungeon_objects[room[1].y+1][room[1].x+1] = ['portal', 0]
-	spawn_points.append([room[1].x+1, room[1].y+1])
+	var objs = [[], [null,null,null,"crates","chest"], [null,"crates"]]
+	var center = (room[1] + (room[2] - room[1])/2).round()
+	var cx = int(center.x)
+	var cy = int(center.y)
+	dungeon_objects[cy][cx] = ['portal', 0]
+	spawn_points.append([cx, cy])
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
+			allocate_object(objs, x, y)
 
 func make_chapel(room):
 	var objs = [["bench"], ["bookcase"], ["bench"]]
-	for y in range(room[1].y, room[2].y, 2):
-		for x in range(room[1].x, room[2].x, 2):
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
 			dungeon_floors[y][x] = "carpet"
 			allocate_object(objs, x, y)
 
 func make_waste(room):
-	var objs = [["waste","bench",null],["waste",null,"pots"]]
-	for y in range(room[1].y, room[2].y, 2):
-		for x in range(room[1].x, room[2].x, 2):
+	var objs = [["waste","bench"],["waste",null,"pots"]]
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
 			allocate_object(objs, x, y)
 
 func make_lab(room):
-	var objs = [["bubblelight",null,null,null,null,null],["desk","wand rack","bookcase"],["bookcase"]]
-	for y in range(room[1].y, room[2].y, 2):
-		for x in range(room[1].x, room[2].x, 2):
+	var objs = [["bubblelight",null],["desk","wand rack","bookcase"],["bookcase"]]
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
 			dungeon_floors[y][x] = "carpet"
 			allocate_object(objs, x, y)
 
 func make_defense(room):
 	var objs = [["beds", "bed cluster"], ["barrels", "crates"]]
-	for y in range(room[1].y, room[2].y, 2):
-		for x in range(room[1].x, room[2].x, 2):
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
 			allocate_object(objs, x, y)
 
 func make_living(room):
 	var objs = [["table", "large table", "pots", "beds", "bed cluster"],
 				["pots", "bookcase", "barrels", "kegs"],["bookcase", "barrels"]]
-	var flooring = room[0] == "large"
-	for y in range(room[1].y, room[2].y, 2):
-		for x in range(room[1].x, room[2].x, 2):
+	var flooring = rng.randf() < .5
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
 			allocate_object(objs, x, y)
 			if flooring:
-				dungeon_floors[y][x] = "floor"
+				dungeon_floors[y][x] = "planks"
 
 func make_storage(room):
-	var objs = [[],["chest", "crates", "barrels"],["barrels", "crates", "crates", "crates"]]
-	for y in range(room[1].y, room[2].y, 2):
-		for x in range(room[1].x, room[2].x, 2):
+	var objs = [[],[null,null,"chest","crates","barrels"],[null,null,null,null,"barrels","crates","crates"]]
+	for y in range(room[1].y+1, room[2].y):
+		for x in range(room[1].x+1, room[2].x):
 			allocate_object(objs, x, y)
 
 func make_hall(room):
@@ -266,24 +289,27 @@ func make_hall(room):
 				if base[y][room[2].x] == 'W' and base[y+1][room[2].x] == 'W':
 					dungeon_objects[y][room[2].x] = ["torch", 22]
 
-func allocate_object(objs, x, y):
-	if base[y][x] == '.':
+func allocate_object(objs, x, y, force=false):
+	if base[y][x] == '.' or force:
 		var open = objs[0]
 		var sides = objs[1]
 		var cramped = sides
 		if len(objs) > 2:
 			cramped = objs[2]
 		var candidate
-		var possibleSides = get_possible_sides(x, y, ['.',','], 2)
-		if len(possibleSides) < 2:
-			candidate = place_object(cramped, possibleSides)
-		elif len(get_possible_sides(x, y, ['.',','])) == 4:
-			if possibleSides.empty():
+		var possibleSides = get_possible_sides(x, y, G.world.SEMIWALLTILES)
+		if len(possibleSides) == 0:
+			if len(get_possible_sides(x, y, '.')) == 4:
 				candidate = place_object(open, possibleSides)
-			elif len(possibleSides) == 1:
-				candidate = place_object(sides, possibleSides)
+		elif len(possibleSides) == 1:
+			candidate = place_object(sides, possibleSides)
+		elif len(possibleSides) < 4:
+			candidate = place_object(cramped, possibleSides)
+		elif force:
+			candidate = place_object(open, possibleSides)
 		if candidate != null:
-			dungeon_objects[y][x] = [candidate[0], candidate[1]]
+			dungeon_objects[y][x] = candidate
+			base[y][x] = ','
 
 func place_object(objs, possibleSides):
 	var obj = rng.rand_arr(objs)
@@ -299,6 +325,8 @@ func place_object(objs, possibleSides):
 		return [obj, rng.rand_arr([0,10,16,22])]
 	elif obj == "table" or obj == "large table":
 		return [obj, rng.rand_arr(possibleSides)]
+	else:
+		return [obj, rng.rand_arr(possibleSides)]
 
 func make_terrain(room, vault_type="default"):
 	var rot = vaults.make_vault(rng, base, room[1], room[2], vault_type)
@@ -306,8 +334,8 @@ func make_terrain(room, vault_type="default"):
 		for y in range(room[1].y, room[2].y+1):
 			for x in range(room[1].x, room[2].x+1):
 				if base[y][x].is_valid_integer():
-					dungeon_objects[y][x] = [special_terrain[vault_type][int(base[y][x])], rot]
-					base[y][x] = ','
+					var obj = special_terrain[vault_type][int(base[y][x])]
+					allocate_object([[obj],[obj]], x, y, true)
 		return true
 
 func divide(from, to, times, times_hall, horizontal):
@@ -357,9 +385,7 @@ func divide(from, to, times, times_hall, horizontal):
 		else:
 			door_candidates.append([0, Vector2(from.x,wall), Vector2(to.x,wall)])
 	else: #vertical
-		var asd = from.x+threshold
-		var ttt = to.x-threshold-int(to.x)%2-oddgap
-		var wall = rng.randi_range(asd, ttt)
+		var wall = rng.randi_range(from.x+threshold, to.x-threshold-int(to.x)%2-oddgap)
 		wall += wall % 2 + oddgap
 		var wall_from = wall-gap
 		var wall_to = wall+gap

@@ -1,8 +1,7 @@
-[gd_scene load_steps=75 format=2]
+[gd_scene load_steps=73 format=2]
 
-[ext_resource path="res://assets/materials/toon.gdshader" type="Shader" id=1]
+[ext_resource path="res://assets/materials/mat_skin.tres" type="Material" id=1]
 [ext_resource path="res://assets/audio/step.wav" type="AudioStream" id=2]
-[ext_resource path="res://assets/textures/wood_bare.png" type="Texture" id=3]
 [ext_resource path="res://assets/audio/land.wav" type="AudioStream" id=7]
 [ext_resource path="res://interface/health_quad.tscn" type="PackedScene" id=9]
 [ext_resource path="res://interface/damage.tscn" type="PackedScene" id=10]
@@ -327,17 +326,6 @@ func on_process(delta):
 	orientation = orientation.orthonormalized() # Orthonormalize orientation.
 	global_transform.basis = orientation.basis.scaled(unit_size)
 
-func dying(delta):
-	if state_time > 3:
-		var mat_override = body_mesh.get_material_override()
-		if mat_override == null:
-			body_mesh.set_material_override(dissolve)
-		elif state_time < 6:
-			dissolve.set_shader_param(\"dissolve_amount\", ease((state_time-3)/3.0, 0.4))
-		else:
-			die()
-	state_time += delta
-
 func die():
 	if weapon:
 		weapon.die()
@@ -555,7 +543,7 @@ nodes/swing/node = SubResource( 33 )
 nodes/swing/position = Vector2( -700, -140 )
 nodes/work/node = SubResource( 34 )
 nodes/work/position = Vector2( -140, 200 )
-node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "lunge", 0, "limp", "lunge", 1, "attack speed", "attack speed", 0, "attack", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation", "cast speed", 0, "cast type", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown", "limp", 0, "movement", "limp", 1, "limping" ]
+node_connections = [ "state", 0, "lunge", "state", 1, "pickup", "state", 2, "work", "state", 3, "jump", "state", 4, "fall", "state", 5, "cast speed", "output", 0, "hardstate", "cast speed", 0, "cast type", "attack speed", 0, "attack", "head_h", 0, "lookL", "head_h", 1, "head_v", "head_h", 2, "lookR", "head_v", 0, "lookU", "head_v", 1, "state", "head_v", 2, "lookD", "limp", 0, "movement", "limp", 1, "limping", "lunge", 0, "limp", "lunge", 1, "attack speed", "attack", 0, "swap", "attack", 1, "swing", "attack", 2, "2swings", "attack", 3, "spin", "cast type", 0, "skillhold", "cast type", 1, "spellhold", "cast type", 2, "Animation", "hardstate", 0, "head_h", "hardstate", 1, "death", "hardstate", 2, "drop", "hardstate", 3, "hit", "hardstate", 4, "knockdown" ]
 
 [sub_resource type="CapsuleShape" id=36]
 radius = 0.5
@@ -762,16 +750,6 @@ bind/21/pose = Transform( -1.42857, -2.15007e-05, -7.61971e-07, -5.09991e-07, -0
 bind/22/name = "PoleTarget.R"
 bind/22/bone = -1
 bind/22/pose = Transform( 1.42857, 0, 1.02179e-06, -8.12049e-14, 1.42857, -1.70299e-07, -1.02179e-06, 0, 1.42857, 0.260682, -0.722117, -0.963032 )
-
-[sub_resource type="ShaderMaterial" id=46]
-shader = ExtResource( 1 )
-shader_param/albedo = Color( 1, 0.764706, 0.764706, 1 )
-shader_param/cuts = 2
-shader_param/wrap = -0.1
-shader_param/steepness = 1.0
-shader_param/specular_strength = 0.0
-shader_param/specular_shininess = 0.0
-shader_param/albedo_texture = ExtResource( 3 )
 
 [sub_resource type="Animation" id=47]
 length = 2.29167
@@ -4692,12 +4670,12 @@ bones/22/bound_children = [  ]
 generate_lightmap = false
 mesh = SubResource( 44 )
 skin = SubResource( 45 )
-material/0 = SubResource( 46 )
-material/1 = SubResource( 46 )
-material/2 = SubResource( 46 )
-material/3 = SubResource( 46 )
-material/4 = SubResource( 46 )
-material/5 = SubResource( 46 )
+material/0 = ExtResource( 1 )
+material/1 = ExtResource( 1 )
+material/2 = ExtResource( 1 )
+material/3 = ExtResource( 1 )
+material/4 = ExtResource( 1 )
+material/5 = ExtResource( 1 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 method_call_mode = 1

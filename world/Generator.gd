@@ -22,18 +22,18 @@ func set_heightmap(size, map):
 
 func make_base(sx, sy, val):
 	var r = []
-	for _y in range(sy):
+	for _y in range(sy+1):
 		var row = []
-		for _x in range(sx):
+		for _x in range(sx+1):
 			row.append(val)
 		r.append(row)
 	return r
 
 func make_random(sx, sy):
 	var r = []
-	for _y in range(sy):
+	for _y in range(sy+1):
 		var row = []
-		for _x in range(sx):
+		for _x in range(sx+1):
 			row.append(rng.randf())
 		r.append(row)
 	return r

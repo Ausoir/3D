@@ -5,7 +5,7 @@ const dungeons = [
 	[Vector2(19,19), [4,3], ["living", "lab", "storage"]],
 	[Vector2(21,21), [4,3], ["living", "lab", "storage"]],
 	[Vector2(25,25), [5,3], ["living", "lab", "storage"]],
-	[Vector2(25,25), [5,3], ["living", "lab", "storage"]],
+	[Vector2(24,24), [5,2], ["living", "lab", "storage"]],
 ]
 const finds = {
 	mobs = [

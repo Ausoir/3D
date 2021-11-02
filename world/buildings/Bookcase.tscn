@@ -30,7 +30,7 @@ func trigger(_arg):
 extents = Vector3( 0.22, 0.33, 0.1 )
 
 [node name="Spatial" type="Spatial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2 )
 script = SubResource( 1 )
 
 [node name="Bookcase" type="MeshInstance" parent="."]
