@@ -2,7 +2,10 @@ extends Spatial
 
 const BLOCK = 4
 const HALFBLOCK = 2
+const Y_FIX = 2
 const particles = {
+	"debug": preload("res://assets/particles/Debug.tscn"),
+	"hit": preload("res://assets/particles/Hit.tscn"),
 	"blood": preload("res://assets/particles/Blood.tscn"),
 	"dust": preload("res://assets/particles/Dust.tscn"),
 	"smoke": preload("res://assets/particles/Smoke.tscn"),
@@ -11,7 +14,8 @@ const particles = {
 	"spark": preload("res://assets/particles/Spark.tscn"),
 	"light": preload("res://assets/particles/Light.tscn"),
 	"overcharge": preload("res://assets/particles/Overcharge.tscn"),
-	"debug": preload("res://assets/particles/Debug.tscn"),
+	"cast": preload("res://assets/particles/Cast.tscn"),
+	"recharged": preload("res://assets/particles/Recharged.tscn"),
 }
 const Command = preload("res://classes/Command.gd")
 const Faction = preload("res://classes/Faction.gd")
@@ -71,7 +75,7 @@ func on_hour(hour):
 func make_particle(arg, pos, lifetime):
 	if arg in particles:
 		var r = particles[arg].instance()
-		r.transform.origin = pos
+		r.transform.origin = pos + r.translation
 		r.duration = lifetime
 		r.emitting = true
 		world.others.add_child(r)

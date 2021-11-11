@@ -1,15 +1,23 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://assets/textures/spell.png" type="Texture" id=1]
-[ext_resource path="res://assets/audio/explode.wav" type="AudioStream" id=3]
+[ext_resource path="res://assets/audio/ripple.wav" type="AudioStream" id=2]
 [ext_resource path="res://objects/Flash.tscn" type="PackedScene" id=4]
 
-[sub_resource type="ParticlesMaterial" id=1]
+[sub_resource type="Curve" id=7]
+_data = [ Vector2( 0, 0 ), 0.0, 6.03068, 0, 0, Vector2( 0.510345, 0.953409 ), 0.0353083, 0.0353083, 0, 0, Vector2( 1, 0 ), -4.91322, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=8]
+curve = SubResource( 7 )
+
+[sub_resource type="ParticlesMaterial" id=9]
 gravity = Vector3( 0, 0, 0 )
 angular_velocity = 720.0
 angular_velocity_random = 1.0
+scale = 2.0
+scale_curve = SubResource( 8 )
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=4]
 flags_transparent = true
 params_diffuse_mode = 4
 params_specular_mode = 4
@@ -21,31 +29,31 @@ particles_anim_loop = false
 albedo_color = Color( 0.792157, 1, 0, 1 )
 albedo_texture = ExtResource( 1 )
 
-[sub_resource type="QuadMesh" id=3]
-material = SubResource( 2 )
+[sub_resource type="QuadMesh" id=5]
+material = SubResource( 4 )
 
-[sub_resource type="GDScript" id=4]
+[sub_resource type="GDScript" id=6]
 script/source = "extends \"res://objects/Particle.gd\"
 
 func _ready():
-	$Flash.set_flash(2, 8, 16)
+	$Flash.set_flash(.2, 5, 4)
 "
 
 [node name="Particle" type="Particles"]
-amount = 12
-lifetime = 0.5
+cast_shadow = 0
+generate_lightmap = false
+amount = 5
 explosiveness = 1.0
 fract_delta = false
-process_material = SubResource( 1 )
-draw_pass_1 = SubResource( 3 )
-script = SubResource( 4 )
+local_coords = false
+process_material = SubResource( 9 )
+draw_pass_1 = SubResource( 5 )
+script = SubResource( 6 )
 
 [node name="Sound" type="AudioStreamPlayer3D" parent="."]
-stream = ExtResource( 3 )
+stream = ExtResource( 2 )
 unit_db = 20.0
-max_distance = 20.0
+max_distance = 8.0
 
 [node name="Flash" parent="." instance=ExtResource( 4 )]
-light_color = Color( 0.223529, 0.490196, 1, 1 )
-light_energy = 16.0
-shadow_color = Color( 0.686275, 0, 1, 1 )
+light_color = Color( 0.384314, 0.807843, 0.541176, 1 )

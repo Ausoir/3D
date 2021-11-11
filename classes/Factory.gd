@@ -10,18 +10,15 @@ const Type_Object = preload("res://objects/Object.tscn")
 const Type_Item = preload("res://objects/Item.tscn")
 
 const unit_data = {
-	"dummy": [Man, 0, {}, ["torch"]],
+	"dummy": [Man, 0, {}, ["torch","cloth armor","boots"]],
 	"miner": [Man, 1, {}, ["cloth armor", "boots", "pickaxe"]],
 	"digger": [Man, 1, {}, ["cloth armor", "boots", "shovel"]],
-	"guard": [Man, 1, {}, ["shortsword", "leather armor", "boots"]],
+	"guard": [Man, 1, {}, ["shortsword", "leather armor", "boots", "torch"]],
 	"warrior": [Man, 1, {}, ["spear", "leather armor", "leather gloves", "leather boots"]],
 	"soldier": [Man, 1, {}, ["longsword", "iron armor", "iron gauntlets", "iron boots", "full helmet"]],
 }
 
 const data = {
-	"torch": ["item", preload("res://assets/models/torch.tscn"),
-		{health=1,onswing=[["swing", 9999]]}, {damage="1d6", speed=.8, tags=["cut"]}],
-
 	"branch": ["item", preload("res://assets/models/branch.obj"),
 		{onswing=[["wait", 12, "work"],["cmd", 0, [["menu","branch"]]]]},{}],
 	"stone": ["item", preload("res://assets/models/stone.obj"),
@@ -85,18 +82,20 @@ const data = {
 	"ruby staff": ["item", preload("res://assets/models/staff_rare.obj"),
 		{onswing=[["swing", 9999]]}, {damage="1d6", speed=1}],
 
+	"torch": ["item", preload("res://assets/models/torch.tscn"), {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
+		{part="offhand"}],
 	"cloth armor": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{part="armor",skin=preload("res://assets/materials/mat_cloth.tres")}],
+		{health=3,part="armor",skin=preload("res://assets/materials/mat_cloth.tres")}],
 	"leather armor": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=3,weight=1, part="armor",skin=preload("res://assets/materials/mat_leather.tres")}],
-	"iron armor": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
+	"cuirass": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=5,weight=3, part="armor",skin=preload("res://assets/materials/mat_metal.tres")}],
 	"leather gloves": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=1, part="arms",skin=preload("res://assets/materials/mat_leather.tres")}],
 	"iron gauntlets": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=2,weight=1, part="arms",skin=preload("res://assets/materials/mat_metal.tres")}],
 	"boots": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
-		{part="legs",skin=preload("res://assets/materials/mat_cloth.tres")}],
+		{health=2,part="legs",skin=preload("res://assets/materials/mat_cloth.tres")}],
 	"leather boots": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=1, part="legs",skin=preload("res://assets/materials/mat_leather.tres")}],
 	"iron boots": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
@@ -109,28 +108,35 @@ const data = {
 		{defense=2,weight=2, part="head"}],
 	"amulet of protection": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
 		{defense=2, part="accessory"}],
+	"amulet of focus": ["item", Bag, {onswing=[["wait",6,"work"],["cmd",0,[["equip"]]]]},
+		{focus=2, part="accessory"}],
 
 	"2 gold": ["item", preload("res://assets/models/coinsSmall.obj"),
-		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["cost",-2,0,true]]]]},{}],
+		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["cost",0,-2,true]]]]},{}],
 	"4 gold": ["item", preload("res://assets/models/coinsMedium.obj"),
-		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["cost",-4,0,true]]]]},{}],
+		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["cost",0,-4,true]]]]},{}],
 	"8 gold": ["item", preload("res://assets/models/coinsLarge.obj"),
-		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["cost",-8,0,true]]]]},{}],
-	"chest": ["building", preload("res://world/buildings/Chest.tscn"),
-		{health=4,onuse=[["wait",12,"work"],["cmd",0,[["trigger",""]]]]},
-		 {defense="1d6", loot="doodads"}],
-	"treasure": ["building", preload("res://world/buildings/Treasure.tscn"),
-		{health=12,onuse=[["wait",12,"work"],["cmd",0,[["trigger",""]]]]},
-		 {defense="1d6", loot="treasure"}],
-	"wand rack": ["building", preload("res://world/buildings/Rack.tscn"),
-		{health=6,onuse=[["wait",12,"work"],["cmd",0,[["trigger",""]]]]},
-		 {defense="1d6", loot="wands"}],
+		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["cost",0,-8,true]]]]},{}],
+	"health potion": ["item", preload("res://assets/models/potionSmall_blue.obj"),
+		{onuse=[["wait", 12, "work"],["cmd", 0, [["die"],["v","host"],["state","regen",120]]]]},{}],
+
+
+
 	"waste": ["building", preload("res://world/buildings/Waste.tscn"), {
-		onmake=[["v","spawnpoint",0],["r","cmd",[[],[["make","shovel"]]]]]
+		onmake=[["v","spawnpoint",0],["r","cmd",[[],[["make","shovel"]]]],
+				["v","spawnpoint",1],["r","cmd",[[],[["make","pot"]]]],
+				["v","spawnpoint",2],["r","cmd",[[],[["make","pot"]]]]]
 	},{}],
+	"pots": ["building", preload("res://world/buildings/Pots.tscn"), {
+		onmake=[["v","spawnpoint",0],["r","cmd",[[],[["make","pot"]]]],
+				["v","spawnpoint",1],["r","cmd",[[],[["make","pot"]]]],
+				["v","spawnpoint",2],["r","cmd",[[],[["make","pot"]]]],
+				["v","spawnpoint",3],["r","cmd",[[],[["make","pot"]]]],
+				["v","spawnpoint",4],["r","cmd",[[],[["make","pot"]]]]]
+	},{}],
+	"pot": ["building", preload("res://world/buildings/Pot.tscn"), {health=1},{}],
 	"table": ["building", preload("res://world/buildings/Table.tscn"), {health=4},{}],
 	"large table": ["building", preload("res://world/buildings/TableLarge.tscn"), {health=8},{}],
-	"pots": ["building", preload("res://world/buildings/Pots.tscn"), {health=1},{}],
 	"bed cluster": ["building", preload("res://world/buildings/Bed.tscn"), {health=12},{loot="beds"}],
 	"beds": ["building", preload("res://world/buildings/Bed2.tscn"), {health=4},{loot="beds"}],
 	"campfire": ["building", preload("res://world/buildings/Campfire.tscn"),{health=4},{}],
@@ -155,11 +161,30 @@ const data = {
 	"occluder": ["building", preload("res://world/buildings/Occluder.tscn"),{},{}],
 	"portal": ["building", preload("res://world/buildings/Portal.tscn"),{
 		onmake=[["v","host"],["state","work",9999],["setwork",24,"Destabilizing..."]],
-		onwork=[["setwork"],["v","host"],["trigger",""]]
+		onwork=[["setwork"],["v","host"],["trigger",""]],
+		onuse=[["wait",8,"work",true],["cmd",0,[["v","host"],["v","controller"],["menu","shop"]]]]
+	},{}],
+	"door": ["building", preload("res://world/buildings/Door.tscn"),{
+		ontouch=[["cmd",0,[["trigger"]]]]
 	},{}],
 	"trapdoor": ["building", preload("res://world/buildings/Trapdoor.tscn"),{
-		onuse=[["wait",12,"work"],["cmd",0,[["trigger",""]]]]
+		onuse=[["wait",24,"work",true],["cmd",0,[["trigger",""]]]]
 	},{}],
+	"chest": ["building", preload("res://world/buildings/Chest.tscn"),
+		{health=4,onuse=[["wait",12,"work",true],["cmd",0,[["trigger"]]]]},
+		{loot="doodads"}],
+	"treasure": ["building", preload("res://world/buildings/Treasure.tscn"),
+		{health=12,onuse=[["wait",12,"work",true],["cmd",0,[["trigger"]]]]},
+		 {loot="treasure"}],
+	"wand rack": ["building", preload("res://world/buildings/RackWands.tscn"),
+		{health=6,onuse=[["wait",12,"work",true],["cmd",0,[["trigger"]]]]},
+		 {loot="wands"}],
+	"weapon rack": ["building", preload("res://world/buildings/RackWeapons.tscn"),
+		{health=6,onuse=[["wait",12,"work",true],["cmd",0,[["trigger"]]]]},
+		 {loot="weapons"}],
+	"armor rack": ["building", preload("res://world/buildings/RackArmors.tscn"),
+		{health=6,onuse=[["wait",12,"work",true],["cmd",0,[["trigger"]]]]},
+		 {loot="armors"}],
 }
 
 var descriptions = {
@@ -168,30 +193,41 @@ var descriptions = {
 	"demolish": "Destroy buildings",
 }
 
-onready var craftables = {
-	"hand": [
-		["Wield Torch", [1,0], [["make","torch"],["wield"],["cost",1,0]]],
-		["Wield Feather", [1,0], [["make","feather blade"],["wield"],["cost",1,0]]],
-		["Wield Saber", [1,0], [["make","saber"],["wield"],["cost",1,0]]],
-		["Wield scimitar", [1,0], [["make","scimitar"],["wield"],["cost",1,0]]],
-		["Wield Warhammer", [1,0], [["make","warhammer"],["wield"],["cost",1,0]]],
-		["Wield Pickaxe", [1,0], [["make","pickaxe"],["wield"],["cost",1,0]]],
-		["Wield Halberd", [1,0], [["make","halberd"],["wield"],["cost",1,0]]],
-		["Equip Iron Suit", [1,0], [["make","iron armor"],["equip"], ["make","iron gauntlets"],["equip"], ["make","iron boots"],["equip"]]],
-		["Equip Head", [1,0], [["make","full helmet"],["equip"],["cost",1,0]]],
-		["Equip Head2", [1,0], [["make","helmet"],["equip"],["cost",1,0]]],
-		["Spawn Friend", [1,0], [["v","pos"], ["make","warrior"], ["claim",1]]],
-		["Spawn Enemy", [1,0], [["v","pos"], ["make","soldier"], ["claim",0]]],
-		["Spawn Chest", [1,0], [["v","pos"], ["make","chest"], ["drop"]]],
-		["Ability Debug", [1,0], [["v","host"],["v","parent"],["ability","debug"]]],
-		["Ability Flurry", [1,0], [["v","host"],["v","parent"],["ability","flurry"]]],
-		["Ability Charge", [1,0], [["v","host"],["v","parent"],["ability","charge"]]],
-	],
-	"hire": [
-		["Summon Miner", [0,0], [["v","host"], ["state","work",9999], ["setwork",3,"Summoning..."],
-			["oncall", "onwork", [["req",0,1], ["v","host"], ["trigger","worker"],["v","host"],["unstate","work"], ["cost",0,1]]]]],
-		["Summon Warrior", [0,0,"workshop"], [["v","host"], ["state","work",9999], ["setwork",3,"Summoning..."],
-			["oncall", "onwork", [["req",0,1], ["v","host"], ["trigger","warrior"],["v","host"],["unstate","work"], ["cost",0,1]]]]],
+onready var menu = {
+	"shop": [
+		[
+			["Transmute Gold to Mana", [0,5], [["cost",0,5],["cost",-2,0]]],
+			["Summon Health Potion", [1,0], [["make","health potion"],["wield"],["cost",1,0]]],
+			["Call a Warrior", [2,5], [["v","pos"], ["make","warrior"], ["claim",1]]],
+			["Call a Soldier", [2,10], [["v","pos"], ["make","soldier"], ["claim",1]]],
+			["Brighten Dungeon", [1,0], [["v","pos"], ["make","soldier"], ["claim",1]]],
+		],
+		[
+			["Summon Torch", [1,0], [["make","torch"],["wield"],["cost",1,0]]],
+			["Summon Pickaxe", [2,0], [["make","pickaxe"],["wield"],["cost",2,0]]],
+			["Summon Shortsword", [2,0], [["make","shortsword"],["wield"],["cost",2,0]]],
+			["Summon Saber", [5,0], [["make","saber"],["wield"],["cost",5,0]]],
+			["Summon Halberd", [5,0], [["make","halberd"],["wield"],["cost",5,0]]],
+			["Summon Mace", [3,0], [["make","mace"],["wield"],["cost",3,0]]],
+			["Summon Cleaver", [3,0], [["make","cleaver"],["wield"],["cost",3,0]]],
+		],
+		[
+			["Summon Full Iron Suit", [15,0], [["make","iron armor"],["equip"], ["make","iron gauntlets"],["equip"], ["make","iron boots"],["equip"],["cost",15,0]]],
+			["Summon Iron Helmet", [2,0], [["make","helmet"],["equip"],["cost",2,0]]],
+			["Summon Full Helmet", [3,0], [["make","full helmet"],["equip"],["cost",3,0]]],
+			["Summon Iron Boots", [2,0], [["make","iron boots"],["equip"],["cost",2,0]]],
+			["Summon Gauntlets", [2,0], [["make","iron gauntlets"],["equip"],["cost",2,0]]],
+			["Summon Cuirass", [3,0], [["make","cuirass"],["equip"],["cost",3,0]]],
+			["Summon Amulet of Protection", [4,0], [["make","amulet of protection"],["equip"],["cost",4,0]]],
+			["Summon Amulet of Focus", [4,0], [["make","amulet of focus"],["equip"],["cost",4,0]]],
+		],
+		[
+			["Memorize Flurry", [5,0], [["v","host"],["v","controller"],["ability","flurry"],["cost",3,0]]],
+			["Memorize Light", [5,0], [["v","host"],["v","controller"],["ability","light"],["cost",3,0]]],
+			["Memorize Cat's Eye", [8,0], [["v","host"],["v","controller"],["ability","cateye"],["cost",3,0]]],
+			["Memorize Haste", [5,0], [["v","host"],["v","controller"],["ability","haste"],["cost",3,0]]],
+			["Memorize Passwall", [5,0], [["v","host"],["v","controller"],["ability","passwall"],["cost",3,0]]],
+		]
 	],
 }
 
@@ -218,8 +254,7 @@ func make_unit(arg):
 			for i in item[3]:
 				G.cmds([["v","pos"],["make", i],["equip"]], r)
 		r.orientation.basis = Transform().looking_at(Vector3(G.rng.randf_range(-1,1),0,G.rng.randf_range(-1,1)), Vector3.UP).basis.orthonormalized()
-		var size = G.rng.randf_range(.8, 1.2)
-		r.unit_size = Vector3(size,size,size)
+		r.set_seed(-1)
 		return r
 
 
@@ -257,6 +292,10 @@ func make(arg):
 			r.onuse = []
 			for i in itemdata.onuse:
 				r.onuse.append(get_duplicate(r, i))
+		if itemdata.has("ontouch"):
+			r.ontouch = []
+			for i in itemdata.ontouch:
+				r.ontouch.append(get_duplicate(r, i))
 		if itemdata.has("onswing"):
 			r.onswing = []
 			for i in itemdata.onswing:

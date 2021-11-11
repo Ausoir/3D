@@ -1,20 +1,24 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://objects/Particle.gd" type="Script" id=1]
 [ext_resource path="res://assets/textures/splinter.png" type="Texture" id=2]
 [ext_resource path="res://assets/audio/hit_bash.wav" type="AudioStream" id=3]
+[ext_resource path="res://assets/particles/curve_easeinout.tres" type="Texture" id=4]
 
 [sub_resource type="ParticlesMaterial" id=1]
 lifetime_randomness = 1.0
+emission_shape = 1
+emission_sphere_radius = 0.3
 flag_align_y = true
 spread = 180.0
-gravity = Vector3( 0, -4, 0 )
-initial_velocity = 16.0
-initial_velocity_random = 1.0
-damping = 12.0
+gravity = Vector3( 0, -12, 0 )
+initial_velocity = 8.0
+initial_velocity_random = 0.5
+angle = 720.0
 angle_random = 1.0
-scale = 0.1
+scale = 0.7
 scale_random = 0.5
+scale_curve = ExtResource( 4 )
 
 [sub_resource type="SpatialMaterial" id=2]
 params_diffuse_mode = 4
@@ -33,9 +37,11 @@ albedo_texture = ExtResource( 2 )
 material = SubResource( 2 )
 
 [node name="Particle" type="Particles"]
+cast_shadow = 0
+generate_lightmap = false
 emitting = false
-amount = 24
-lifetime = 0.4
+amount = 12
+lifetime = 0.8
 one_shot = true
 explosiveness = 1.0
 process_material = SubResource( 1 )

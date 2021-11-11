@@ -58,7 +58,7 @@ const data = {
 		 "W,WWW,W"],
 		["WWW,WWW",
 		 "W,,,,,W",
-		 "W,#D#,W",
+		 "W,#,#,W",
 		 "W,#.#,W",
 		 "WW#.#WW"],
 		["WWWWWWW",
@@ -71,39 +71,41 @@ const data = {
 		 "W.D,^,=",
 		 "W,W,,.W",
 		 "WWWWWWW"],
-		["WWWWW",
+		["WWDWW",
 		 "W...W",
-		 "W.!.W",
+		 "D.!.D",
 		 "W...W",
-		 "WWWWW"],
+		 "WWDWW"],
+		["WW=WW",
+		 "W...W",
+		 "=.0.=",
+		 "W...W",
+		 "WW=WW"],
 		["##D##",
 		 "#...#",
 		 "#.^.#",
 		 "#...#",
 		 "#####"],
-		["WW=WWWDWWW#WW",
-		 "D...........D",
-		 "WWW#WWDWW=WWW"],
+		["###W=WDWWW###",
+		 "#...........#",
+		 "###WWWDWW=###"],
 		["###########",
-		 "#...D^D...#",
+		 "#....^....#",
 		 "###########"],
 		["WWWWW=WWW",
 		 "W.......W",
 		 "WWW=WWWWW"],
-		["WD#####",
+		["WWD####",
 		 "W..,..#",
 		 "WW#####"],
-		["WWW.WWW",
-		 "W.,,,.W",
-		 "W.###.W"],
 		["WWWWWWW",
-		 ".W.D,,,",
+		 "..W,,,,",
 		 "WWWWWWW"],
-		["WWWWW",
-		 "=.D.=",
-		 "WWWWW"],
+		["WW=WW",
+		 "W...W",
+		 "WW=WW"],
 		["#####",
-		 "D...D",
+		 "#...#",
 		 "#####"],
 		["#,#",
 		 "#.#",
@@ -154,7 +156,7 @@ const data = {
 		 "W,,,,,W",
 		 "=,,0,,=",
 		 "W,,,,,W",
-		 "WDWWWDW"],
+		 "WWDWDWW"],
 		["WWDWW",
 		 "W,,,W",
 		 "=,0,=",
@@ -263,28 +265,66 @@ const data = {
 		["11111"],
 	],
 	"entrance" : [
-		["WWWDWW",
-		 "W0D,,=",
-		 "WWWWDW"],
-		["WDWDW",
-		 "D,0,D",
-		 "WDWDW"],
-		["WWWWW",
-		 "W10,W",
-		 "WWWWW"],
-		["WWWW",
-		 "W10W",
-		 "WWWW"],
+		["#####",
+		 "#,,,#",
+		 "#,,,#",
+		 "#,@,#",
+		 "#,,,D",
+		 "#,,,#",
+		 "#####"],
+		["#####WW",
+		 "#,,,#,W",
+		 "#,@,D,D",
+		 "#,,,#,W",
+		 "#####WW"],
+		["##D##",
+		 "#0,0#",
+		 "#0@0#",
+		 "#0,0#",
+		 "#####"],
+		["#####",
+		 "#,,,#",
+		 "#,@,D",
+		 "#,,,#",
+		 "#####"],
+		["WWDWW",
+		 "W@,0W",
+		 "WW=WW"],
+		["WWW,W",
+		 "W@01W",
+		 "WWW,W"],
 		["W,W",
-		 ",0,",
+		 ",@,",
 		 "W,W"],
 		["WWW",
-		 "W0D",
+		 "W@,",
 		 "WWW"],
+		["W@W"],
 	],
 }
 
-func make_vault(rng, base, from, to, type="default", container_only=false):
+func audit_vaults():
+	for vault_type in data.keys():
+		var vaults = data[vault_type]
+		var index = 0
+		for vault in vaults:
+			audit_vault(vault, vault_type, index)
+			index += 1
+
+func audit_vault(vault, vault_type, index):
+	var row = 0
+	for rows in vault:
+		var col = 0
+		for cell in rows:
+			if cell == 'D':
+				if col % 2 == 1 or row % 2 == 1:
+					push_error("Invalid vault at type:"+vault_type+" index:"+str(index))
+					return false
+			col += 1
+		row += 1
+	return true
+
+func make_vault(rng, base, from, to, type="default"):
 	var size = to - from
 	var candidates = []
 	from = Vector2(from.x + int(from.x)%2, from.y + int(from.y)%2)
@@ -293,9 +333,9 @@ func make_vault(rng, base, from, to, type="default", container_only=false):
 		var diffY = size.y - len(vault) + 1
 		var diffX2 = size.x - len(vault) + 1
 		var diffY2 = size.y - len(vault[0]) + 1
-		if diffX == 0 and diffY == 0 and !container_only:
+		if diffX == 0 and diffY == 0:
 			candidates.append([vault, from.x, from.y, rng.randi_range(0, 3), false])
-		elif diffX2 == 0 and diffY2 == 0 and !container_only:
+		elif diffX2 == 0 and diffY2 == 0:
 			candidates.append([vault, from.x, from.y, rng.randi_range(0, 3), true])
 		elif diffX >= 4 and diffY >= 4:
 			var startX = from.x + rng.randi_range(1, floor((diffX-2)/2))*2

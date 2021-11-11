@@ -18,9 +18,11 @@ onready var camera = $CameraBase
 var mouse_motion = Vector2()
 var mouse_captured = true
 var id = 1
-var gold = 50
+var mana = 5
+var gold = 0
 var pathing = Pathing.new()
 var opening_menu = 0
+var view_item
 
 
 func _ready():
@@ -28,6 +30,9 @@ func _ready():
 	springarm.add_excluded_object(self)
 	G.factions[1].add(self)
 	G.you = self
+	G.ui.get_node(\"AnimationPlayer/Fade\").set_size(get_viewport().size)
+	G.ui.get_node(\"AnimationPlayer\").play(\"FadeIn\")
+	G.ui.update_resources(mana, gold)
 
 func assign(punit):
 	.assign(punit)
@@ -37,18 +42,23 @@ func assign(punit):
 	set_ability(\"debug\")
 	set_faction(1)
 
-func add_resource(p, message=true):
-	gold += p
+func add_resource(pmana, pgold, message=true):
+	mana += pmana
+	gold += pgold
 	if message:
-		G.ui.display_gather(p)
+		G.ui.display_gather(pmana, pgold)
+	G.ui.update_resources(mana, gold)
 
-func require_resource(spend, pgold, message=true):
-	if gold - pgold >= 0:
-		if spend:
-			add_resource(-pgold, message)
-		return true
-	if spend and message:
-		G.message(\"Not enough gold!\")
+func require_resource(spend, pmana, pgold, message=true):
+	if mana - pmana >= 0:
+		if gold - pgold >= 0:
+			if spend:
+				add_resource(-mana, -pgold, message)
+			return true
+		elif spend and message:
+			G.message(\"Not enough Gold!\")
+	elif spend and message:
+		G.message(\"Not enough Mana!\")
 	return false
 
 
@@ -66,16 +76,18 @@ func _input(event):
 		if event is InputEventMouseMotion:
 			var rot = event.relative * CAMERA_MOUSE_ROTATION_SPEED
 			camera.rotate_y(-rot.x)
-			camera.orthonormalize()
 			camera.rotation.x += rot.y
 			camera.rotation.x = clamp(camera.rotation.x, CAMERA_X_ROT_MIN, CAMERA_X_ROT_MAX)
-		show_interactable_tip()
+		view_item = show_interactable_tip()
 	if Input.is_action_just_pressed(\"restart\"):
 		restart()
 	elif Input.is_action_just_pressed(\"ui_fullscreen\"):
 		OS.window_fullscreen = !OS.window_fullscreen
 	elif Input.is_action_just_pressed(\"ui_mouse\"):
-		capture_mouse()
+		if G.ui.on:
+			G.ui.clear()
+		else:
+			capture_mouse()
 
 
 func on_process(delta):
@@ -102,15 +114,19 @@ func on_process(delta):
 				Input.get_action_strength(\"move_back\") - Input.get_action_strength(\"move_front\")
 			)
 		if move_target != Vector2.ZERO:
+			opening_menu = 0
 			set_task([\"moveto\", .001, move_target.x, move_target.y])
 
 		if Input.is_action_pressed(\"special\"):
 			set_task([\"special\", 1])
+		elif Input.is_action_just_released(\"special\"):
+			if unit.cast < 0:
+				G.message(\"Ability on cooldown: \" + str(unit.cast))
 		elif Input.is_action_just_pressed(\"interact\"):
 			swing(unit.weapon)
 		elif Input.is_action_just_pressed(\"item\"):
-			if G.ui.tooltip.visible:
-				set_task([\"interact\", 0])
+			if view_item:
+				set_task([\"interact\", 0, view_item.transform.origin])
 			else:
 				var tpathing = Pathing.new()
 				tpathing.height = unit.get_position().y+.2
@@ -123,20 +139,22 @@ func on_process(delta):
 				set_task([\"wait\", 1, \"work\"])
 				opening_menu += 1
 				if opening_menu > 32:
-					set_task([\"cmd\", 0, [[\"menu\", \"hand\", id]]])
-		elif Input.is_action_just_released(\"item\"):
+					opening_menu = 0
+					set_task([\"cmd\", 0, [[\"v\",\"controller\"],[\"menu\",\"shop\"]]])
+		else:
 			opening_menu = 0
 
 func show_interactable_tip():
 	G.ui.set_tooltip(null)
 	var item = get_interactable()
-	if item and unit.get_view_position().direction_to(item.global_transform.origin+Vector3(0,2,0)).dot(camera.global_transform.basis.z) > .7:
+	if item:
 		if item.item_type == \"item\":
 			G.ui.set_tooltip(\"Pick up [\" + item.item_name.capitalize() + \"]\")
 		elif item.item_type == \"object\":
 			G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
 		elif item.item_type == \"building\":
 			G.ui.set_tooltip(\"Use [\" + item.item_name.capitalize() + \"]\")
+		return item
 
 
 func on_hit(_pos, _hitter, _damage):

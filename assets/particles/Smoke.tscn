@@ -3,13 +3,13 @@
 [ext_resource path="res://objects/Particle.gd" type="Script" id=1]
 [ext_resource path="res://assets/textures/dust.png" type="Texture" id=2]
 
-[sub_resource type="Curve" id=4]
+[sub_resource type="Curve" id=1]
 _data = [ Vector2( 0, 0 ), 0.0, 7.14123, 0, 0, Vector2( 0.509434, 0.986364 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), -7.50525, 0.0, 0, 0 ]
 
-[sub_resource type="CurveTexture" id=5]
-curve = SubResource( 4 )
+[sub_resource type="CurveTexture" id=2]
+curve = SubResource( 1 )
 
-[sub_resource type="ParticlesMaterial" id=1]
+[sub_resource type="ParticlesMaterial" id=3]
 emission_shape = 1
 emission_sphere_radius = 0.3
 direction = Vector3( 0, 1, 0 )
@@ -20,9 +20,9 @@ initial_velocity_random = 1.0
 angle_random = 1.0
 scale = 2.0
 scale_random = 1.0
-scale_curve = SubResource( 5 )
+scale_curve = SubResource( 2 )
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=4]
 params_diffuse_mode = 4
 params_specular_mode = 4
 params_blend_mode = 1
@@ -31,13 +31,15 @@ params_billboard_keep_scale = true
 albedo_color = Color( 0.611765, 0.611765, 0.611765, 1 )
 albedo_texture = ExtResource( 2 )
 
-[sub_resource type="QuadMesh" id=3]
-material = SubResource( 2 )
+[sub_resource type="QuadMesh" id=5]
+material = SubResource( 4 )
 
 [node name="Particle" type="Particles"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+cast_shadow = 0
+generate_lightmap = false
 amount = 9
-lifetime = 3.0
-process_material = SubResource( 1 )
-draw_pass_1 = SubResource( 3 )
+lifetime = 2.0
+process_material = SubResource( 3 )
+draw_pass_1 = SubResource( 5 )
 script = ExtResource( 1 )

@@ -19,9 +19,10 @@ func rid(node_name):
 			node.queue_free()
 			if has_node("StaticBody/"+node_name):
 				get_node("StaticBody/"+node_name).queue_free()
+				if $StaticBody.get_child_count() == 0:
+					$StaticBody.queue_free()
 				return true
 	return false
 
-func get_spawnpoint():
-	var child = G.rng.rand_arr($Spawn.get_children())
-	return child.global_transform
+func get_spawnpoint(idx):
+	return $Spawn.get_child(idx).global_transform

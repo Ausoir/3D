@@ -1,8 +1,7 @@
 extends KinematicBody
 
-const GRAVITY = -.98
-const JUMP_SPEED = 20
-const HEIGHT = Vector3(0, 16, 0)
+const DISSOLVE = preload("res://assets/materials/mat_dissolve.tres")
+const GRAVITY = -.3
 onready var sfx_land = $Sound/Land
 onready var sfx_step = $Sound/Step
 onready var sfx_voice = $Sound/Voice
@@ -12,7 +11,7 @@ onready var skeleton = $CharacterArmature/Skeleton
 onready var body_mesh = $CharacterArmature/Skeleton/Body
 onready var health_bar = $Health
 onready var damage_label = $Damage
-var dissolve = preload("res://assets/materials/mat_dissolve.tres").duplicate()
+var dissolve = DISSOLVE.duplicate()
 var item_name = "unit"
 var controller
 var unit_size = Vector3.ONE
@@ -35,6 +34,8 @@ var hit_glance = true #hit bounces off object. Disabled for AI's
 var hitbox
 var hitshape
 var level = 1
+var cast = 0
+var focus = 0
 var health = Vector2(5, 5)
 
 func _ready():
@@ -68,11 +69,16 @@ func on_hit(pos, hitter, damage, tags):
 	else:
 		damage_label.display(damage)
 		G.make_particle("blood", pos, 1)
+		G.make_particle("hit", pos, 1)
 		set_state("hit", true)
 		damage(damage)
 		health_bar.display(health.x, health.y, item_name, level)
 
 func _physics_process(delta):
+	if cast < 0:
+		cast += delta
+		if cast >= 0:
+			G.make_particle("recharged", get_position(), 1).follow(self)
 	controller.on_process(delta)
 	on_process(delta)
 
@@ -82,7 +88,6 @@ func on_process(delta):
 	if is_on_floor():
 		if airborne_time > .3:
 			airborne_time = 0
-			on_hit(get_position(), null, 1, ["true"])
 			set_state("drop", true)
 			sfx_land.play()
 		else:
@@ -130,10 +135,7 @@ func on_process(delta):
 	motion = motion.linear_interpolate(motion_target, 8 * delta)
 	var speed = max(abs(motion.x), abs(motion.y))
 	if speed > 0.1:
-		var target = motion.x * view_x + motion.y * view_z
-		var q_from = orientation.basis.get_rotation_quat()
-		var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
-		orientation.basis = Basis(q_from.slerp(q_to, delta * 10))
+		face(delta, motion)
 	var rotdiff = orientation.basis.x.dot(view_z)
 	anim_tree["parameters/head_h/add_amount"] = rotdiff * -2
 	var h_velocity = Vector2(0, move_speed.x*speed).rotated(-orientation.basis.get_euler().y)
@@ -150,13 +152,24 @@ func on_process(delta):
 	orientation = orientation.orthonormalized() # Orthonormalize orientation.
 	global_transform.basis = orientation.basis.scaled(unit_size)
 
+func face(delta, to):
+	var target = to.x * view_x + to.y * view_z
+	var q_from = orientation.basis.get_rotation_quat()
+	var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
+	orientation.basis = Basis(q_from.slerp(q_to, delta * 10))
+
 func push_objects(vel):
 	var slides = get_slide_count()
 	for i in range(slides):
-		var col = get_slide_collision(i)
-		if col.collider is KinematicBody:
-			col.collider.move_and_slide(Vector3(vel.x*unit_size.x*.5,0,vel.y*unit_size.z*.5), Vector3.UP)
-			return
+		var obj = get_slide_collision(i).collider
+		if obj is KinematicBody:
+			var origY = obj.transform.origin.y
+			obj.move_and_slide(Vector3(vel.x*unit_size.x*.5,0,vel.y*unit_size.z*.5), Vector3.UP)
+			obj.transform.origin.y = origY
+		elif obj is StaticBody:
+			if obj.get("item_name") and obj.ontouch:
+				controller.tgt = obj
+				controller.set_tasks(obj.ontouch)
 
 func on_anim_finish():
 	pass

@@ -1,23 +1,23 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=18 format=2]
 
+[ext_resource path="res://assets/font_message.tres" type="DynamicFont" id=1]
 [ext_resource path="res://assets/Baumans-Regular.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=3]
 [ext_resource path="res://interface/health.tscn" type="PackedScene" id=4]
 [ext_resource path="res://interface/SkillTree.tscn" type="PackedScene" id=5]
+[ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=6]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends CanvasLayer
 
-const Menubutton = preload(\"res://interface/button_resource.tscn\")
 const Itembutton = preload(\"res://interface/button_item.tscn\")
-const Healthbar = preload(\"res://interface/health.tscn\")
 onready var menu = $Menu
 onready var tint = $Menu/Tint
 onready var tooltip = $Interaction
+onready var hidden = $Menu/Hidden
 onready var tabs = $Menu/Tabs
 onready var tab_character = $Menu/Tabs/Character/Buttons
 onready var tab_equipment = $Menu/Tabs/Equipment/Buttons
-onready var tab_shop = $Menu/Tabs/Shop/Buttons
 var on = false
 var host
 var argument
@@ -26,47 +26,70 @@ var argument
 func _ready():
 	tint.connect(\"gui_input\", self, \"on_background_click\")
 
+func bring_tab(tab_name):
+	if !tabs.has_node(tab_name):
+		var shop = hidden.get_node(tab_name)
+		hidden.remove_child(shop)
+		tabs.add_child(shop)
+		tabs.set_current_tab(tabs.get_child_count()-1)
+		shop.on_bring(self, argument)
+	else:
+		tabs.get_node(tab_name).on_bring(self, argument)
+
+func stash_tab(tab_name):
+	if tabs.has_node(tab_name):
+		var shop = tabs.get_node(tab_name)
+		tabs.remove_child(shop)
+		hidden.add_child(shop)
+		tabs.set_current_tab(min(tabs.current_tab, tabs.get_child_count()-1))
 
 func _process(_delta):
 	$FPS.set_text(str(Engine.get_frames_per_second())+' FPS')
-
 
 func on_background_click(event):
 	if event is InputEventMouseButton and !event.pressed:
 		clear()
 
-
-func display(arg, playerID):
+func display(arg, player):
 	if on:
 		clear()
 	on = true
-	host = G.get_player(playerID)
-	argument = arg
+	host = player
 	G.you.capture_mouse(0)
 	tint.set_size(get_viewport().size)
 	menu.show()
-	tabs.rect_position = get_viewport().size / 2 - tabs.rect_size / 2
+	var screen_center = get_viewport().size / 2
+	tabs.rect_position = screen_center - tabs.rect_size / 2
 	on_tab_select(tabs.current_tab)
-
+	argument = arg
+	if !argument.empty():
+		bring_tab(\"Shop\")
+	else:
+		stash_tab(\"Shop\")
 
 func clear():
-	G.you.capture_mouse(1)
 	on = false
+	G.you.capture_mouse(1)
 	menu.hide()
 
-
-func button_pressed(args):
+func _button_pressed(args):
 	G.cmds(args, host.unit)
 	clear()
 
-
-func display_gather(gold):
+func display_gather(mana, gold):
 	var plus = \"\"
+	if mana != 0:
+		if mana > 0:
+			plus = \"+\"
+		message(plus+str(mana) + \" Mana\")
 	if gold != 0:
 		if gold > 0:
 			plus = \"+\"
-		message(plus+str(gold) + \" Gold\")
+		message(plus+str(mana) + \" Gold\")
 
+func update_resources(mana, gold):
+	$Menu/Info/ManaAmount.text = str(mana)
+	$Menu/Info/GoldAmount.text = str(gold)
 
 func set_tooltip(msg):
 	if msg == null:
@@ -76,24 +99,18 @@ func set_tooltip(msg):
 		tooltip.show()
 		tooltip.rect_position = get_viewport().size / 2 - tooltip.rect_size / 2 + Vector2(0, 160)
 
-
 func message(msg):
 	$Messages.add(str(msg))
-
 
 func on_tab_select(tab):
 	for child in tab_character.get_children():
 		child.queue_free()
 	for child in tab_equipment.get_children():
 		child.queue_free()
-	for child in tab_shop.get_children():
-		child.queue_free()
 	if tab == 0:
 		fill_character()
 	elif tab == 1:
 		fill_equipment()
-	elif tab == 3:
-		fill_shop()
 
 func fill_equipment():
 	var equipments = []
@@ -106,9 +123,9 @@ func fill_equipment():
 		var item = equipment[1]
 		var button = Itembutton.instance()
 		if item == hostUnit.weapon:
-			button.connect(\"pressed\", self, \"button_pressed\", [[[\"t\",null],[\"wield\"]]])
+			button.connect(\"pressed\", self, \"_button_pressed\", [[[\"t\",null],[\"wield\"]]])
 		else:
-			button.connect(\"pressed\", self, \"button_pressed\", [[[\"unequip\",equipment[0]]]])
+			button.connect(\"pressed\", self, \"_button_pressed\", [[[\"unequip\",equipment[0]]]])
 		button.get_node(\"Container/Category\").set_text(equipment[0].to_upper())
 		button.get_node(\"Container/Name\").set_text(item.item_name.capitalize())
 		for property in item.properties:
@@ -128,9 +145,7 @@ func fill_equipment():
 		button.rect_min_size.y = button.get_node(\"Container\").rect_size.y + 14
 
 func fill_character():
-	tab_character.add_child(Healthbar.instance())
 	var stats = G.younit.update_stats()
-	stats['gold'] = G.you.gold
 	var label = Label.new()
 	label.add_font_override(\"font\", G.font)
 	tab_character.add_child(label)
@@ -139,24 +154,6 @@ func fill_character():
 		label.add_font_override(\"font\", G.font)
 		label.set_text(stat.capitalize() + \": \" + str(stats[stat]))
 		tab_character.add_child(label)
-
-func fill_shop():
-	var items = G.factory.craftables[argument]
-	for item in items:
-		var reqs = item[1]
-		var button = Menubutton.instance()
-		button.get_node(\"Name\").set_text(item[0])
-		button.set_reqs(reqs[0])
-		button.set_size(Vector2(380, 80))
-		button.connect(\"pressed\", self, \"button_pressed\", [item[2]])
-		button.set_use_parent_material(true)
-		if !G.you.require_resource(false, reqs[0]):
-			button.disabled = true
-		if !button.disabled:
-			var desc = button.get_node(\"Reqs\")
-			desc.add_color_override(\"font_color\", Color(1,1,1))
-			desc.set_text(G.factory.get_description(name))
-		tab_shop.add_child(button)
 "
 
 [sub_resource type="GDScript" id=2]
@@ -200,41 +197,16 @@ func _physics_process(_delta):
 				child.queue_free()
 "
 
-[sub_resource type="Shader" id=3]
-code = "shader_type canvas_item;
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0, 0, 0, 0.627451 )
+expand_margin_left = 16.0
+expand_margin_right = 16.0
 
-uniform sampler2D flowMap; //Displacement map
-uniform float strength;    //Force of the effect
-uniform float speed;       //Speed of the effect
-uniform int frames : hint_range(1, 10); //Frames of the effect
-
-//Returns a value between 0 and 1 depending of the frames -> exemple: frames = 4, frame 1 = 0.25
-float clock(float time){
-	float fframes = float(frames);
-	return floor(mod(time * speed, fframes)) / fframes;
-}
-
-void fragment(){
-	float c = clock(TIME); //Get clock frame
-	vec4 offset = texture(flowMap, vec2(UV.x + c, UV.y + c)) * strength; //Get offset 
-	//COLOR = texture(TEXTURE, vec2(UV.x,UV.y) + normal.xy); //Apply offset
-	COLOR = texture(TEXTURE, vec2(UV.x,UV.y) + offset.xy - vec2(0.5,0.5)*strength); //We need to remove the displacement 
-}
-
-
-// TEST CLOCK
-/*
-void fragment(){
-	float c = clock(TIME);
-	COLOR = vec4( c, c, c, 1);
-}
-*/"
-
-[sub_resource type="ShaderMaterial" id=4]
-shader = SubResource( 3 )
-shader_param/strength = null
-shader_param/speed = null
-shader_param/frames = null
+[sub_resource type="DynamicFont" id=4]
+size = 24
+outline_size = 1
+outline_color = Color( 0.282353, 0.282353, 0.282353, 1 )
+font_data = ExtResource( 2 )
 
 [sub_resource type="CanvasItemMaterial" id=5]
 blend_mode = 3
@@ -245,8 +217,46 @@ size = 24
 font_data = ExtResource( 2 )
 
 [sub_resource type="GDScript" id=7]
-script/source = "extends ViewportContainer
+script/source = "extends Control
 
+const Menubutton = preload(\"res://interface/button_resource.tscn\")
+
+func on_bring(interface, argument):
+	for tab in get_children():
+		var vbox = tab.get_child(0)
+		for item in vbox.get_children():
+			item.queue_free()
+	var menu = G.factory.menu[argument]
+	var count = 0
+	for items in menu:
+		var category = get_child(count).get_node(\"Buttons\")
+		for item in items:
+			var button = Menubutton.instance()
+			var reqs = item[1]
+			button.get_node(\"Name\").set_text(item[0])
+			button.set_reqs(reqs)
+			button.set_size(Vector2(380, 80))
+			button.connect(\"pressed\", interface, \"_button_pressed\", [item[2]])
+			button.set_use_parent_material(true)
+			if !G.you.require_resource(false, reqs[0], reqs[1]):
+				button.disabled = true
+			if !button.disabled:
+				var desc = button.get_node(\"Reqs\")
+				desc.add_color_override(\"font_color\", Color(1,1,1))
+				desc.set_text(G.factory.get_description(name))
+			category.add_child(button)
+		count += 1
+
+func _on_tab_select(_tab):
+	pass # Replace with function body.
+"
+
+[sub_resource type="GDScript" id=8]
+script/source = "extends Control
+
+
+func on_bring(_argument):
+	pass
 
 func _gui_input(event):
 	if Input.is_action_pressed(\"interact\"):
@@ -255,18 +265,9 @@ func _gui_input(event):
 			$Viewport/SkillTree.rect_position = pos
 "
 
-[sub_resource type="StyleBoxFlat" id=12]
-bg_color = Color( 0, 0, 0, 0.627451 )
-expand_margin_left = 16.0
-expand_margin_right = 16.0
-
-[sub_resource type="DynamicFont" id=9]
-size = 24
-outline_size = 1
-outline_color = Color( 0.282353, 0.282353, 0.282353, 1 )
-font_data = ExtResource( 2 )
-
-[sub_resource type="Animation" id=10]
+[sub_resource type="Animation" id=9]
+resource_name = "FadeIn"
+length = 1.5
 tracks/0/type = "value"
 tracks/0/path = NodePath("AnimationPlayer/Fade:custom_styles/panel:bg_color")
 tracks/0/interp = 1
@@ -274,14 +275,29 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 1 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 0, 0.5, 1.5 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ) ]
+"values": [ Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 1 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=10]
+length = 1.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("AnimationPlayer/Fade:custom_styles/panel:bg_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1, 1.2 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 0, 0, 0, 1 ), Color( 0, 0, 0, 1 ) ]
 }
 
 [sub_resource type="StyleBoxFlat" id=11]
-bg_color = Color( 1, 1, 1, 1 )
+bg_color = Color( 0, 0, 0, 1 )
 corner_detail = 1
 anti_aliasing = false
 
@@ -296,9 +312,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Interaction" type="Button" parent="."]
+margin_bottom = 36.0
+mouse_filter = 2
+custom_styles/normal = SubResource( 3 )
+custom_fonts/font = SubResource( 4 )
+button_mask = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Menu" type="Control" parent="."]
 visible = false
-material = SubResource( 4 )
+mouse_filter = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -310,11 +336,64 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Info" type="Panel" parent="Menu"]
+margin_right = 340.0
+margin_bottom = 120.0
+
+[node name="Health" parent="Menu/Info" instance=ExtResource( 4 )]
+margin_left = 20.0
+margin_top = 20.0
+margin_right = 20.0
+margin_bottom = 20.0
+
+[node name="ManaAmount" type="Label" parent="Menu/Info"]
+use_parent_material = true
+margin_left = 80.0
+margin_top = 72.0
+margin_right = 114.0
+margin_bottom = 106.0
+custom_fonts/font = ExtResource( 1 )
+text = "00"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Icon" type="Sprite" parent="Menu/Info/ManaAmount"]
+use_parent_material = true
+position = Vector2( -36, 0 )
+texture = ExtResource( 6 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 0, 0, 32, 32 )
+
+[node name="GoldAmount" type="Label" parent="Menu/Info"]
+use_parent_material = true
+margin_left = 200.0
+margin_top = 72.0
+margin_right = 234.0
+margin_bottom = 106.0
+custom_fonts/font = ExtResource( 1 )
+text = "00"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Icon" type="Sprite" parent="Menu/Info/GoldAmount"]
+use_parent_material = true
+position = Vector2( -36, 0 )
+texture = ExtResource( 6 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 32, 0, 32, 32 )
+
 [node name="Tabs" type="TabContainer" parent="Menu"]
 use_parent_material = true
 margin_right = 488.0
 margin_bottom = 600.0
+mouse_filter = 1
+size_flags_vertical = 0
 custom_fonts/font = SubResource( 6 )
+drag_to_rearrange_enabled = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -364,60 +443,106 @@ margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
 
-[node name="Skills" type="ViewportContainer" parent="Menu/Tabs"]
+[node name="Hidden" type="Control" parent="Menu"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+mouse_filter = 1
+
+[node name="Shop" type="TabContainer" parent="Menu/Hidden"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 4.0
 margin_top = 47.0
-margin_right = -4.0
-margin_bottom = -4.0
-mouse_default_cursor_shape = 6
+margin_right = 444.0
+margin_bottom = 7.0
+mouse_filter = 1
+tab_align = 0
+all_tabs_in_front = true
+drag_to_rearrange_enabled = true
 script = SubResource( 7 )
 
-[node name="Viewport" type="Viewport" parent="Menu/Tabs/Skills"]
+[node name="Miscellaneous" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Miscellaneous"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
+
+[node name="Weapons" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Weapons"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
+
+[node name="Armors" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Armors"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
+
+[node name="Spells" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 32.0
+margin_right = -4.0
+margin_bottom = -4.0
+
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Spells"]
+margin_right = 480.0
+margin_bottom = 600.0
+rect_min_size = Vector2( 480, 600 )
+
+[node name="Skills" type="ViewportContainer" parent="Menu/Hidden"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 4.0
+margin_top = 47.0
+margin_right = 452.0
+margin_bottom = 607.0
+mouse_default_cursor_shape = 6
+script = SubResource( 8 )
+
+[node name="Viewport" type="Viewport" parent="Menu/Hidden/Skills"]
 size = Vector2( 488, 600 )
 transparent_bg = true
 handle_input_locally = false
 render_target_update_mode = 0
 
-[node name="SkillTree" parent="Menu/Tabs/Skills/Viewport" instance=ExtResource( 5 )]
+[node name="SkillTree" parent="Menu/Hidden/Skills/Viewport" instance=ExtResource( 5 )]
+visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
 margin_left = 4.0
 margin_top = 47.0
 margin_right = 4.0
 margin_bottom = 47.0
-
-[node name="Shop" type="ScrollContainer" parent="Menu/Tabs"]
-visible = false
-use_parent_material = true
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 47.0
-margin_right = -4.0
-margin_bottom = -4.0
-mouse_filter = 1
-scroll_horizontal_enabled = false
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Buttons" type="VBoxContainer" parent="Menu/Tabs/Shop"]
-margin_right = 480.0
-margin_bottom = 600.0
-rect_min_size = Vector2( 480, 600 )
-
-[node name="Interaction" type="Button" parent="."]
-margin_bottom = 36.0
-mouse_filter = 2
-custom_styles/normal = SubResource( 12 )
-custom_fonts/font = SubResource( 9 )
-button_mask = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="FPS" type="Label" parent="."]
 use_parent_material = true
@@ -433,11 +558,12 @@ __meta__ = {
 }
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/FadeIn = SubResource( 9 )
 anims/FadeOut = SubResource( 10 )
 
 [node name="Fade" type="Panel" parent="AnimationPlayer"]
 material = SubResource( 5 )
-mouse_filter = 1
+mouse_filter = 2
 input_pass_on_modal_close_click = false
 custom_styles/panel = SubResource( 11 )
 __meta__ = {
@@ -445,3 +571,4 @@ __meta__ = {
 }
 
 [connection signal="tab_selected" from="Menu/Tabs" to="." method="on_tab_select"]
+[connection signal="tab_selected" from="Menu/Hidden/Shop" to="Menu/Hidden/Shop" method="_on_tab_select"]

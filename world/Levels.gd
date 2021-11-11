@@ -1,11 +1,11 @@
 const dungeons = [
-	[Vector2(13,13), [3,0], ["storage"]],
-	[Vector2(15,15), [4,2], ["living", "storage"]],
-	[Vector2(17,17), [4,2], ["living", "lab", "storage"]],
-	[Vector2(19,19), [4,3], ["living", "lab", "storage"]],
-	[Vector2(21,21), [4,3], ["living", "lab", "storage"]],
-	[Vector2(25,25), [5,3], ["living", "lab", "storage"]],
-	[Vector2(24,24), [5,2], ["living", "lab", "storage"]],
+	[Vector2(12,12), [3,0], ["storage"]],
+	[Vector2(14,14), [4,2], ["living", "storage"]],
+	[Vector2(16,16), [4,2], ["living", "lab", "storage"]],
+	[Vector2(18,18), [4,3], ["living", "lab", "storage"]],
+	[Vector2(20,20), [4,3], ["living", "lab", "storage"]],
+	[Vector2(24,24), [5,3], ["living", "lab", "storage"]],
+	[Vector2(28,28), [4,2], ["living", "lab", "storage"]],
 ]
 const finds = {
 	mobs = [
@@ -20,9 +20,11 @@ const finds = {
 		["helmet","leather armor","leather gloves","leather boots"],
 	],
 	weapons = [
-		["helmet","leather armor"],
-		["shortsword"],
-		["amulet of protection","2 gold","4 gold","8 gold"],
+		["shortsword", "torch", "knife", "shiv", "shovel", "spear", "axe", "club"],
+		["cleaver", "hammer", "trident", "scimitar", "mace"],
+	],
+	wands = [
+		["jade staff", "crystal staff", "ruby staff"],
 	],
 	trinkets = [
 		["amulet of protection","2 gold","4 gold","8 gold"],

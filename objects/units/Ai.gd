@@ -63,9 +63,12 @@ func path_to(repath, from, to):
 		next_task()
 
 func unstuck(target_pos):
-	var unit_pos = unit.get_interact_position()
-	var strafe = unit_pos.cross(target_pos) * (40 * G.rng.randi_range(0, 1) - 20)
-	set_task(["move", G.rng.randi_range(20, 40), unit_pos + strafe, 0])
+	if G.rng.randi_range(0, 3) == 0:
+		set_task(["attack", 9999, target_pos])
+	else:
+		var unit_pos = unit.get_interact_position()
+		var strafe = unit_pos.cross(target_pos) * (40 * G.rng.randi_range(0, 1) - 20)
+		set_task(["move", G.rng.randi_range(20, 40), unit_pos + strafe, 0])
 
 func perceive():
 	for obj in G.world.units.get_children():
@@ -86,7 +89,8 @@ func hear(vec):
 
 func on_hit(_pos, hitter, _damage):
 	target = hitter
-	update_target(target.get_interact_position(), true)
+	alertness = CHASING
+	set_task(["move", 9999, target.get_interact_position(), 0])
 
 func die():
 	set_alert(IDLE)
@@ -103,13 +107,16 @@ func on_process(delta):
 func perform(current_state):
 	if G.time.second:
 		var unit_pos = unit.get_position()
-		if target and G.time.seconds % 4 == 0:
-			if (last_pos - unit_pos).length() < .5:
-				var pos = target.get_interact_position()
-				unstuck(pos)
-				set_alert(UNSTUCKING)
-				last_pos = unit_pos + Vector3(9,9,9)
-				return
+		if target and G.time.seconds % 6 == 0:
+			if task[0] == "move":
+				if (last_pos - unit_pos).length() < .5:
+					var pos = target.get_interact_position()
+					unstuck(pos)
+					set_alert(UNSTUCKING)
+					G.message("UNSTUCKING")
+					last_pos = unit_pos + Vector3(9,9,9)
+					return
+			last_pos = unit_pos + Vector3(9,9,9)
 		last_pos = unit_pos
 		var t = perceive()
 		if t:
@@ -138,7 +145,7 @@ func perform(current_state):
 			if task[0] == "move":
 				var unit_pos = unit.get_interact_position()
 				var dist = (target_pos - unit_pos).length()
-				if dist < unit.get_reach()+1:
+				if dist < unit.get_reach()+(unit.move_speed.x - target.move_speed.x):
 					last_pos = unit_pos + Vector3(9,9,9)
 					set_task(["attack", 9999, target_pos])
 				else:
@@ -146,7 +153,8 @@ func perform(current_state):
 			elif task[0] == "attack":
 				task[2] = target_pos
 	elif current_state == UNSTUCKING:
-		if G.time.second and G.time.seconds % 3 == 0:
+		if G.time.second and G.time.seconds % 5 == 0:
+			last_pos = unit.get_position() + Vector3(9,9,9)
 			if target:
 				update_target(target.get_interact_position(), true)
 			else:

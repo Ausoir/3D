@@ -49,3 +49,8 @@ shape = SubResource( 1 )
 
 [node name="TriggerAnimation" type="AnimationPlayer" parent="."]
 anims/open = SubResource( 2 )
+
+[node name="Spawn" type="Spatial" parent="."]
+
+[node name="Position3D" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.658043, -0.513811 )

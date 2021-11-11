@@ -1,52 +1,34 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://assets/models/buildings/fountainRoundDetail.obj" type="ArrayMesh" id=1]
-[ext_resource path="res://assets/models/buildings/bench.obj" type="ArrayMesh" id=3]
+[ext_resource path="res://objects/Building.gd" type="Script" id=2]
 
-[sub_resource type="GDScript" id=1]
-script/source = "extends \"res://objects/Building.gd\"
-
-
-func open_walls():
-	if G.world.rng.randi_range(0, 1) == 0:
-		rid(\"Bench\")
-	if G.world.rng.randi_range(0, 1) == 0:
-		rid(\"Bench2\")
-	if G.world.rng.randi_range(0, 1) == 0:
-		rid(\"Bench3\")
-	if G.world.rng.randi_range(0, 1) == 0:
-		rid(\"Bench4\")
-"
-
-[sub_resource type="Curve" id=2]
+[sub_resource type="Curve" id=1]
 _data = [ Vector2( 0, 0.3125 ), 0.0, 0.298097, 0, 0, Vector2( 0.434043, 0.421591 ), 1.06818, 1.06818, 0, 0, Vector2( 1, 0.00340903 ), -3.45105, 0.0, 0, 0 ]
 
-[sub_resource type="CurveTexture" id=3]
-curve = SubResource( 2 )
+[sub_resource type="CurveTexture" id=2]
+curve = SubResource( 1 )
 
-[sub_resource type="ParticlesMaterial" id=4]
+[sub_resource type="ParticlesMaterial" id=3]
 gravity = Vector3( 0, 1, 0 )
-scale_curve = SubResource( 3 )
+scale_curve = SubResource( 2 )
 
-[sub_resource type="SpatialMaterial" id=5]
+[sub_resource type="SpatialMaterial" id=4]
 flags_transparent = true
 flags_unshaded = true
 params_diffuse_mode = 4
 params_specular_mode = 4
 albedo_color = Color( 0.345098, 0.94902, 1, 1 )
 
-[sub_resource type="SphereMesh" id=6]
-material = SubResource( 5 )
+[sub_resource type="SphereMesh" id=5]
+material = SubResource( 4 )
 radial_segments = 16
 rings = 8
 
-[sub_resource type="SphereShape" id=7]
-
-[sub_resource type="BoxShape" id=8]
-extents = Vector3( 0.7, 0.2, 0.3 )
+[sub_resource type="SphereShape" id=6]
 
 [node name="Spatial" type="Spatial"]
-script = SubResource( 1 )
+script = ExtResource( 2 )
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 cast_shadow = 0
@@ -63,8 +45,8 @@ generate_lightmap = false
 amount = 4
 lifetime = 3.0
 speed_scale = 0.3
-process_material = SubResource( 4 )
-draw_pass_1 = SubResource( 6 )
+process_material = SubResource( 3 )
+draw_pass_1 = SubResource( 5 )
 
 [node name="SpotLight" type="SpotLight" parent="MeshInstance"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 3, 0 )
@@ -79,40 +61,4 @@ collision_mask = 34
 
 [node name="CollisionShape" type="CollisionShape" parent="StaticBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
-shape = SubResource( 7 )
-
-[node name="Bench1" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0.2, 1.6 )
-shape = SubResource( 8 )
-
-[node name="Bench2" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0.200001, -1.6 )
-shape = SubResource( 8 )
-
-[node name="Bench3" type="CollisionShape" parent="StaticBody"]
-transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.6, 0.2, -1 )
-shape = SubResource( 8 )
-
-[node name="Bench4" type="CollisionShape" parent="StaticBody"]
-transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -1.6, 0.2, 1 )
-shape = SubResource( 8 )
-
-[node name="Bench1" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1.6 )
-mesh = ExtResource( 3 )
-material/0 = null
-
-[node name="Bench2" type="MeshInstance" parent="."]
-transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1, 0, -1.6 )
-mesh = ExtResource( 3 )
-material/0 = null
-
-[node name="Bench3" type="MeshInstance" parent="."]
-transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 1.6, 0, -1 )
-mesh = ExtResource( 3 )
-material/0 = null
-
-[node name="Bench4" type="MeshInstance" parent="."]
-transform = Transform( 1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -1.6, 0, 1 )
-mesh = ExtResource( 3 )
-material/0 = null
+shape = SubResource( 6 )

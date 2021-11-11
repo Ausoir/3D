@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/door_metal.ogg-eab5a1b9e42c9b85dd24a7e30e393ec6.oggstr"
+
+[deps]
+
+source_file="res://assets/audio/door_metal.ogg"
+dest_files=[ "res://.import/door_metal.ogg-eab5a1b9e42c9b85dd24a7e30e393ec6.oggstr" ]
+
+[params]
+
+loop=false
+loop_offset=0

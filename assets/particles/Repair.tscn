@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://objects/Particle.gd" type="Script" id=1]
-[ext_resource path="res://assets/textures/sun.png" type="Texture" id=2]
+[ext_resource path="res://assets/textures/FireMask.png" type="Texture" id=2]
 
 [sub_resource type="ParticlesMaterial" id=1]
 emission_shape = 2
@@ -28,6 +28,8 @@ size = Vector2( 0.2, 0.2 )
 
 [node name="Particle" type="Particles"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+cast_shadow = 0
+generate_lightmap = false
 process_material = SubResource( 1 )
 draw_pass_1 = SubResource( 3 )
 script = ExtResource( 1 )

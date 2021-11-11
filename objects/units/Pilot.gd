@@ -21,7 +21,6 @@ func set_faction(p):
 
 func set_ability(p):
 	ability = p
-	G.skills.on_set(p, unit)
 
 func set_task(newtask=["wait", 0]):
 	tasks = []
@@ -60,23 +59,22 @@ func on_process(delta):
 		return
 	elif task_timer < 9999:
 		task_timer -= delta * 10
-	on_task_update()
+	on_task_update(delta)
 
 func on_task_set(newtask):
 	task = newtask
 	task_timer = newtask[1]
-	on_task_update()
+	on_task_update(0)
 
-func on_task_update():
+func on_task_update(delta):
 	if task[0] == "wait":
 		if len(task) > 2:
 			unit.set_state(task[2])
+			if len(task) > 3 and is_instance_valid(tgt):
+				face(tgt.transform.origin)
+				unit.face(delta, Vector2(0,.1))
 		else:
 			unit.set_state()
-	elif task[0] == "work":
-		unit.set_state("work")
-	elif task[0] == "interact":
-		unit.set_state("grab")
 	elif task[0] == "move":
 		unit.set_state("move")
 		var dist = face(task[2])
@@ -111,6 +109,7 @@ func on_task_finish():
 	elif task[0] == "interact":
 		var item = get_interactable()
 		if item:
+			face(item.global_transform.origin)
 			interact(item)
 		return false
 	elif task[0] == "work":
@@ -148,11 +147,7 @@ func get_interactable():
 
 func interact(object):
 	if object != null:
-		if object is String:
-			if object in G.factory.decor_interactions:
-				tgt = object
-				set_tasks(G.factory.decor_interactions[object])
-		elif object.onuse:
+		if object.onuse:
 			tgt = object
 			set_tasks(object.onuse)
 		return true

@@ -8,8 +8,18 @@
 script/source = "extends Button
 
 
-func set_reqs(mana):
-	$ManaAmount.set_text(str(mana))
+func set_reqs(reqs):
+	var mana = reqs[0]
+	var gold = reqs[1]
+	if mana > 0 and gold > 0:
+		$ManaAmount.set_text(str(mana))
+		$GoldAmount.set_text(str(gold))
+	elif mana > 0:
+		$ManaAmount.set_text(str(mana))
+		$GoldAmount.hide()
+	elif gold > 0:
+		$ManaAmount.hide()
+		$GoldAmount.set_text(str(gold))
 "
 
 [node name="Button" type="Button"]
@@ -55,6 +65,26 @@ texture = ExtResource( 1 )
 centered = false
 region_enabled = true
 region_rect = Rect2( 0, 0, 32, 32 )
+
+[node name="GoldAmount" type="Label" parent="."]
+use_parent_material = true
+margin_left = 160.0
+margin_top = 80.0
+margin_right = 194.0
+margin_bottom = 114.0
+custom_fonts/font = ExtResource( 3 )
+text = "00"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="GoldIcon" type="Sprite" parent="GoldAmount"]
+use_parent_material = true
+position = Vector2( -36, 0 )
+texture = ExtResource( 1 )
+centered = false
+region_enabled = true
+region_rect = Rect2( 32, 0, 32, 32 )
 
 [node name="Reqs" type="Label" parent="."]
 use_parent_material = true

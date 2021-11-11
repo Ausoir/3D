@@ -1,11 +1,11 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://objects/Particle.gd" type="Script" id=1]
-[ext_resource path="res://assets/textures/sun.png" type="Texture" id=2]
+[ext_resource path="res://assets/textures/circle.png" type="Texture" id=2]
 
 [sub_resource type="ParticlesMaterial" id=1]
 emission_shape = 1
-emission_sphere_radius = 4.0
+emission_sphere_radius = 2.0
 direction = Vector3( 0, 1, 0 )
 spread = 60.0
 gravity = Vector3( 0, 2, 0 )
@@ -28,8 +28,12 @@ size = Vector2( 0.8, 0.8 )
 
 [node name="Particle" type="Particles"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+cast_shadow = 0
+generate_lightmap = false
 amount = 3
+lifetime = 0.5
 speed_scale = 0.8
+fract_delta = false
 process_material = SubResource( 1 )
 draw_pass_1 = SubResource( 3 )
 script = ExtResource( 1 )

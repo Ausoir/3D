@@ -34,7 +34,10 @@ albedo_texture = ExtResource( 2 )
 material = SubResource( 2 )
 
 [node name="Particle" type="Particles"]
-lifetime = 0.7
+cast_shadow = 0
+generate_lightmap = false
+lifetime = 0.5
+fract_delta = false
 process_material = SubResource( 1 )
 draw_pass_1 = SubResource( 3 )
 script = ExtResource( 1 )

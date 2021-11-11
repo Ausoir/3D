@@ -11,6 +11,8 @@ func _init(phost, ptype, plifetime):
 		particle = G.make_particle("repair", host.global_transform.origin, 9999)
 	elif name == "haste":
 		particle = G.make_particle("repair", host.global_transform.origin, 9999)
+	elif name == "regen":
+		particle = G.make_particle("repair", host.global_transform.origin, 9999)
 	elif name == "light":
 		particle = G.make_particle("light", host.global_transform.origin, 9999)
 	elif name == "night vision":
@@ -36,6 +38,8 @@ func update(second):
 	if second:
 		if name == "work":
 			host.work -= 1
+		elif name == "regen":
+			host.health.x = min(host.health.x + 1, host.health.y)
 		if lifetime < 999999:
 			lifetime -= 1
 			if lifetime <= 0:

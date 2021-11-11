@@ -36,16 +36,18 @@ func _process(delta):
 "
 
 [sub_resource type="QuadMesh" id=2]
-size = Vector2( 2, 0.3 )
+size = Vector2( 1.8, 0.2 )
 
 [sub_resource type="ViewportTexture" id=3]
 viewport_path = NodePath("Viewport")
 
 [sub_resource type="SpatialMaterial" id=4]
 resource_local_to_scene = true
-flags_transparent = true
 flags_unshaded = true
 flags_no_depth_test = true
+flags_albedo_tex_force_srgb = true
+params_diffuse_mode = 4
+params_specular_mode = 4
 params_depth_draw_mode = 2
 params_billboard_mode = 2
 params_billboard_keep_scale = true
@@ -59,7 +61,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 0.2, 0, 3.5, 0 )
 script = SubResource( 1 )
 
 [node name="Viewport" type="Viewport" parent="."]
-size = Vector2( 200, 32 )
+size = Vector2( 288, 32 )
 transparent_bg = true
 hdr = false
 usage = 0
@@ -69,5 +71,8 @@ render_target_update_mode = 3
 [node name="Health" parent="Viewport" instance=ExtResource( 1 )]
 
 [node name="Quad" type="MeshInstance" parent="."]
+cast_shadow = 0
+generate_lightmap = false
 mesh = SubResource( 2 )
+software_skinning_transform_normals = false
 material/0 = SubResource( 4 )

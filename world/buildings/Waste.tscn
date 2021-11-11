@@ -1,11 +1,9 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://assets/materials/mat_leather.tres" type="Material" id=1]
 [ext_resource path="res://assets/models/bucket.obj" type="ArrayMesh" id=2]
-[ext_resource path="res://assets/models/buildings/potB.obj" type="ArrayMesh" id=3]
 [ext_resource path="res://assets/models/lootSackA.obj" type="ArrayMesh" id=4]
 [ext_resource path="res://assets/materials/toon.gdshader" type="Shader" id=5]
-[ext_resource path="res://assets/models/buildings/potC.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://assets/textures/dirt.png" type="Texture" id=7]
 
 [sub_resource type="GDScript" id=1]
@@ -25,14 +23,11 @@ func open_walls():
 		rid(\"Bucket2\")
 "
 
-[sub_resource type="SphereShape" id=2]
-radius = 0.5
-
-[sub_resource type="CapsuleMesh" id=3]
+[sub_resource type="CapsuleMesh" id=2]
 radial_segments = 16
 rings = 4
 
-[sub_resource type="ShaderMaterial" id=4]
+[sub_resource type="ShaderMaterial" id=3]
 shader = ExtResource( 5 )
 shader_param/albedo = Color( 0.262745, 0.129412, 0.0313726, 1 )
 shader_param/cuts = 4
@@ -44,16 +39,6 @@ shader_param/specular_map = ExtResource( 7 )
 
 [node name="Spatial" type="Spatial"]
 script = SubResource( 1 )
-
-[node name="Pot1" type="MeshInstance" parent="."]
-transform = Transform( -0.141143, 0, 0.989989, 0, 1, 0, -0.989989, 0, -0.141143, -0.519587, -2.38419e-07, -0.926277 )
-mesh = ExtResource( 3 )
-material/0 = null
-
-[node name="Pot2" type="MeshInstance" parent="."]
-transform = Transform( -0.141143, 0, 0.989989, 0, 1, 0, -0.989989, 0, -0.141143, 0.544676, -2.38419e-07, -0.862693 )
-mesh = ExtResource( 6 )
-material/0 = null
 
 [node name="Bucket1" type="MeshInstance" parent="."]
 transform = Transform( 0.0293348, -0.99957, 0, 0.99957, 0.0293348, 0, 0, 0, 1, 1.13179, 0.4, 0.00991988 )
@@ -73,35 +58,21 @@ mesh = ExtResource( 4 )
 material/0 = ExtResource( 1 )
 material/1 = null
 
-[node name="StaticBody" type="StaticBody" parent="."]
-collision_layer = 34
-collision_mask = 34
-
-[node name="Pot1" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.54294, 0.33575, -0.91493 )
-shape = SubResource( 2 )
-
-[node name="Pot2" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.59266, 0.33575, -0.86925 )
-shape = SubResource( 2 )
-
-[node name="Bucket1" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.16771, 0.33575, -0.02376 )
-shape = SubResource( 2 )
-
-[node name="Bucket2" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.94609, 0.33575, -0.23395 )
-shape = SubResource( 2 )
-
 [node name="Spawn" type="Spatial" parent="."]
 
-[node name="Position3D" type="Position3D" parent="Spawn"]
+[node name="0" type="Position3D" parent="Spawn"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.12745, 0.376061, 0.0914921 )
+
+[node name="1" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.663603, 0, -1.03529 )
+
+[node name="2" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.538138, 0, -1.08303 )
 
 [node name="Poop" type="MeshInstance" parent="."]
 transform = Transform( 0.5, 0, 0.866025, 0, 0.2, 0, -0.866025, 0, 0.5, 0, 0, 0.1144 )
 cast_shadow = 0
 generate_lightmap = false
-mesh = SubResource( 3 )
+mesh = SubResource( 2 )
 software_skinning_transform_normals = false
-material/0 = SubResource( 4 )
+material/0 = SubResource( 3 )

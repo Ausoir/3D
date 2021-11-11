@@ -45,6 +45,8 @@ func _ready():
 "
 
 [node name="Particle" type="Particles"]
+cast_shadow = 0
+generate_lightmap = false
 emitting = false
 amount = 16
 lifetime = 0.5

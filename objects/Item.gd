@@ -13,6 +13,7 @@ var ondie
 var onuse
 var onswing
 var onwork
+var ontouch
 var properties = {}
 var work = 1
 var work_max = 0
@@ -57,6 +58,7 @@ func damage(dmg):
 
 
 func die():
+	G.make_particle("dust", transform.origin, 2)
 	if ondie:
 		G.cmds(ondie, self)
 	if holder:

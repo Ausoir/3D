@@ -37,7 +37,7 @@ func run(args):
 				return Transform()
 			return host.global_transform
 		elif args[1] == "spawnpoint":
-			return host.get_spawnpoint()
+			return host.get_spawnpoint(args[2])
 		elif args[1] == "snap":
 			return G.world.snap_to_tile(tgt)
 	elif args[0] == "r":
@@ -62,18 +62,23 @@ func run(args):
 	elif args[0] == "cost":
 		var player = G.get_unit_player(host)
 		if player:
-			if len(args) > 2:
-				player.add_resource(-args[1], true)
+			if len(args) > 3:
+				player.add_resource(-args[1], -args[2], true)
 			else:
-				player.add_resource(-args[1])
+				player.add_resource(-args[1], -args[2])
 	elif args[0] == "order":
 		tgt.set_tasks(args[1])
 	elif args[0] == "ability":
 		tgt.set_ability(args[1])
 	elif args[0] == "trigger":
-		tgt.trigger(args[1])
+		if len(args) == 1: #Used only on Factory.door
+			tgt.trigger(host)
+		else:
+			tgt.trigger(args[1])
 	elif args[0] == "wield":
 		host.set_weapon(tgt)
+	elif args[0] == "offhand":
+		host.set_offhand(tgt)
 	elif args[0] == "equip":
 		if "part" in tgt.properties:
 			host.set_armor(tgt)
@@ -111,6 +116,8 @@ func run(args):
 	elif args[0] == "task":
 		tgt.set_task()
 		tgt.set_tasks(args[1])
+	elif args[0] == "seed":
+		tgt.set_seed(args[1])
 	elif args[0] == "make":
 		var newitem = G.factory.make(args[1])
 		if newitem == null:
@@ -132,7 +139,7 @@ func run(args):
 		if tgt:
 			tgt.damage(args[1])
 	elif args[0] == "menu":
-		G.ui.display(args[1], args[2])
+		G.ui.display(args[1], tgt)
 	elif args[0] == "message":
 		G.message(args[1])
 	elif args[0] == "claim":

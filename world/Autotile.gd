@@ -52,6 +52,14 @@ func autotile():
 				tile = gridmap.fencewindow
 			else:
 				tile = gridmap.window
+		elif map[y][x] == '#':
+			var origTile = autotile_map_to[cell[2]]
+			if autotile_map_to[cell[2]] == gridmap.wall:
+				tile = gridmap.fence
+			if autotile_map_to[cell[2]] == gridmap.wallcorner:
+				tile = gridmap.fencecorner
+			else:
+				tile = origTile
 		else:
 			tile = autotile_map_to[cell[2]]
 		gridmap.set_cell_item(x/2, 0, y/2, tile, orientations[cell[3]])

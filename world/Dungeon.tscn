@@ -21,6 +21,7 @@ var rng = preload(\"res://classes/Random.gd\").new()
 var map_size
 var dungeon_map
 var spawnpoints = []
+var torchs = []
 
 
 func _ready():
@@ -41,7 +42,7 @@ func generate(level):
 	var current_level = level.get_dungeon()
 	rng.randomize()
 	var seeed = rng.randi_range(1, 999999)
-	#seeed = 428113
+#	seeed = 17383
 	print(seeed)
 	rng.set_seed(seeed)
 	tilemap.rng = rng
@@ -59,9 +60,7 @@ func generate(level):
 	print(dungeon_map)
 	dungeon_map = generator.make_border('W', ['#', '='])
 	Autotile.new(tilemap, dungeon_map).autotile()
-	spawnpoints = generator.spawn_points
 
-	var torchs = []
 	for x in range(0,map_size.x+1):
 		for z in range(0,map_size.y+1):
 			var isOdd = x % 2 == 1 or z % 2 == 1
@@ -72,6 +71,8 @@ func generate(level):
 			var room_floors = generator.dungeon_floors[z][x]
 			var dir = tilemap.get_cell_item_orientation(hx, 0, hz)
 			var tile = tilemap.get_cell_item(hx,0,hz)
+			if terrain == '@':
+				spawnpoints.append(Vector3(hx, 0, hz))
 			if !isOdd:
 				if generator.biome[z][x] < .3:
 					if x > 2 and x < map_size.x - 2 and z > 2 and z < map_size.y - 2:
@@ -98,17 +99,8 @@ func generate(level):
 							tilemap.set_cell_item(hx,0,hz,tilemap.wall2,dir)
 						elif generator.biome[z][x] > .75:
 							tilemap.set_cell_item(hx,0,hz,tilemap.wall3,dir)
-				if tile != -1 and (terrain == 'd' or terrain == '-' or terrain == '#'):
-					if tile in tilemap.fence_map:
-						tilemap.set_cell_item(hx, 0, hz, tilemap.fence_map[tile], dir)
-				elif terrain == '^':
-					if tilemap.get_cell_item(hx, -1, hz) == -1:
-						tilemap.set_cell_item(hx, -1, hz, tilemap.spike, dir)
-						make_occluder(hx, 0, hz)
 				elif terrain == '?':
 					build(\"treasure\", Vector3(hx, 0, hz))
-				elif terrain == '!':
-					spawn(tilemap.map_to_world(hx, 1, hz))
 				elif tile == tilemap.door or tile == tilemap.fencedoor:
 					if x > 1 and z > 1 and x < map_size.x-1 and z < map_size.y-1:
 						var pos = Vector3(hx, 0, hz)
@@ -120,8 +112,7 @@ func generate(level):
 			if room_floors != null:
 				if room_floors == \"planks\":
 					var plank = build(room_floors, Vector3(hx, 0, hz), 0)
-					if generator.biome[z][x] < .3:
-						plank.trigger(generator.biome[z][x] * 30)
+					plank.trigger(generator.biome[z][x] * 50)
 				else:
 					build(room_floors, Vector3(hx, 0, hz), 0)
 			if generator.biome[z][x] < .3 and terrain == 'W' and rng.randi_range(0, 3) == 0:
@@ -131,18 +122,21 @@ func generate(level):
 				if room_objects[0] == \"torch\":
 					torchs.append(pos)
 					build(\"walltorch\", pos, room_objects[1])
-				elif room_objects[0] == \"portal\":
-					build(room_objects[0], pos, room_objects[1])
+				elif room_objects[0] == \"door\":
+					var door = build(\"door\", pos, room_objects[1])
+					if tile == tilemap.fencedoor:
+						door.to_fence()
+				elif room_objects[0] == \"mob\":
+					spawn(tilemap.map_to_world(hx, 1, hz))
 				else:
 					build(room_objects[0], pos, room_objects[1])
 
-
 func get_spawnpoint():
-	if spawnpoints:
-		var t = spawnpoints.pop_front()
-		return Vector3(t[0]*2, 2, t[1]*2)
-	return Vector3(map_size.x*2, 2, map_size.y*2)
-
+	var t = rng.rand_arr(spawnpoints)
+	if t == null:
+		t = Vector3(map_size.x/2, 0, map_size.y/2)
+	build(\"portal\", t, 0)
+	return t * tilemap.cell_size + Vector3(2,2,2)
 
 func poi_near(arr, pos, radius):
 	var diffY = Vector3(1, 2, 1)
@@ -152,7 +146,7 @@ func poi_near(arr, pos, radius):
 	return false
 
 func spawn(pos):
-	for _i in range(1):#, rng.randi_range(1, 5)):
+	for _i in range(1, rng.randi_range(1, 3)):
 		var unit = G.level.get_loot(\"mobs\")
 		G.cmds([[\"t\", pos],[\"make\",unit],[\"rotate\"]], null)
 
@@ -165,11 +159,6 @@ func build(building, pos, orientation=-1):
 	if ortho != Vector2.ZERO:
 		t = t.looking_at(vec+Vector3(ortho.x, 0, ortho.y), Vector3.UP)
 	var r = G.cmds([[\"t\", t],[\"make\",building]], null)
-	return r
-
-func make_occluder(x,y,z):
-	var vec = tilemap.map_to_world(x,y,z)
-	var r = G.cmds([[\"t\", vec],[\"make\",\"occluder\"]], null)
 	return r
 
 func is_tile_at(vec, tilename):
@@ -192,7 +181,7 @@ func set_tile_at(vec, tilename, orientation=-1, autotile=false):
 		orientation = tilemap.get_cell_item_orientation(pos.x,pos.y,pos.z)
 	tilemap.set_cell_item(pos.x, pos.y, pos.z, tile, orientation)
 	if autotile:
-		tilemap.autotile_map(Vector2(pos.x-1, pos.z-1), Vector2(pos.x+1, pos.z+1), 0)
+		tilemap.autotile_map_simple(Vector2(pos.x-1, pos.z-1), Vector2(pos.x+1, pos.z+1), 0)
 
 
 func snap_to_tile(vec):
@@ -457,8 +446,8 @@ ambient_light_energy = 0.0
 ambient_light_sky_contribution = 0.0
 fog_color = Color( 0, 0, 0, 1 )
 fog_sun_color = Color( 0, 0, 0, 1 )
-fog_depth_begin = 8.0
-fog_depth_end = 38.0
+fog_depth_begin = 7.0
+fog_depth_end = 12.0
 auto_exposure_scale = 0.1
 auto_exposure_min_luma = 0.1
 dof_blur_far_distance = 25.0
@@ -502,7 +491,6 @@ environment = SubResource( 3 )
 
 [node name="OmniLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( 1, 0, 0, 0, 0.400429, 0.916328, 0, -0.916328, 0.400429, 11, 14, 15 )
-visible = false
 light_energy = 2.0
 light_specular = 0.0
 light_bake_mode = 0
@@ -517,9 +505,9 @@ collision_mask = 3
 shape = SubResource( 4 )
 
 [node name="Floor" type="StaticBody" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, 0 )
-collision_layer = 0
-collision_mask = 0
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+collision_layer = 2
+collision_mask = 2
 
 [node name="CollisionShape" type="CollisionShape" parent="Floor"]
 shape = SubResource( 4 )

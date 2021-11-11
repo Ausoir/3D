@@ -1,0 +1,2 @@
+Building.rid() not ridding staticbody. If removed shape was bigger than unit collision box, it causes inside penetration bug (fps drop)
+TODO: DungeonGenerator._init

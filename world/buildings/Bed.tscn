@@ -92,8 +92,8 @@ func _ready():
 [sub_resource type="BoxShape" id=6]
 extents = Vector3( 0.8, 0.5, 0.8 )
 
-[sub_resource type="BoxShape" id=7]
-extents = Vector3( 0.567361, 0.5, 1.01356 )
+[sub_resource type="CylinderShape" id=7]
+radius = 0.5
 
 [node name="Spatial" type="Spatial"]
 script = SubResource( 1 )
@@ -200,7 +200,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0.128 )
 shape = SubResource( 6 )
 
 [node name="Wood" type="CollisionShape" parent="StaticBody"]
-transform = Transform( 0.665843, 0, -0.746092, 0, 1, 0, 0.746092, 0, 0.665843, -2.24449, 0.5, 1.84206 )
+transform = Transform( 0.665843, -0.746092, 3.26127e-08, 0, -4.37114e-08, -1, 0.746092, 0.665843, -2.91049e-08, -2.24449, 0.5, 1.84206 )
 shape = SubResource( 7 )
 
 [node name="Spawn" type="Spatial" parent="."]
