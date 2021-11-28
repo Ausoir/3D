@@ -9,7 +9,12 @@ const dungeons = [
 ]
 const finds = {
 	mobs = [
-		["guard"],
+		["digger", "miner"],
+		["guard", "spearman", "warrior"],
+		["inquisitor", "spearman"],
+	],
+	undead = [
+		["digger"],
 	],
 	items = [
 		["2 gold","4 gold"],
@@ -32,6 +37,9 @@ const finds = {
 	beds = [
 		["2 gold", "miner", "digger"]
 	],
+	books = [
+		["spellbook"]
+	]
 }
 var level
 
@@ -47,7 +55,7 @@ func get_variance(arr, mod):
 	loot_level = clamp(loot_level, 0, len(arr) - 1)
 	return arr[loot_level]
 
-func get_loot(loot_type):
+func get_loot(loot_type, biome=-1):
 	var mod = 0
 	if loot_type == "doodads":
 		if G.rng.randf() < .3:
@@ -60,4 +68,9 @@ func get_loot(loot_type):
 	if loot_type in finds:
 		var loot_table = finds[loot_type]
 		var loot_list = get_variance(loot_table, mod)
-		return G.rng.rand_arr(loot_list)
+		if biome == -1:
+			return G.rng.rand_arr(loot_list)
+		else:
+			var biome_threshold = 1.0 / len(loot_list)
+			var biome_index = floor(biome / biome_threshold)
+			return loot_list[biome_index]

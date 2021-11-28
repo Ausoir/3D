@@ -14,14 +14,11 @@ func resize(variance):
 
 func rid(node_name):
 	if has_node(node_name):
-		var node = get_node(node_name)
-		if is_instance_valid(node):
-			node.queue_free()
-			if has_node("StaticBody/"+node_name):
-				get_node("StaticBody/"+node_name).queue_free()
-				if $StaticBody.get_child_count() == 0:
-					$StaticBody.queue_free()
-				return true
+		if get_child_count() == 1:
+			queue_free()
+		else:
+			get_node(node_name).queue_free()
+			return true
 	return false
 
 func get_spawnpoint(idx):

@@ -49,7 +49,7 @@ const data = {
 		["WWWWWWW",
 		 "W,#,,,W",
 		 "W,###,W",
-		 "W.,.#.W",
+		 "W.,...W",
 		 "W,###,W"],
 		["WWWWWWW",
 		 "W,#,W,W",

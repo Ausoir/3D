@@ -6,7 +6,21 @@ func _init(phost):
 	host = phost
 	tgt = host
 
+func replace_vars(args):
+	var r = []
+	for arg in args:
+		if arg is String:
+			if arg == "$t":
+				r.append(tgt)
+				continue
+			elif arg == "$h":
+				r.append(host)
+				continue
+		r.append(arg)
+	return r
+
 func run(args):
+	args = replace_vars(args)
 	if args[0] == "t":
 		return args[1]
 	elif args[0] == "v":
@@ -17,35 +31,43 @@ func run(args):
 			host = tgt
 			return t
 		elif args[1] == "parent":
-			return host.get_parent()
+			return args[2].get_parent()
 		elif args[1] == "controller":
-			return host.controller
+			return args[2].controller
 		elif args[1] == "usepos":
-			return host.get_interact_position()
+			return args[2].get_interact_position()
 		elif args[1] == "frontpos":
-			return host.get_adjacent(0, args[2])
+			return args[2].get_adjacent(0, args[3])
 		elif args[1] == "add":
-			return tgt + args[2]
+			return args[2] + args[3]
 		elif args[1] == "holder":
-			return host.holder
+			return args[2].holder
 		elif args[1] == "weapon":
-			return host.weapon
+			return args[2].weapon
 		elif args[1] == "pos":
-			return host.global_transform.origin
+			return args[2].global_transform.origin
 		elif args[1] == "transform":
-			if !host.is_inside_tree():
+			if !args[2].is_inside_tree():
 				return Transform()
-			return host.global_transform
+			return args[2].global_transform
 		elif args[1] == "spawnpoint":
-			return host.get_spawnpoint(args[2])
+			return args[2].get_spawnpoint(args[3])
 		elif args[1] == "snap":
-			return G.world.snap_to_tile(tgt)
+			return G.world.snap_to_tile(args[2])
 	elif args[0] == "r":
 		if args[1] == "int":
 			return G.rng.randi_range(args[2], args[3])
 		elif args[1] == "cmd":
 			var chosen = args[2][G.rng.randi_range(0, len(args[2])-1)]
 			return G.cmds([["t",tgt]]+chosen, host)
+	elif args[0] == "rnd":
+		if G.rng.randf() > args[1]:
+			stop = true
+	elif args[0] == "dat":
+		if args[1] == "g":
+			return host.dat.g(args[2], args[3])
+		elif args[1] == "a":
+			host.dat.a(args[2], args[3])
 	elif args[0] == "run":
 		return G.cmds(args[1], tgt)
 	elif args[0] == "!if":
@@ -68,19 +90,30 @@ func run(args):
 				player.add_resource(-args[1], -args[2])
 	elif args[0] == "order":
 		tgt.set_tasks(args[1])
-	elif args[0] == "ability":
-		tgt.set_ability(args[1])
+	elif args[0] == "spell":
+		if args[1] == "learn":
+			if len(args) > 3:
+				return tgt.learn_spell(args[2], true)
+		elif args[1] == "forget":
+			if len(args) > 2:
+				return tgt.forget_spell(true)
+			return tgt.forget_spell()
+		elif args[1] == "memorize":
+			if len(args) > 3:
+				return tgt.add_ability(args[2], true)
+			return tgt.add_ability(args[2])
 	elif args[0] == "trigger":
-		if len(args) == 1: #Used only on Factory.door
-			tgt.trigger(host)
-		else:
-			tgt.trigger(args[1])
+		if is_instance_valid(tgt):
+			if len(args) == 1:
+				tgt.trigger(host)
+			else:
+				tgt.trigger(args[1])
 	elif args[0] == "wield":
 		host.set_weapon(tgt)
 	elif args[0] == "offhand":
 		host.set_offhand(tgt)
 	elif args[0] == "equip":
-		if "part" in tgt.properties:
+		if tgt.dat.g("part"):
 			host.set_armor(tgt)
 		else:
 			host.set_weapon(tgt)
@@ -113,6 +146,9 @@ func run(args):
 			host.set_progress_bar(args[2])
 	elif args[0] == "getobj":
 		return G.world.get_item_type_at(args[1], tgt, 0)
+	elif args[0] == "act":
+		if args[1].item_type == "unit":
+			args[1].set_state(args[2], args[3])
 	elif args[0] == "task":
 		tgt.set_task()
 		tgt.set_tasks(args[1])
@@ -135,6 +171,8 @@ func run(args):
 			tgt.die()
 		else:
 			return null
+	elif args[0] == "hit":
+		args[1].on_hit(args[2], null, args[3], args[4])
 	elif args[0] == "damage":
 		if tgt:
 			tgt.damage(args[1])
@@ -142,8 +180,8 @@ func run(args):
 		G.ui.display(args[1], tgt)
 	elif args[0] == "message":
 		G.message(args[1])
-	elif args[0] == "claim":
-		G.factions[args[1]].add(tgt)
+	elif args[0] == "faction":
+		tgt.faction = args[1]
 		return tgt
 	elif args[0] == "rotate":
 		var t
@@ -152,6 +190,7 @@ func run(args):
 		else:
 			t = Transform().looking_at(Vector3(G.rng.randf_range(-1,1),0,G.rng.randf_range(-1,1)), Vector3.UP)
 		tgt.transform.basis = t.basis.orthonormalized()
+		return tgt
 	elif args[0] == "tile":
 		G.world.set_tile_at(tgt, args[1])
 	elif args[0] == "iftile":
@@ -167,4 +206,6 @@ func run(args):
 		var pos = args[2]
 		var ortho = [Vector3.LEFT,Vector3.RIGHT,Vector3.FORWARD,Vector3.BACK][args[3]]
 		return G.cmds([["t",pos],["tilespace",false],["t",Transform().translated(pos).looking_at(ortho+pos, Vector3.UP)],["make",args[1]]], null)
+	elif args[0] == "brighten":
+		G.world.get_node("WorldEnvironment/OmniLight").show()
 	return tgt

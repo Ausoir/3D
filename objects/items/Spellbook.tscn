@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Item.gd\"
+
+const models = [
+	preload(\"res://assets/models/bookA.obj\"),
+	preload(\"res://assets/models/bookB.obj\"),
+	preload(\"res://assets/models/bookC.obj\"),
+	preload(\"res://assets/models/bookD.obj\"),
+	preload(\"res://assets/models/bookE.obj\"),
+	preload(\"res://assets/models/bookF.obj\"),
+]
+
+var spell
+
+func _ready():
+	._ready()
+	self.mesh = G.world.rng.rand_arr(models)
+	var spell_type = G.rng.rand_arr(G.factory.spells)
+	spell = G.rng.rand_arr(spell_type)
+
+func trigger(arg):
+	G.cmds([[\"v\",\"controller\",\"$h\"],[\"spell\",\"learn\",spell,true]], arg)
+	die()
+"
+
+[node name="Spellbook" type="MeshInstance"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.1, 0.05, 0 )
+cast_shadow = 0
+generate_lightmap = false
+software_skinning_transform_normals = false
+script = SubResource( 1 )

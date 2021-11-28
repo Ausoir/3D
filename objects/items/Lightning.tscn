@@ -1,0 +1,129 @@
+[gd_scene load_steps=5 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+render_mode unshaded, cull_disabled;
+uniform int rays : hint_range(1, 16) = 1;
+uniform float thickness : hint_range(0.001, 1.0) = 0.02;
+uniform vec4 outline : hint_color = vec4(0.2, 0, 0.8, 0.0);
+
+
+float plot(vec2 st, float pct, float half_width){
+	return smoothstep(pct-half_width, pct, st.x) - smoothstep(pct, pct+half_width, st.x);
+}
+
+float rand(vec2 n) {
+    return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+float noise(vec2 n) {
+    vec2 d = vec2(0.0, 1.0);
+    vec2 b = floor(n), f = smoothstep(vec2(0.0), vec2(1.0), fract(n));
+    return mix(mix(rand(b), rand(b + d.yx), f.x), mix(rand(b + d.xy), rand(b + d.yy), f.x), f.y);
+}
+
+float fbm(vec2 n) {
+    float total = 0.0, amplitude = 1.0;
+    for (int i = 0; i < 5; i++) {
+        total += noise(n) * amplitude;
+        n += n;
+        amplitude *= 0.5;
+    }
+    return total;
+}
+
+void fragment(){
+	vec2 uv = UV;
+	vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
+	
+	vec2 t;
+	float y;
+	float pct;
+	float buffer;
+	for (int i = 0; i < rays; i++) {
+		t = uv * vec2(1.0, 8.0) + vec2(float(i), -float(i)) - TIME * 3.0;
+		y = fbm(t) * 0.5;
+		pct = plot(uv, y, thickness);
+		buffer = plot(uv, y, thickness * 4.0);
+		color += pct*vec4(1.0, 1.0, 1.0, 1.0);
+		color += buffer*outline;
+	}
+	
+	ALBEDO = color.rgb;
+	ALPHA = color.a;
+}"
+
+[sub_resource type="ShaderMaterial" id=2]
+shader = SubResource( 1 )
+shader_param/rays = 4
+shader_param/thickness = 0.02
+shader_param/outline = Color( 0, 0.764706, 1, 0 )
+
+[sub_resource type="QuadMesh" id=3]
+material = SubResource( 2 )
+
+[sub_resource type="GDScript" id=4]
+script/source = "extends MeshInstance
+
+var target
+var shooter
+var shock1
+var shock2
+
+func shoot(pshooter, pos, ptarget):
+	shooter = pshooter
+	target = ptarget
+	if target:
+		var target_pos = target.get_interact_position()
+		shock1 = G.make_particle(\"shock\", transform.origin, 9999)
+		shock2 = G.make_particle(\"shock\", target_pos, 9999)
+		target.on_hit(target_pos, null, 1, [\"magic\"])
+	else:
+		queue_free()
+
+func die():
+	if shock1:
+		shock1.duration = 0
+	if shock2:
+		shock2.duration = 0
+	queue_free()
+
+func _physics_process(_delta):
+	on_process()
+	
+func on_process():
+	if target and is_instance_valid(target):
+		if target.dat.is_dead():
+			die()
+		elif shooter.state != \"special\":
+			die()
+		else:
+			var target_pos = target.get_interact_position()
+			var shooting_pos = shooter.get_hand_position()
+			var diff = target_pos - shooting_pos
+			var dist = diff.length()
+			look_at_from_position(shooting_pos + diff/2, target_pos, Vector3.FORWARD)
+			rotate_y(1.57)
+			scale.y = dist
+			shock1.translation = shooting_pos
+			shock2.translation = target_pos
+			if G.time.quarter_second:
+				G.message(rotation)
+				target.on_hit(target_pos, null, 1, [\"magic\"])
+	else:
+		die()
+"
+
+[node name="MeshInstance" type="MeshInstance"]
+transform = Transform( 0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 0, 0, 0 )
+cast_shadow = 0
+generate_lightmap = false
+mesh = SubResource( 3 )
+software_skinning_transform_normals = false
+material/0 = null
+script = SubResource( 4 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 3 )
+material/0 = null

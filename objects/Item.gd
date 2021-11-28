@@ -3,75 +3,53 @@ extends Spatial
 onready var status = G.factory.Status.new()
 var item_name
 var item_type
-var health = Vector2(10, 10)
-var faction = 0
 var direction = 0
 var holder
 var req = [0, 0, 0, 0]
-var onmake
-var ondie
-var onuse
-var onswing
-var onwork
-var ontouch
-var properties = {}
+var dat
 var work = 1
 var work_max = 0
 var progress_bar
 
 
-func set_faction(pfaction):
-	faction = pfaction
-
-
-func get_team():
-	return G.factions[faction]
-
-
 func on_hour(_hour):
 	pass
 
-
 func on_make():
-	if onmake:
-		G.cmds(onmake, self)
-
+	if dat.g("onmake"):
+		G.cmds(dat.v.onmake, self)
 
 func on_hit(pos, _hitter, damage=1, _tags=[]):
-	if "defense" in properties:
-		damage -= G.roll(properties.defense)
+	if !pos:
+		pos = transform.origin
+	if dat.g("defense"):
+		damage -= G.roll(dat.v.defense)
 	if damage > 0:
 		G.make_particle("splinter", pos, 1)
 		damage(damage)
 	else:
 		G.make_particle("spark", pos, 1)
 
-
 func trigger(_arg):
 	pass
 
-
 func damage(dmg):
-	health.x -= dmg
-	if health.x <= 0:
+	dat.add("hp", Vector2(-dmg, 0))
+	if dat.is_dead():
 		die()
-
 
 func die():
 	G.make_particle("dust", transform.origin, 2)
-	if ondie:
-		G.cmds(ondie, self)
+	if dat.g("ondie"):
+		G.cmds(dat.v.ondie, self)
 	if holder:
 		holder.set_weapon(null)
-	G.factions[faction].remove(self)
 	status.die()
 	queue_free()
-
 
 func set_work(amount):
 	work = amount
 	work_max = amount
-
 
 func set_progress_bar(label=null):
 	progress_bar = G.factory.Progress.instance()
@@ -79,20 +57,17 @@ func set_progress_bar(label=null):
 		progress_bar.label(label)
 	add_child(progress_bar)
 
-
 func check_workdone():
 	if progress_bar:
 		progress_bar.progress(float(work_max - work) / work_max)
 	if work <= 0:
 		on_work()
 
-
 func on_work():
-	if onwork:
+	if dat.g("onwork"):
 		work = work_max
-		G.cmds(onwork, self)
+		G.cmds(dat.v.onwork, self)
 		return true
-
 
 func _process(delta):
 	status.update(delta)

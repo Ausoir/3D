@@ -1,0 +1,35 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Building.gd\"
+const models = [
+	preload(\"res://assets/models/buildings/potA.obj\"),
+	preload(\"res://assets/models/buildings/potB.obj\"),
+	preload(\"res://assets/models/buildings/potC.obj\"),
+	preload(\"res://assets/models/buildings/potA_decorated.obj\"),
+	preload(\"res://assets/models/buildings/potB_decorated.obj\"),
+	preload(\"res://assets/models/buildings/potC_decorated.obj\"),
+]
+
+var unit_size = Vector3(.5,.5,.5)
+
+func open_walls():
+	resize(G.rng.randf()*.2)
+	$MeshInstance.mesh = G.world.rng.rand_arr(models)
+"
+
+[sub_resource type="SphereShape" id=2]
+radius = 0.5
+
+[node name="Spatial" type="KinematicBody"]
+collision_layer = 2
+collision_mask = 2
+script = SubResource( 1 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.452055, 0 )
+shape = SubResource( 2 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+generate_lightmap = false
+software_skinning_transform_normals = false

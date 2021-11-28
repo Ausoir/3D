@@ -1,0 +1,56 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://objects/Particle.gd" type="Script" id=1]
+[ext_resource path="res://assets/textures/lightning.png" type="Texture" id=2]
+
+[sub_resource type="Gradient" id=1]
+offsets = PoolRealArray( 0, 0.155738, 0.385246, 0.590164, 0.819672, 1 )
+colors = PoolColorArray( 0, 0.239296, 0.720703, 1, 1, 1, 1, 1, 0.625, 0.868164, 1, 1, 1, 1, 1, 1, 0, 0.112305, 1, 1, 1, 1, 1, 1 )
+
+[sub_resource type="GradientTexture" id=2]
+gradient = SubResource( 1 )
+width = 512
+
+[sub_resource type="ParticlesMaterial" id=3]
+emission_shape = 1
+emission_sphere_radius = 0.3
+direction = Vector3( 0, 1, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+angle = 720.0
+angle_random = 1.0
+scale_random = 1.0
+color_ramp = SubResource( 2 )
+hue_variation = -0.02
+hue_variation_random = 1.0
+anim_offset = 1.0
+anim_offset_random = 1.0
+
+[sub_resource type="SpatialMaterial" id=4]
+flags_unshaded = true
+vertex_color_use_as_albedo = true
+params_diffuse_mode = 4
+params_specular_mode = 4
+params_blend_mode = 1
+params_billboard_mode = 3
+params_billboard_keep_scale = true
+particles_anim_h_frames = 4
+particles_anim_v_frames = 1
+particles_anim_loop = false
+albedo_texture = ExtResource( 2 )
+
+[sub_resource type="QuadMesh" id=5]
+material = SubResource( 4 )
+
+[node name="Particles" type="Particles"]
+cast_shadow = 0
+generate_lightmap = false
+amount = 4
+lifetime = 0.1
+speed_scale = 2.0
+explosiveness = 0.5
+randomness = 1.0
+fract_delta = false
+process_material = SubResource( 3 )
+draw_pass_1 = SubResource( 5 )
+script = ExtResource( 1 )

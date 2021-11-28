@@ -1,0 +1,208 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://assets/textures/dirt.png" type="Texture" id=1]
+[ext_resource path="res://assets/textures/rune.png" type="Texture" id=2]
+[ext_resource path="res://assets/audio/bgm_portal.wav" type="AudioStream" id=3]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Building.gd\"
+
+
+func trigger(_arg):
+	$AnimationPlayer.play(\"Shut\")
+
+func die():
+	G.make_particle(\"overcharge\", global_transform.origin + $MeshInstance.translation, 1)
+	.die()
+"
+
+[sub_resource type="SphereMesh" id=2]
+
+[sub_resource type="Shader" id=3]
+code = "// Omen's Smoke Bomb from Valorant
+// Recreation by NekotoArts (CC0 License)
+// No need for credit, just check out my YT channel maybe?
+// I make a lot more Godot stuff there
+// https://www.youtube.com/channel/UCD7K_FECPHTF0z5okAVlh0g
+
+shader_type spatial;
+render_mode unshaded, cull_disabled;
+
+uniform sampler2D smoke_texture : hint_albedo;
+
+uniform vec4 outer_color : hint_color = vec4(0.11, 0.09, 0.2, 1.0);
+uniform vec4 inner_color : hint_color = vec4(0.24, 0.2, 0.37, 1.0);
+uniform float time_scale = 0.2;
+uniform float smoke_sharpness = 0.765;
+uniform float dissolve : hint_range(-1.0, 1.0) = -1.0;
+uniform float edge_pulse = 0.07;
+uniform bool apply_inside = true;
+
+const float PI = 3.1415;
+
+float fresnel(float amount, vec3 normal, vec3 view)
+{
+	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0 )), amount);
+}
+
+float saturatef(float a){
+	return clamp(a, 0.0, 1.0);
+}
+
+void vertex(){
+	// Smoke Texture
+	vec2 smoke_uv = UV - TIME * time_scale;
+	vec4 smoke_color = texture(smoke_texture, smoke_uv);
+	VERTEX += NORMAL * smoke_color.r * edge_pulse * sin(UV.y * PI);
+}
+
+void fragment(){
+	// Check for front or back face
+	if (!apply_inside){
+		float frontiplier = FRONT_FACING ? 1.0 : -1.0;
+		NORMAL *= frontiplier;
+	}
+	
+	// Inner Fresnel
+	float fres = fresnel(2, NORMAL, VIEW) * 5.0;
+	fres = saturatef(fres);
+	fres = 1.0 - fres;
+	
+	// Outer Fresnel
+	float outer_fres = fresnel(5.0, NORMAL, VIEW) * 2.0;
+	outer_fres = saturatef(outer_fres);
+	
+	// Smoke Texture
+	vec2 smoke_uv = UV - TIME * time_scale;
+	vec4 smoke_color = texture(smoke_texture, smoke_uv);
+	float smoke_buffer = smoothstep(0.0, smoke_sharpness, smoke_color.r);
+	
+	// Overlay Smoke onto Fresnels
+	float overlay = mix(fres, 0.5, smoke_buffer);
+	overlay = mix(outer_fres, 1.0, overlay);
+	
+	// Dissolve Effect
+	ALPHA = smoothstep(dissolve, 1.0, smoke_color.r);
+	ALPHA_SCISSOR = 0.5;
+	
+	// Coloring the Effect
+	vec3 final_color = mix(outer_color.rgb, inner_color.rgb, overlay);
+	
+	ALBEDO = final_color;
+}"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+shader_param/outer_color = Color( 0.333333, 0.32549, 0.396078, 1 )
+shader_param/inner_color = Color( 0.0588235, 0.0117647, 0.211765, 1 )
+shader_param/time_scale = 0.2
+shader_param/smoke_sharpness = 0.765
+shader_param/dissolve = -0.19
+shader_param/edge_pulse = 0.3
+shader_param/apply_inside = true
+shader_param/smoke_texture = ExtResource( 1 )
+
+[sub_resource type="ParticlesMaterial" id=5]
+gravity = Vector3( 0, 0, 0 )
+angular_velocity = 360.0
+angular_velocity_random = 1.0
+scale = 3.0
+scale_random = 0.2
+
+[sub_resource type="SpatialMaterial" id=6]
+flags_transparent = true
+params_diffuse_mode = 4
+params_specular_mode = 4
+params_blend_mode = 1
+params_billboard_mode = 3
+params_billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+albedo_color = Color( 1, 0, 1, 1 )
+albedo_texture = ExtResource( 2 )
+
+[sub_resource type="QuadMesh" id=7]
+material = SubResource( 6 )
+
+[sub_resource type="Animation" id=8]
+resource_name = "Shut"
+tracks/0/type = "method"
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 1 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "die"
+} ]
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath("MeshInstance:scale:x")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.91, 0.00789773, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 1 )
+}
+tracks/2/type = "bezier"
+tracks/2/path = NodePath("MeshInstance:scale:y")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.51, -0.0183088, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 1 )
+}
+tracks/3/type = "bezier"
+tracks/3/path = NodePath("MeshInstance:scale:z")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.92, -0.00957322, 0, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 1 )
+}
+
+[node name="Spatial" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+mesh = SubResource( 2 )
+material/0 = SubResource( 4 )
+
+[node name="Particles" type="Particles" parent="MeshInstance"]
+cast_shadow = 0
+generate_lightmap = false
+amount = 1
+lifetime = 600.0
+process_material = SubResource( 5 )
+draw_pass_1 = SubResource( 7 )
+
+[node name="SpotLight" type="SpotLight" parent="MeshInstance"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 4, 0 )
+light_color = Color( 0.172549, 0.0745098, 0.227451, 1 )
+light_energy = 10.0
+shadow_enabled = true
+spot_range = 12.0
+spot_attenuation = 0.189465
+spot_angle = 70.0
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/Shut = SubResource( 8 )
+
+[node name="Ambient" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 3 )
+unit_db = 4.0
+unit_size = 2.0
+autoplay = true
+max_distance = 12.0

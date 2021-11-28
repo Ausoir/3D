@@ -6,10 +6,17 @@
 script/source = "extends Spatial
 
 onready var node_quad = $Quad
+var lifetime = 1
 
+func _process(delta):
+	lifetime -= delta
+	if lifetime < 0:
+		queue_free()
 
-func display(damage):
+func display(damage, clr=null):
 	$Viewport/Label.set_text(str(damage))
+	if clr:
+		$Viewport/Label.add_color_override(\"font_color\", clr)
 	node_quad.emitting = true
 "
 
@@ -74,5 +81,6 @@ __meta__ = {
 emitting = false
 amount = 1
 one_shot = true
+fract_delta = false
 process_material = SubResource( 3 )
 draw_pass_1 = SubResource( 6 )

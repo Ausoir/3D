@@ -1,0 +1,63 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://objects/Building.gd" type="Script" id=1]
+[ext_resource path="res://assets/models/buildings/fountainRoundDetail.obj" type="ArrayMesh" id=2]
+
+[sub_resource type="SphereShape" id=1]
+
+[sub_resource type="Curve" id=2]
+_data = [ Vector2( 0, 0.3125 ), 0.0, 0.298097, 0, 0, Vector2( 0.434043, 0.421591 ), 1.06818, 1.06818, 0, 0, Vector2( 1, 0.00340903 ), -3.45105, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=3]
+curve = SubResource( 2 )
+
+[sub_resource type="ParticlesMaterial" id=4]
+gravity = Vector3( 0, 1, 0 )
+scale_curve = SubResource( 3 )
+
+[sub_resource type="SpatialMaterial" id=5]
+flags_transparent = true
+flags_unshaded = true
+params_diffuse_mode = 4
+params_specular_mode = 4
+albedo_color = Color( 0.345098, 0.94902, 1, 1 )
+
+[sub_resource type="SphereMesh" id=6]
+material = SubResource( 5 )
+radial_segments = 16
+rings = 8
+
+[node name="Spatial" type="StaticBody"]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource( 1 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0 )
+cast_shadow = 0
+generate_lightmap = false
+mesh = ExtResource( 2 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+material/2 = null
+
+[node name="Particles" type="Particles" parent="CollisionShape/MeshInstance"]
+cast_shadow = 0
+generate_lightmap = false
+amount = 4
+lifetime = 3.0
+speed_scale = 0.3
+process_material = SubResource( 4 )
+draw_pass_1 = SubResource( 6 )
+
+[node name="SpotLight" type="SpotLight" parent="CollisionShape/MeshInstance"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 3, 0 )
+light_color = Color( 0.905882, 0.364706, 1, 1 )
+light_energy = 3.0
+spot_range = 4.5
+spot_attenuation = 0.189465

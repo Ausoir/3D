@@ -1,0 +1,78 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://assets/materials/toon.gdshader" type="Shader" id=1]
+[ext_resource path="res://assets/textures/dirt.png" type="Texture" id=2]
+[ext_resource path="res://assets/materials/mat_leather.tres" type="Material" id=3]
+[ext_resource path="res://assets/models/lootSackA.obj" type="ArrayMesh" id=4]
+[ext_resource path="res://assets/models/bucket.obj" type="ArrayMesh" id=5]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Building.gd\"
+
+
+func open_walls():
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Pot1\")
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Pot2\")
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Sack\")
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Bucket1\")
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Bucket2\")
+"
+
+[sub_resource type="CapsuleMesh" id=2]
+radial_segments = 16
+rings = 4
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = ExtResource( 1 )
+shader_param/albedo = Color( 0.262745, 0.129412, 0.0313726, 1 )
+shader_param/cuts = 4
+shader_param/wrap = 0.0
+shader_param/steepness = 1.0
+shader_param/specular_strength = 0.3
+shader_param/specular_shininess = 16.0
+shader_param/specular_map = ExtResource( 2 )
+
+[node name="Spatial" type="Spatial"]
+script = SubResource( 1 )
+
+[node name="Bucket1" type="MeshInstance" parent="."]
+transform = Transform( 0.0293348, -0.99957, 0, 0.99957, 0.0293348, 0, 0, 0, 1, 1.13179, 0.4, 0.00991988 )
+mesh = ExtResource( 5 )
+material/0 = null
+material/1 = null
+
+[node name="Bucket2" type="MeshInstance" parent="."]
+transform = Transform( -0.0174741, 0.595422, 0.803223, 0.487841, 0.706311, -0.512969, -0.872758, 0.382881, -0.302813, -0.964648, 0.290983, -0.28343 )
+mesh = ExtResource( 5 )
+material/0 = null
+material/1 = null
+
+[node name="Sack" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.856803, 0, 0.862069 )
+mesh = ExtResource( 4 )
+material/0 = ExtResource( 3 )
+material/1 = null
+
+[node name="Spawn" type="Spatial" parent="."]
+
+[node name="0" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.12745, 0.376061, 0.0914921 )
+
+[node name="1" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.663603, 0, -1.03529 )
+
+[node name="2" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.538138, 0, -1.08303 )
+
+[node name="Poop" type="MeshInstance" parent="."]
+transform = Transform( 0.5, 0, 0.866025, 0, 0.2, 0, -0.866025, 0, 0.5, 0, 0, 0.1144 )
+cast_shadow = 0
+generate_lightmap = false
+mesh = SubResource( 2 )
+software_skinning_transform_normals = false
+material/0 = SubResource( 3 )

@@ -1,11 +1,12 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
-[ext_resource path="res://assets/font_message.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/font28.tres" type="DynamicFont" id=1]
 [ext_resource path="res://assets/Baumans-Regular.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=3]
 [ext_resource path="res://interface/health.tscn" type="PackedScene" id=4]
 [ext_resource path="res://interface/SkillTree.tscn" type="PackedScene" id=5]
-[ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=6]
+[ext_resource path="res://assets/textures/icons.png" type="Texture" id=6]
+[ext_resource path="res://assets/theme.tres" type="Theme" id=7]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends CanvasLayer
@@ -32,9 +33,9 @@ func bring_tab(tab_name):
 		hidden.remove_child(shop)
 		tabs.add_child(shop)
 		tabs.set_current_tab(tabs.get_child_count()-1)
-		shop.on_bring(self, argument)
+		shop.on_bring(self)
 	else:
-		tabs.get_node(tab_name).on_bring(self, argument)
+		tabs.get_node(tab_name).on_bring(self)
 
 func stash_tab(tab_name):
 	if tabs.has_node(tab_name):
@@ -63,8 +64,8 @@ func display(arg, player):
 	on_tab_select(tabs.current_tab)
 	argument = arg
 	if !argument.empty():
-		bring_tab(\"Shop\")
-	else:
+		bring_tab(argument)
+	else: #stash all tabs
 		stash_tab(\"Shop\")
 
 func clear():
@@ -128,32 +129,42 @@ func fill_equipment():
 			button.connect(\"pressed\", self, \"_button_pressed\", [[[\"unequip\",equipment[0]]]])
 		button.get_node(\"Container/Category\").set_text(equipment[0].to_upper())
 		button.get_node(\"Container/Name\").set_text(item.item_name.capitalize())
-		for property in item.properties:
-			if property in [\"weight\", \"defense\", \"health\", \"damage\", \"speed\"]:
+		for property in [\"weight\", \"defense\", \"health\", \"damage\", \"speed\"]:
+			var theproperty = item.dat.g(property)
+			if theproperty:
 				var label = Label.new()
-				label.set_text(property.capitalize() + \"   \" + str(item.properties[property]))
+				label.set_text(property.capitalize() + \"   \" + str(theproperty))
 				button.get_node(\"Container\").add_child(label)
-			elif property == \"tags\":
-				for tag in item.properties.tags:
-					var desc = G.factory.get_description(tag)
-					if !desc.empty():
-						var label = Label.new()
-						label.set_text(desc)
-						button.get_node(\"Container\").add_child(label)
+		var tags = item.dat.g(\"tags\", [])
+		for tag in tags:
+			var desc = G.factory.get_description(tag)
+			if !desc.empty():
+				var label = Label.new()
+				label.set_text(desc)
+				button.get_node(\"Container\").add_child(label)
 		tab_equipment.add_child(button)
 		button.get_node(\"Container/Category\").rect_min_size.x = tab_equipment.rect_size.x - 14
 		button.rect_min_size.y = button.get_node(\"Container\").rect_size.y + 14
 
 func fill_character():
-	var stats = G.younit.update_stats()
-	var label = Label.new()
-	label.add_font_override(\"font\", G.font)
-	tab_character.add_child(label)
+	var hostUnit = host.unit
+	var stats = hostUnit.update_stats()
 	for stat in stats:
-		label = Label.new()
-		label.add_font_override(\"font\", G.font)
+		var label = Label.new()
 		label.set_text(stat.capitalize() + \": \" + str(stats[stat]))
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.hint_tooltip = G.factory.get_description(stat)
 		tab_character.add_child(label)
+	for property in hostUnit.dat.v:
+		if property.substr(0, 2) == \"s_\":
+			var property_name = property.substr(2)
+			var label = Label.new()
+			var experience = hostUnit.dat.v[property]
+			var levels = G.dec2base2(experience)
+			label.set_text(\"Mastery - \" + property_name.capitalize() + \": \" + str(levels))
+			label.mouse_filter = Control.MOUSE_FILTER_STOP
+			label.hint_tooltip = G.factory.get_description(property_name)
+			tab_character.add_child(label)
 "
 
 [sub_resource type="GDScript" id=2]
@@ -166,7 +177,6 @@ var timeout = 0
 func add(msg):
 	set_position(Vector2(64, get_viewport().size.y - 64))
 	var label = Label.new()
-	label.add_font_override(\"font\", G.font)
 	label.set_text(msg)
 	for child in get_children():
 		var pos = child.get_position()
@@ -221,12 +231,12 @@ script/source = "extends Control
 
 const Menubutton = preload(\"res://interface/button_resource.tscn\")
 
-func on_bring(interface, argument):
+func on_bring(interface):
 	for tab in get_children():
 		var vbox = tab.get_child(0)
 		for item in vbox.get_children():
 			item.queue_free()
-	var menu = G.factory.menu[argument]
+	var menu = interface.host.known_spells
 	var count = 0
 	for items in menu:
 		var category = get_child(count).get_node(\"Buttons\")
@@ -238,12 +248,9 @@ func on_bring(interface, argument):
 			button.set_size(Vector2(380, 80))
 			button.connect(\"pressed\", interface, \"_button_pressed\", [item[2]])
 			button.set_use_parent_material(true)
+			button.hint_tooltip = G.factory.get_description(item[0])
 			if !G.you.require_resource(false, reqs[0], reqs[1]):
 				button.disabled = true
-			if !button.disabled:
-				var desc = button.get_node(\"Reqs\")
-				desc.add_color_override(\"font_color\", Color(1,1,1))
-				desc.set_text(G.factory.get_description(name))
 			category.add_child(button)
 		count += 1
 
@@ -307,6 +314,7 @@ script = SubResource( 1 )
 [node name="Messages" type="Control" parent="."]
 material = ExtResource( 3 )
 mouse_filter = 1
+theme = ExtResource( 7 )
 script = SubResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -325,6 +333,7 @@ __meta__ = {
 [node name="Menu" type="Control" parent="."]
 visible = false
 mouse_filter = 1
+theme = ExtResource( 7 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -352,6 +361,8 @@ margin_left = 80.0
 margin_top = 72.0
 margin_right = 114.0
 margin_bottom = 106.0
+hint_tooltip = "Your current mana"
+mouse_filter = 0
 custom_fonts/font = ExtResource( 1 )
 text = "00"
 __meta__ = {
@@ -372,6 +383,8 @@ margin_left = 200.0
 margin_top = 72.0
 margin_right = 234.0
 margin_bottom = 106.0
+hint_tooltip = "Your current gold"
+mouse_filter = 0
 custom_fonts/font = ExtResource( 1 )
 text = "00"
 __meta__ = {
@@ -402,10 +415,10 @@ __meta__ = {
 use_parent_material = true
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 47.0
-margin_right = -4.0
-margin_bottom = -4.0
+margin_left = 5.0
+margin_top = 44.0
+margin_right = -5.0
+margin_bottom = -5.0
 mouse_filter = 1
 scroll_horizontal_enabled = false
 __meta__ = {
@@ -427,10 +440,10 @@ visible = false
 use_parent_material = true
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 47.0
-margin_right = -4.0
-margin_bottom = -4.0
+margin_left = 5.0
+margin_top = 44.0
+margin_right = -5.0
+margin_bottom = -5.0
 mouse_filter = 1
 scroll_horizontal_enabled = false
 __meta__ = {
@@ -449,7 +462,7 @@ margin_right = 40.0
 margin_bottom = 40.0
 mouse_filter = 1
 
-[node name="Shop" type="TabContainer" parent="Menu/Hidden"]
+[node name="Spells" type="TabContainer" parent="Menu/Hidden"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -458,67 +471,54 @@ margin_top = 47.0
 margin_right = 444.0
 margin_bottom = 7.0
 mouse_filter = 1
+theme = ExtResource( 7 )
 tab_align = 0
 all_tabs_in_front = true
 drag_to_rearrange_enabled = true
 script = SubResource( 7 )
 
-[node name="Miscellaneous" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+[node name="Alchemy" type="ScrollContainer" parent="Menu/Hidden/Spells"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+margin_left = 5.0
+margin_top = 49.0
+margin_right = -5.0
+margin_bottom = -5.0
 
-[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Miscellaneous"]
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Spells/Alchemy"]
 margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
 
-[node name="Weapons" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+[node name="Conjuration" type="ScrollContainer" parent="Menu/Hidden/Spells"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+margin_left = 5.0
+margin_top = 49.0
+margin_right = -5.0
+margin_bottom = -5.0
 
-[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Weapons"]
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Spells/Conjuration"]
 margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
 
-[node name="Armors" type="ScrollContainer" parent="Menu/Hidden/Shop"]
+[node name="Spellcasting" type="ScrollContainer" parent="Menu/Hidden/Spells"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+margin_left = 5.0
+margin_top = 49.0
+margin_right = -5.0
+margin_bottom = -5.0
 
-[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Armors"]
+[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Spells/Spellcasting"]
 margin_right = 480.0
 margin_bottom = 600.0
 rect_min_size = Vector2( 480, 600 )
 
-[node name="Spells" type="ScrollContainer" parent="Menu/Hidden/Shop"]
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
-
-[node name="Buttons" type="VBoxContainer" parent="Menu/Hidden/Shop/Spells"]
-margin_right = 480.0
-margin_bottom = 600.0
-rect_min_size = Vector2( 480, 600 )
-
-[node name="Skills" type="ViewportContainer" parent="Menu/Hidden"]
+[node name="_Skills" type="ViewportContainer" parent="Menu/Hidden"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -529,13 +529,13 @@ margin_bottom = 607.0
 mouse_default_cursor_shape = 6
 script = SubResource( 8 )
 
-[node name="Viewport" type="Viewport" parent="Menu/Hidden/Skills"]
+[node name="Viewport" type="Viewport" parent="Menu/Hidden/_Skills"]
 size = Vector2( 488, 600 )
 transparent_bg = true
 handle_input_locally = false
 render_target_update_mode = 0
 
-[node name="SkillTree" parent="Menu/Hidden/Skills/Viewport" instance=ExtResource( 5 )]
+[node name="SkillTree" parent="Menu/Hidden/_Skills/Viewport" instance=ExtResource( 5 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -571,4 +571,4 @@ __meta__ = {
 }
 
 [connection signal="tab_selected" from="Menu/Tabs" to="." method="on_tab_select"]
-[connection signal="tab_selected" from="Menu/Hidden/Shop" to="Menu/Hidden/Shop" method="_on_tab_select"]
+[connection signal="tab_selected" from="Menu/Hidden/Spells" to="Menu/Hidden/Spells" method="_on_tab_select"]

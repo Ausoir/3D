@@ -4,23 +4,27 @@ const BLOCK = 4
 const HALFBLOCK = 2
 const Y_FIX = 2
 const particles = {
-	"debug": preload("res://assets/particles/Debug.tscn"),
-	"hit": preload("res://assets/particles/Hit.tscn"),
-	"blood": preload("res://assets/particles/Blood.tscn"),
-	"dust": preload("res://assets/particles/Dust.tscn"),
-	"smoke": preload("res://assets/particles/Smoke.tscn"),
-	"splinter": preload("res://assets/particles/Splinter.tscn"),
-	"repair": preload("res://assets/particles/Repair.tscn"),
-	"spark": preload("res://assets/particles/Spark.tscn"),
-	"light": preload("res://assets/particles/Light.tscn"),
-	"overcharge": preload("res://assets/particles/Overcharge.tscn"),
-	"cast": preload("res://assets/particles/Cast.tscn"),
-	"recharged": preload("res://assets/particles/Recharged.tscn"),
+	"debug": preload("res://objects/particles/Debug.tscn"),
+	"hit": preload("res://objects/particles/Hit.tscn"),
+	"blood": preload("res://objects/particles/Blood.tscn"),
+	"dust": preload("res://objects/particles/Dust.tscn"),
+	"smoke": preload("res://objects/particles/Smoke.tscn"),
+	"splinter": preload("res://objects/particles/Splinter.tscn"),
+	"repair": preload("res://objects/particles/Repair.tscn"),
+	"spark": preload("res://objects/particles/Spark.tscn"),
+	"light": preload("res://objects/particles/Light.tscn"),
+	"shock": preload("res://objects/particles/Shock.tscn"),
+	"overcharge": preload("res://objects/particles/Overcharge.tscn"),
+	"cast": preload("res://objects/particles/Cast.tscn"),
+	"cast silent": preload("res://objects/particles/Cast_silent.tscn"),
+	"cast fail": preload("res://objects/particles/Cast_fail.tscn"),
+	"recharged": preload("res://objects/particles/Recharged.tscn"),
+	"charmed": preload("res://objects/particles/Charmed.tscn"),
 }
+const Properties = preload("res://classes/Properties.gd")
 const Command = preload("res://classes/Command.gd")
-const Faction = preload("res://classes/Faction.gd")
-const font = preload("res://assets/font_message.tres")
-var skills = preload("res://objects/units/Ability.gd").new()
+const Interface_Damage = preload("res://interface/damage.tscn")
+var skills = preload("res://classes/Ability.gd").new()
 var time = preload("res://classes/Time.gd").new()
 var ui
 var factory
@@ -31,11 +35,6 @@ var world
 var level
 var space
 var controllers = []
-var factions = [
-	Faction.new(0),
-	Faction.new(1),
-	Faction.new(2),
-]
 
 var rng = preload("res://classes/Random.gd").new()
 
@@ -49,9 +48,8 @@ func _process(delta):
 
 func initialize(pworld):
 	ui = preload("res://interface/Interface.tscn").instance()
-	G.world = pworld
-	G.space = pworld.get_world().direct_space_state
-	factory._ready()
+	world = pworld
+	space = pworld.get_world().direct_space_state
 	pworld.others.add_child(ui)
 
 
@@ -65,11 +63,6 @@ func get_unit_player(unit):
 	for player in world.players.get_children():
 		if player.unit == unit:
 			return player
-
-
-func on_hour(hour):
-	for faction in factions:
-		faction.on_hour(hour)
 
 
 func make_particle(arg, pos, lifetime):
@@ -101,7 +94,9 @@ func drop(arg, exc):
 
 func roll(arg):
 	var r = 0
-	if "d" in arg:
+	if arg is int:
+		r = G.rng.randi_range(1, arg)
+	elif "d" in arg:
 		var dices = arg.split("d")
 		for _i in range(int(dices[0])):
 			r += G.rng.randi_range(1, int(dices[1]))
@@ -158,3 +153,24 @@ func cmds(args, host):
 func cmd(arg, host):
 	var c = Command.new(host)
 	return c.run(arg)
+
+func find_target_los(pos, radius_sq, faction, exc):
+	for obj in G.world.units.get_children():
+		var objpos = obj.get_view_position()
+		if (objpos-pos).length_squared() < radius_sq and obj.controller.faction != faction:
+			var collision = G.space.intersect_ray(pos, objpos, [exc, obj], 32)
+			if not collision:
+				return obj
+
+func dec2base2(value):
+	var r = ""
+	while (value > 0):
+		r = str(value & 1) + r
+		value = (value >> 1)
+	return len(r)
+
+func display_damage(pos, dmg, clr=null):
+	var label = Interface_Damage.instance()
+	world.others.add_child(label)
+	label.transform.origin = pos
+	label.display(dmg, clr)

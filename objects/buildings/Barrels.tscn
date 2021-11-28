@@ -1,0 +1,83 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://assets/models/buildings/crateDark.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/models/buildings/barrelDark.obj" type="ArrayMesh" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Building.gd\"
+
+
+func open_walls():
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Barrel3\")
+		if G.world.rng.randi_range(0, 1) == 0:
+			rid(\"Crate\")
+	if G.world.rng.randi_range(0, 1) == 0:
+		rid(\"Barrel2\")
+		if G.world.rng.randi_range(0, 1) == 0:
+			rid(\"Barrel\")
+"
+
+[sub_resource type="CylinderShape" id=2]
+radius = 0.4
+height = 1.0
+
+[sub_resource type="BoxShape" id=3]
+extents = Vector3( 0.5, 0.5, 0.5 )
+
+[node name="Spatial" type="StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.272974 )
+collision_layer = 2
+collision_mask = 2
+script = SubResource( 1 )
+
+[node name="Barrel" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.381532, 0.5, -0.62083 )
+shape = SubResource( 2 )
+
+[node name="Mesh" type="MeshInstance" parent="Barrel"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0 )
+generate_lightmap = false
+mesh = ExtResource( 2 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+material/2 = null
+
+[node name="Barrel2" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.376925, 1.503, -0.62083 )
+shape = SubResource( 2 )
+
+[node name="Mesh" type="MeshInstance" parent="Barrel2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0 )
+generate_lightmap = false
+mesh = ExtResource( 2 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+material/2 = null
+
+[node name="Crate" type="CollisionShape" parent="."]
+transform = Transform( 0.961713, 0, 0.27406, 0, 1, 0, -0.27406, 0, 0.961713, -0.784312, 0.5, -0.45226 )
+shape = SubResource( 3 )
+
+[node name="Mesh" type="MeshInstance" parent="Crate"]
+transform = Transform( 1, 0, 2.98023e-08, 0, 1, 0, -2.98023e-08, 0, 1, 0, 0, 0 )
+generate_lightmap = false
+mesh = ExtResource( 1 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+
+[node name="Barrel3" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.605359, 1.5, -0.49685 )
+shape = SubResource( 2 )
+
+[node name="Mesh2" type="MeshInstance" parent="Barrel3"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0 )
+generate_lightmap = false
+mesh = ExtResource( 2 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+material/2 = null

@@ -21,6 +21,7 @@ var rng = preload(\"res://classes/Random.gd\").new()
 var map_size
 var dungeon_map
 var spawnpoints = []
+var spawnpoints_enemy = []
 var torchs = []
 
 
@@ -34,7 +35,7 @@ func _ready():
 func add_player():
 	var unit = G.cmds([[\"make\",\"dummy\"]], null)
 	var player = preload(\"res://objects/units/Player.tscn\").instance()
-	unit.transform.origin = get_spawnpoint()# + Vector3(0,24,0)
+	unit.transform.origin = get_spawnpoint()
 	player.assign(unit)
 	$Players.add_child(player)
 
@@ -42,7 +43,7 @@ func generate(level):
 	var current_level = level.get_dungeon()
 	rng.randomize()
 	var seeed = rng.randi_range(1, 999999)
-#	seeed = 17383
+#	seeed = 70277
 	print(seeed)
 	rng.set_seed(seeed)
 	tilemap.rng = rng
@@ -61,6 +62,7 @@ func generate(level):
 	dungeon_map = generator.make_border('W', ['#', '='])
 	Autotile.new(tilemap, dungeon_map).autotile()
 
+	var mob_num = clamp(floor(map_size.x * map_size.y * .01), 2, 16)
 	for x in range(0,map_size.x+1):
 		for z in range(0,map_size.y+1):
 			var isOdd = x % 2 == 1 or z % 2 == 1
@@ -122,19 +124,22 @@ func generate(level):
 				if room_objects[0] == \"torch\":
 					torchs.append(pos)
 					build(\"walltorch\", pos, room_objects[1])
+				elif room_objects[0] == \"mob\":
+					spawnpoints_enemy.append(tilemap.map_to_world(hx, 1, hz))
 				elif room_objects[0] == \"door\":
 					var door = build(\"door\", pos, room_objects[1])
 					if tile == tilemap.fencedoor:
 						door.to_fence()
-				elif room_objects[0] == \"mob\":
-					spawn(tilemap.map_to_world(hx, 1, hz))
 				else:
 					build(room_objects[0], pos, room_objects[1])
+	while mob_num > 0:
+		mob_num -= 1
+		spawn(rng.rand_arr(spawnpoints_enemy))
 
 func get_spawnpoint():
 	var t = rng.rand_arr(spawnpoints)
 	if t == null:
-		t = Vector3(map_size.x/2, 0, map_size.y/2)
+		t = Vector3(.5, 0, .5)
 	build(\"portal\", t, 0)
 	return t * tilemap.cell_size + Vector3(2,2,2)
 
@@ -146,9 +151,10 @@ func poi_near(arr, pos, radius):
 	return false
 
 func spawn(pos):
-	for _i in range(1, rng.randi_range(1, 3)):
-		var unit = G.level.get_loot(\"mobs\")
-		G.cmds([[\"t\", pos],[\"make\",unit],[\"rotate\"]], null)
+#	for _i in range(1, rng.randi_range(1, 3)):
+	var unit = G.level.get_loot(\"mobs\")
+	var t = pos + Vector3(rng.randf_range(-1, 1), 0, rng.randf_range(-1, 1))
+	G.cmds([[\"t\", t],[\"make\",unit],[\"rotate\"]], null)
 
 func build(building, pos, orientation=-1):
 	if orientation == -1:
@@ -164,11 +170,9 @@ func build(building, pos, orientation=-1):
 func is_tile_at(vec, tilename):
 	return tilemap.is_tile_named(get_tile_at(vec), tilename)
 
-
 func get_tile_at(vec):
 	var pos = tilemap.world_to_map(vec)# + Vector3(0, 1, 0))
 	return tilemap.get_cell_item(pos.x, pos.y, pos.z)
-
 
 func set_tile_at(vec, tilename, orientation=-1, autotile=false):
 	var pos = tilemap.world_to_map(vec)# + Vector3(0, 1, 0))
@@ -183,11 +187,9 @@ func set_tile_at(vec, tilename, orientation=-1, autotile=false):
 	if autotile:
 		tilemap.autotile_map_simple(Vector2(pos.x-1, pos.z-1), Vector2(pos.x+1, pos.z+1), 0)
 
-
 func snap_to_tile(vec):
 	var r = tilemap.world_to_map(vec)
 	return tilemap.map_to_world(r.x, r.y, r.z)
-
 
 func get_units_near(vec, radius=2):
 	var r = []
@@ -195,7 +197,6 @@ func get_units_near(vec, radius=2):
 		if (i.global_transform.origin - vec).length() <= radius:
 			r.append(i)
 	return r
-
 
 func get_items_at(vec, radius=1.5):
 	var r = []
@@ -210,7 +211,6 @@ func get_item_type_at(type, vec, radius=2):
 		for i in items:
 			if type == i.item_type:
 				return i
-
 
 func get_pos(vec):
 	return tilemap.map_to_world(vec.x, vec.y+.5, vec.z)
@@ -472,12 +472,12 @@ cell_octant_size = 4
 collision_layer = 35
 collision_mask = 35
 data = {
-"cells": PoolIntArray( 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 1441792, 4, 0, 1441792, 65536, 0, 3, 65537, 0, 11, 65538, 0, 6, 65539, 0, 1441809, 65540, 0, 1441809, 1, 65533, 1441792, 2, 65533, 1441792, 3, 65533, 1441792, 4, 65533, 1441792, 65536, 65533, 3, 65537, 65533, 15, 65538, 65533, 6, 0, 65534, 0, 1, 65534, 0, 2, 65534, 0, 3, 65534, 1441792, 4, 65534, 1441792, 65536, 65534, 1441803, 65537, 65534, 1048591, 65538, 65534, 655366, 65539, 65534, 1441798, 65540, 65534, 1441809, 0, 65535, 0, 1, 65535, 0, 2, 65535, 0, 3, 65535, 1441792, 4, 65535, 1441792, 65536, 65535, 1441798, 65537, 65535, 655376, 65538, 65535, 11, 65539, 65535, 6, 65540, 65535, 1441809 )
+"cells": PoolIntArray(  )
 }
 script = SubResource( 2 )
 __meta__ = {
 "_editor_clip_": 0,
-"_editor_floor_": Vector3( 0, 1, 0 )
+"_editor_floor_": Vector3( 0, 0, 0 )
 }
 
 [node name="Objects" type="Spatial" parent="."]
@@ -491,6 +491,7 @@ environment = SubResource( 3 )
 
 [node name="OmniLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( 1, 0, 0, 0, 0.400429, 0.916328, 0, -0.916328, 0.400429, 11, 14, 15 )
+visible = false
 light_energy = 2.0
 light_specular = 0.0
 light_bake_mode = 0
@@ -506,10 +507,12 @@ shape = SubResource( 4 )
 
 [node name="Floor" type="StaticBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
-collision_layer = 2
-collision_mask = 2
+collision_layer = 0
+collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="Floor"]
 shape = SubResource( 4 )
 
 [node name="Players" type="Spatial" parent="."]
+
+[node name="Audio" type="AudioStreamPlayer" parent="."]

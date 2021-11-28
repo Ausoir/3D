@@ -4,26 +4,20 @@ var unit
 var build_queue = []
 var tgt #for use in cmd
 var tasks
-var task
+var task = ["", 0]
 var task_timer
-var faction
-var ability
+var faction = 0
 
 
 func assign(arg):
-	faction = G.factions[0]
 	unit = arg
 	unit.controller = self
 	set_task()
 
-func set_faction(p):
-	faction = G.factions[p]
-
-func set_ability(p):
-	ability = p
-
 func set_task(newtask=["wait", 0]):
 	tasks = []
+	if newtask[0] != task[0]:
+		on_task_finish()
 	on_task_set(newtask)
 	task_timer = task[1]
 
@@ -49,7 +43,7 @@ func change_task(newtask):
 func next_task():
 	var newtask = tasks.pop_back()
 	if newtask == null:
-		newtask = ["wait", 9999]
+		newtask = ["wait", 0]
 	on_task_set(newtask)
 
 func on_process(delta):
@@ -86,16 +80,15 @@ func on_task_update(delta):
 		else:
 			unit.motion_target = Vector2(0, 1)
 	elif task[0] == "attack":
-		unit.set_state("swing")
 		face(task[2])
 		unit.motion_target = Vector2(0, 1)
+		swing(unit.weapon)
 	elif task[0] == "moveto":
 		unit.motion_target = Vector2(task[2], task[3])
 		unit.set_state("move")
-	elif task[0] == "swing":
-		unit.set_state("swing")
 	elif task[0] == "special":
-		unit.set_state("special")
+		if unit.cast == 0:
+			unit.set_state("special")
 
 func on_task_finish():
 	if task[0] == "damage":
@@ -104,8 +97,6 @@ func on_task_finish():
 		if len(task) > 3:
 			tgt = task[3]
 		G.cmds([["t",tgt]]+task[2], unit)
-	elif task[0] == "special":
-		G.skills.perform(ability, unit)
 	elif task[0] == "interact":
 		var item = get_interactable()
 		if item:
@@ -135,7 +126,7 @@ func get_interactable():
 	var r
 	if items:
 		for item in items:
-			if item.get("item_name") and item.onuse:
+			if item.get("item_type") and item.dat.g("onuse"):
 				if item.item_type == "item":
 					return item
 				elif item.item_type == "object":
@@ -147,14 +138,16 @@ func get_interactable():
 
 func interact(object):
 	if object != null:
-		if object.onuse:
+		var onuse = object.dat.g("onuse")
+		if onuse:
 			tgt = object
-			set_tasks(object.onuse)
+			set_tasks(onuse)
 		return true
 
 
 func swing(object):
-	if object != null and object.onswing:
+	if object != null:
+		var onswing = object.dat.g("onswing")
 		tgt = object
-		set_tasks(object.onswing)
+		set_tasks(onswing)
 		return true

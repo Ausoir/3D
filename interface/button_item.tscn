@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://assets/font_message.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/font28.tres" type="DynamicFont" id=1]
 
 [node name="Button" type="Button"]
 margin_right = 320.0

@@ -1,8 +1,8 @@
 [gd_scene load_steps=5 format=2]
 
-[ext_resource path="res://assets/textures/icon_items.png" type="Texture" id=1]
 [ext_resource path="res://assets/materials/mat_interface.tres" type="Material" id=2]
-[ext_resource path="res://assets/font_message.tres" type="DynamicFont" id=3]
+[ext_resource path="res://assets/font28.tres" type="DynamicFont" id=3]
+[ext_resource path="res://assets/textures/icons.png" type="Texture" id=4]
 
 [sub_resource type="GDScript" id=1]
 script/source = "extends Button
@@ -29,6 +29,7 @@ anchor_bottom = 1.0
 margin_right = -544.0
 margin_bottom = -480.0
 rect_min_size = Vector2( 380, 120 )
+hint_tooltip = "Button"
 script = SubResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -61,7 +62,7 @@ __meta__ = {
 [node name="ManaIcon" type="Sprite" parent="ManaAmount"]
 use_parent_material = true
 position = Vector2( -36, 0 )
-texture = ExtResource( 1 )
+texture = ExtResource( 4 )
 centered = false
 region_enabled = true
 region_rect = Rect2( 0, 0, 32, 32 )
@@ -81,20 +82,7 @@ __meta__ = {
 [node name="GoldIcon" type="Sprite" parent="GoldAmount"]
 use_parent_material = true
 position = Vector2( -36, 0 )
-texture = ExtResource( 1 )
+texture = ExtResource( 4 )
 centered = false
 region_enabled = true
 region_rect = Rect2( 32, 0, 32, 32 )
-
-[node name="Reqs" type="Label" parent="."]
-use_parent_material = true
-margin_left = 220.0
-margin_top = 64.0
-margin_right = 380.0
-margin_bottom = 96.0
-rect_scale = Vector2( 1.5, 1.5 )
-custom_colors/font_color = Color( 1, 0, 0, 1 )
-autowrap = true
-__meta__ = {
-"_edit_use_anchors_": false
-}

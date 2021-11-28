@@ -1,0 +1,99 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://assets/textures/sparkle.png" type="Texture" id=1]
+
+[sub_resource type="PhysicsMaterial" id=1]
+bounce = 0.5
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends RigidBody
+
+var faction = 0
+var speed = 1
+var lifetime = 1
+var onhit
+
+func shoot(towards):
+#	pass
+#	var to = Vector3(G.rng.randi_range(-12, 12),
+#					   G.rng.randi_range(-12, 4),
+#					   G.rng.randi_range(-12, 12))
+	apply_central_impulse(towards * 16)
+
+func _physics_process(delta):
+	lifetime -= delta * .5
+	if lifetime < .1:
+		queue_free()
+
+func _on_body_entered(body):
+	if body.get(\"item_type\"):
+		G.make_particle(\"hit\", transform.origin, 1)
+		G.cmds(onhit, body)
+		queue_free()
+"
+
+[sub_resource type="SphereShape" id=3]
+radius = 0.3
+
+[sub_resource type="Curve" id=4]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), -3.28576, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=5]
+width = 512
+curve = SubResource( 4 )
+
+[sub_resource type="ParticlesMaterial" id=9]
+direction = Vector3( 0, 1, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+angular_velocity = 720.0
+angular_velocity_random = 0.5
+scale = 3.0
+scale_random = 1.0
+scale_curve = SubResource( 5 )
+hue_variation = 1.0
+hue_variation_random = 1.0
+
+[sub_resource type="SpatialMaterial" id=7]
+flags_unshaded = true
+vertex_color_use_as_albedo = true
+params_diffuse_mode = 4
+params_specular_mode = 4
+params_blend_mode = 1
+params_cull_mode = 2
+params_billboard_mode = 3
+params_billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+albedo_texture = ExtResource( 1 )
+
+[sub_resource type="QuadMesh" id=8]
+material = SubResource( 7 )
+
+[node name="Spatial" type="RigidBody"]
+input_ray_pickable = false
+collision_layer = 3
+collision_mask = 0
+physics_material_override = SubResource( 1 )
+gravity_scale = 0.0
+custom_integrator = true
+contacts_reported = 2
+contact_monitor = true
+can_sleep = false
+axis_lock_linear_y = true
+script = SubResource( 2 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 3 )
+
+[node name="Particles" type="Particles" parent="."]
+cast_shadow = 0
+generate_lightmap = false
+amount = 1
+lifetime = 0.2
+fract_delta = false
+process_material = SubResource( 9 )
+draw_pass_1 = SubResource( 8 )
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

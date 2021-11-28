@@ -1,0 +1,80 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://assets/models/buildings/chestTop_common_empty.obj" type="ArrayMesh" id=1]
+[ext_resource path="res://assets/models/buildings/chest_common_empty.obj" type="ArrayMesh" id=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "extends \"res://objects/Lootable.gd\"
+
+const models = [
+	preload(\"res://assets/models/buildings/chest_uncommon.obj\"),
+	preload(\"res://assets/models/buildings/chestTop_uncommon.obj\"),
+	preload(\"res://assets/models/buildings/chest_rare.obj\"),
+	preload(\"res://assets/models/buildings/chestTop_rare.obj\"),
+	preload(\"res://assets/models/buildings/chest_common.obj\"),
+]
+
+func open_walls():
+	var rare = dat.g(\"rarity\", 0) - G.rng.randi_range(0, 1)
+	if rare == 1:
+		$Chest/Chest.mesh = models[4]
+	elif rare == 2:
+		$Chest/Chest.mesh = models[0]
+		$Chest/Lid.mesh = models[1]
+	elif rare == 3:
+		$Chest/Chest.mesh = models[2]
+		$Chest/Lid.mesh = models[3]
+
+"
+
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 0.5, 0.5, 0.5 )
+
+[sub_resource type="Animation" id=3]
+tracks/0/type = "value"
+tracks/0/path = NodePath("Chest/Lid:rotation_degrees")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0, 0 ), Vector3( -90, 0, 0 ) ]
+}
+
+[node name="Spatial" type="StaticBody"]
+collision_layer = 2
+collision_mask = 2
+script = SubResource( 1 )
+
+[node name="Chest" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.5 )
+shape = SubResource( 2 )
+
+[node name="Chest" type="MeshInstance" parent="Chest"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+generate_lightmap = false
+mesh = ExtResource( 2 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+material/2 = null
+material/3 = null
+
+[node name="Lid" type="MeshInstance" parent="Chest"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+generate_lightmap = false
+mesh = ExtResource( 1 )
+software_skinning_transform_normals = false
+material/0 = null
+material/1 = null
+
+[node name="TriggerAnimation" type="AnimationPlayer" parent="."]
+anims/open = SubResource( 3 )
+
+[node name="Spawn" type="Spatial" parent="."]
+
+[node name="Position3D" type="Position3D" parent="Spawn"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.658043, -0.513811 )

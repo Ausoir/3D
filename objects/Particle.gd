@@ -8,7 +8,7 @@ func _ready():
 	if has_node("Sound"):
 		var sound = $Sound
 		sound.play()
-		var dist = max(12, sound.get_max_distance())
+		var dist = min(24, sound.get_max_distance())
 		G.cmds([["alert", sound.global_transform.origin, dist]], null)
 
 func follow(p):

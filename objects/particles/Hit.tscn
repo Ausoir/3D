@@ -1,0 +1,67 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://assets/audio/hit_flesh.wav" type="AudioStream" id=1]
+[ext_resource path="res://assets/textures/hit.png" type="Texture" id=2]
+[ext_resource path="res://objects/Particle.gd" type="Script" id=3]
+
+[sub_resource type="Gradient" id=1]
+offsets = PoolRealArray( 0, 0.655738, 1 )
+colors = PoolColorArray( 1, 1, 1, 1, 1, 0.263672, 0, 1, 1, 0.568359, 0, 1 )
+
+[sub_resource type="GradientTexture" id=2]
+gradient = SubResource( 1 )
+width = 512
+
+[sub_resource type="Curve" id=3]
+_data = [ Vector2( 0, 0.843182 ), 0.0, -1.44301, 0, 0, Vector2( 1, 0 ), -5.89063, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=4]
+width = 512
+curve = SubResource( 3 )
+
+[sub_resource type="ParticlesMaterial" id=5]
+lifetime_randomness = 0.5
+gravity = Vector3( 0, 0, 0 )
+angular_velocity = 720.0
+angular_velocity_random = 1.0
+scale = 2.0
+scale_random = 0.3
+scale_curve = SubResource( 4 )
+color_ramp = SubResource( 2 )
+anim_speed = 5.0
+anim_speed_random = 1.0
+
+[sub_resource type="SpatialMaterial" id=6]
+flags_unshaded = true
+vertex_color_use_as_albedo = true
+params_diffuse_mode = 4
+params_specular_mode = 4
+params_blend_mode = 1
+params_billboard_mode = 3
+params_billboard_keep_scale = true
+particles_anim_h_frames = 3
+particles_anim_v_frames = 1
+particles_anim_loop = false
+albedo_texture = ExtResource( 2 )
+
+[sub_resource type="QuadMesh" id=7]
+material = SubResource( 6 )
+
+[node name="Particle" type="Particles"]
+cast_shadow = 0
+generate_lightmap = false
+emitting = false
+amount = 4
+lifetime = 0.7
+one_shot = true
+explosiveness = 1.0
+fract_delta = false
+local_coords = false
+process_material = SubResource( 5 )
+draw_pass_1 = SubResource( 7 )
+script = ExtResource( 3 )
+
+[node name="Sound" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource( 1 )
+unit_db = 20.0
+max_distance = 8.0

@@ -17,7 +17,7 @@ var Pathing = preload("res://objects/units/Pathing.gd")
 var pathing
 
 var npc_search = preload("res://assets/audio/npc_search.wav")
-
+var follow
 
 func _init(unit):
 	pathing = Pathing.new()
@@ -76,11 +76,12 @@ func perceive():
 			var objpos = obj.get_view_position()
 			var unitpos = unit.get_view_position()
 			var dist = unitpos.distance_to(objpos)
-			if dist < sight_range and !obj.controller.faction.is_ally(faction) and\
+			if dist < sight_range and obj.controller.faction != faction and\
 				unitpos.direction_to(objpos).dot(unit.transform.basis.z) > 0:
-				var collision = G.space.intersect_ray(unitpos, objpos, [unit, obj], 32)
-				if not collision:
-					return obj
+					if !obj.status.has_state("ghost"):
+						var collision = G.space.intersect_ray(unitpos, objpos, [unit, obj], 32)
+						if not collision:
+							return obj
 
 func hear(vec):
 	if alertness == IDLE:
@@ -88,9 +89,12 @@ func hear(vec):
 		search_pos = Vector3(vec.x, unitpos.y, vec.z)
 
 func on_hit(_pos, hitter, _damage):
-	target = hitter
-	alertness = CHASING
-	set_task(["move", 9999, target.get_interact_position(), 0])
+	if hitter != null:
+		target = hitter
+		alertness = CHASING
+		set_task(["move", 9999, target.get_interact_position(), 0])
+	elif alertness == IDLE:
+		set_task(["move", 9999, unit.get_position() + unit.transform.basis.z * -2, 0])
 
 func die():
 	set_alert(IDLE)
@@ -107,9 +111,9 @@ func on_process(delta):
 func perform(current_state):
 	if G.time.second:
 		var unit_pos = unit.get_position()
-		if target and G.time.seconds % 6 == 0:
+		if target and G.time.seconds % 4 == 0:
 			if task[0] == "move":
-				if (last_pos - unit_pos).length() < .5:
+				if (last_pos - unit_pos).length_squared() < .3:
 					var pos = target.get_interact_position()
 					unstuck(pos)
 					set_alert(UNSTUCKING)
@@ -117,7 +121,8 @@ func perform(current_state):
 					last_pos = unit_pos + Vector3(9,9,9)
 					return
 			last_pos = unit_pos + Vector3(9,9,9)
-		last_pos = unit_pos
+		else:
+			last_pos = unit_pos
 		var t = perceive()
 		if t:
 			target = t
@@ -129,6 +134,9 @@ func perform(current_state):
 				update_target(search_pos, true)
 				set_alert(SEARCHING)
 				unit.talk(npc_search)
+			elif follow:
+				target = follow
+				update_target(target.get_interact_position(), true)
 	elif current_state == SEARCHING:
 		if G.time.quarter_second:
 			update_target(search_pos, false)
@@ -140,18 +148,15 @@ func perform(current_state):
 		if G.time.quarter_second:
 			update_target(target.get_interact_position(), tasks.empty())
 	elif current_state == CHASING:
-		if G.time.quarter_second:
-			var target_pos = target.get_interact_position()
-			if task[0] == "move":
-				var unit_pos = unit.get_interact_position()
-				var dist = (target_pos - unit_pos).length()
-				if dist < unit.get_reach()+(unit.move_speed.x - target.move_speed.x):
-					last_pos = unit_pos + Vector3(9,9,9)
-					set_task(["attack", 9999, target_pos])
-				else:
-					update_target(target_pos, true)
-			elif task[0] == "attack":
-				task[2] = target_pos
+		var target_pos = target.get_position()
+		var unit_pos = unit.get_position()
+		var dist = (target_pos - unit_pos).length()
+		if dist < unit.get_reach()+(unit.move_speed.y - target.move_speed.y):
+			if target != follow:
+				last_pos = unit_pos + Vector3(9,9,9)
+				set_task(["attack", 9999, target_pos])
+		else:
+			update_target(target_pos, true)
 	elif current_state == UNSTUCKING:
 		if G.time.second and G.time.seconds % 5 == 0:
 			last_pos = unit.get_position() + Vector3(9,9,9)
@@ -159,3 +164,6 @@ func perform(current_state):
 				update_target(target.get_interact_position(), true)
 			else:
 				alertness = IDLE
+
+func announce(_msg):
+	pass

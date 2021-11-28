@@ -10,8 +10,8 @@ onready var anim_player = $AnimationPlayer
 onready var skeleton = $CharacterArmature/Skeleton
 onready var body_mesh = $CharacterArmature/Skeleton/Body
 onready var health_bar = $Health
-onready var damage_label = $Damage
 var dissolve = DISSOLVE.duplicate()
+var item_type = "unit"
 var item_name = "unit"
 var controller
 var unit_size = Vector3.ONE
@@ -34,9 +34,9 @@ var hit_glance = true #hit bounces off object. Disabled for AI's
 var hitbox
 var hitshape
 var level = 1
+var dat
 var cast = 0
 var focus = 0
-var health = Vector2(5, 5)
 
 func _ready():
 	status = G.factory.Status.new()
@@ -58,26 +58,37 @@ func get_defense():
 	return 0
 
 func on_hit(pos, hitter, damage, tags):
+	if !pos:
+		pos = get_interact_position()
 	if !("true" in tags):
-		var ac = 0
-		get_defense()
-		damage -= G.roll("1d"+str(ac))
+		damage -= G.roll("1d"+str(get_defense()))
+		if "cut" in tags:
+			damage -= G.roll("1d"+str(get_defense()))
 	if hitter:
 		controller.on_hit(pos, hitter, damage)
 	if damage <= 0:
-		G.make_particle("spark", pos, 1)
+		if !("magic" in tags):
+			G.make_particle("spark", pos, 1)
 	else:
-		damage_label.display(damage)
+		experience("dodging", damage)
+		var color = null
+		if "magic" in tags:
+			color = Color(1, 1, 0)
+		G.display_damage(pos + Vector3(0,1.5,0), damage, color)
 		G.make_particle("blood", pos, 1)
-		G.make_particle("hit", pos, 1)
-		set_state("hit", true)
+		G.make_particle("hit", pos, 1).follow(self)
 		damage(damage)
-		health_bar.display(health.x, health.y, item_name, level)
+		var hp = dat.g("hp", Vector2.ONE)
+		health_bar.display(hp.x, hp.y, item_name, level)
+		if hp.x > 0:
+			if !("light" in tags):
+				set_state("hit", true)
 
 func _physics_process(delta):
-	if cast < 0:
-		cast += delta
-		if cast >= 0:
+	if cast > 0:
+		cast -= delta
+		if cast <= 0:
+			cast = 0
 			G.make_particle("recharged", get_position(), 1).follow(self)
 	controller.on_process(delta)
 	on_process(delta)
@@ -158,18 +169,14 @@ func face(delta, to):
 	var q_to = Transform().looking_at(target, Vector3.UP).basis.get_rotation_quat()
 	orientation.basis = Basis(q_from.slerp(q_to, delta * 10))
 
-func push_objects(vel):
+func push_objects(_vel):
 	var slides = get_slide_count()
 	for i in range(slides):
 		var obj = get_slide_collision(i).collider
-		if obj is KinematicBody:
-			var origY = obj.transform.origin.y
-			obj.move_and_slide(Vector3(vel.x*unit_size.x*.5,0,vel.y*unit_size.z*.5), Vector3.UP)
-			obj.transform.origin.y = origY
-		elif obj is StaticBody:
-			if obj.get("item_name") and obj.ontouch:
+		if obj is StaticBody:
+			if obj.get("item_type") and obj.dat.g("ontouch"):
 				controller.tgt = obj
-				controller.set_tasks(obj.ontouch)
+				controller.set_tasks(obj.dat.g("ontouch"))
 
 func on_anim_finish():
 	pass
@@ -178,7 +185,6 @@ func on_step():
 	if abs(motion.x) > .5 or abs(motion.y) > .5:
 		sfx_step.seek(0)
 		sfx_step.play()
-		G.cmds([["alert", get_position(), 3]], self)
 
 func talk(stream):
 	sfx_voice.set_stream(stream)
@@ -206,19 +212,18 @@ func get_adjacent(x, y):
 	return target_pos
 
 func damage(dmg):
-	if health.x > 0:
-		health.x -= dmg
-		if health.x <= 0:
-			controller.set_task()
-			set_state("death", true)
+	dat.add("hp", Vector2(-dmg, 0))
+	if dat.is_dead():
+		controller.set_task()
+		set_state("death", true)
 
 func dying(delta):
 	if state_time > 3:
 		var mat_override = body_mesh.get_material_override()
 		if mat_override == null:
 			body_mesh.set_material_override(dissolve)
-		elif state_time < 5.5:
-			dissolve.set_shader_param("dissolve_amount", ease((state_time-3)/3.0, 0.4))
+		elif state_time < 9:
+			dissolve.set_shader_param("dissolve_amount", ease((state_time-3)/6.0, 0.3)*2)
 		else:
 			die()
 	state_time += delta
@@ -228,5 +233,14 @@ func die():
 	controller.die()
 	queue_free()
 
-func set_faction(p):
-	controller.set_faction(p)
+func experience(skill, amount):
+	if skill != null:
+		var dat_skill = "s_" + skill
+		var prev_level = G.dec2base2(dat.g(dat_skill, 1))
+		dat.add(dat_skill, amount)
+		var current_level = G.dec2base2(dat.g(dat_skill))
+		if prev_level < current_level:
+			controller.announce(skill.capitalize() + " skill increased by "+str(current_level-prev_level))
+
+func get_reach():
+	return unit_size.x + dat.g("reach", 0)

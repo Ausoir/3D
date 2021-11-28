@@ -7,7 +7,7 @@ const ORTHO = [Vector3(-BLOCK-HALFBLOCK,0,0),Vector3(BLOCK+HALFBLOCK,0,0),Vector
 var target
 var height = 0
 var pathing_length = 16
-var pathing_times = 36
+var pathing_times = 5
 var open
 var closed = []
 var closest
@@ -102,8 +102,8 @@ func update(hostposv, targetv):
 					break
 			else:
 				break
-		#for draw in open:
-		#	G.make_particle("smoke", to_tile_pos(draw.pos), 3)
+#		for draw in open:
+#			G.make_particle("debug", to_tile_pos(draw.pos), 3)
 		if not done and next_reset > pathing_times: #Out of reach
 			done = closest
 		if done:

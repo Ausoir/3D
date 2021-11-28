@@ -7,6 +7,7 @@ var seconds = 0
 var second
 var half_second
 var quarter_second
+var eighth_second
 
 
 func on_process(delta):
@@ -14,17 +15,20 @@ func on_process(delta):
 	second = false
 	half_second = false
 	quarter_second = false
-	if frame >= .25:
+	eighth_second = false
+	if frame >= .125:
 		if len(tick_events) > 0:
 			var event = tick_events.pop_back()
 			if event.is_valid():
 				event.call_func()
-		frame = frame - .25
+		frame = frame - .125
 		frames = frames + 1
-		quarter_second = true
-		if frames == 2:
+		eighth_second = true
+		if frames % 2 == 0:
+			quarter_second = true
+		if frames % 4 == 0:
 			half_second = true
-		elif frames == 4:
+		if frames == 8:
 			second = true
 			seconds += 1
 			frames = 0

@@ -185,6 +185,7 @@ func clear_doorways():
 			if base[y][x-1] in walltiles:
 				wallX += 1
 			if wallX == 2 and wallY == 2:
+				dungeon_objects[y][x] = null
 				base[y][x] = ','
 				base[y+1][x] = ','
 				base[y-1][x] = ','
@@ -205,6 +206,7 @@ func clear_doorways():
 				dungeon_objects[y][x+1] = null
 				dungeon_objects[y][x-1] = null
 			else:
+				dungeon_objects[y][x] = null
 				base[y][x] = 'W'
 
 func make_exit():
@@ -222,10 +224,11 @@ func make_entrance(room):
 	var center = (room[1] + (room[2] - room[1])/2).round()
 	var cx = int(center.x)
 	var cy = int(center.y)
-	base[cy][cx] = '@'
 	for y in range(room[1].y+1, room[2].y):
 		for x in range(room[1].x+1, room[2].x):
 			allocate_object(objs, x, y)
+	base[cy][cx] = '@'
+	dungeon_objects[cy][cx] = null
 
 func make_chapel(room):
 	var objs = [["bench"], ["bookcase"], ["bench"]]
@@ -262,6 +265,8 @@ func make_living(room):
 			allocate_object(objs, x, y)
 			if flooring:
 				dungeon_floors[y][x] = "planks"
+			if base[y][x] == '.':
+				base[y][x] = '!'
 
 func make_storage(room):
 	var objs = [[],[null,null,"chest","crates","barrels"],[null,null,null,null,"barrels","crates","crates"]]
@@ -272,9 +277,8 @@ func make_storage(room):
 func make_hall(room):
 	var size = room[2] - room[1]
 	if size.y <= 5:
-		for x in range(room[1].x+2, room[2].x-2, 8):
-			if rng.randi_range(0, 2) == 0:
-				dungeon_objects[room[1].y+2][x] = ["mob", 0]
+		for x in range(room[1].x+2, room[2].x-1, 8):
+			dungeon_objects[room[1].y+2][x] = ["mob",0]
 			if rng.randi_range(0, 1) == 0:
 				if base[room[1].y][x] == 'W' and base[room[1].y][x+1] == 'W':
 					dungeon_objects[room[1].y][x] = ["torch", 10]
@@ -282,9 +286,8 @@ func make_hall(room):
 				if base[room[2].y][x] == 'W' and base[room[2].y][x-1] == 'W':
 					dungeon_objects[room[2].y][x] = ["torch", 0]
 	elif size.x <= 5:
-		for y in range(room[1].y+2, room[2].y-2, 8):
-			if rng.randi_range(0, 2) == 0:
-				dungeon_objects[y][room[1].x+2] = ["mob", 0]
+		for y in range(room[1].y+2, room[2].y-1, 8):
+			dungeon_objects[y][room[1].x+2] = ["mob",0]
 			if rng.randi_range(0, 1) == 0:
 				if base[y][room[1].x] == 'W' and base[y-1][room[1].x] == 'W':
 					dungeon_objects[y][room[1].x] = ["torch", 16]
@@ -333,6 +336,8 @@ func make_terrain(room, vault_type="default"):
 					var obj = special_terrain[vault_type][int(base[y][x])]
 					base[y][x] = '.'
 					allocate_object([[obj],[obj]], x, y)
+				elif base[y][x] == '!':
+					dungeon_objects[y][x] = ['mob', 0]
 		return true
 
 func divide(from, to, times, times_hall, horizontal):
